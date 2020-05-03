@@ -9,6 +9,13 @@
     <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
+    <licenses>
+        <license>
+            <name>GNU General Public License v3 (GPLv3)</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+        </license>
+    </licenses>
+
     <scm>
         <url>https://github.com/castorm/kafka-connect-http-plugin</url>
         <connection>scm:git:https://github.com/castorm/kafka-connect-http-plugin.git</connection>
