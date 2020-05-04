@@ -1,5 +1,5 @@
 # Kafka Connect HTTP Connector
-[![Build Status](https://travis-ci.com/castorm/kafka-connect-http-plugin.svg?branch=master)](https://travis-ci.com/castorm/kafka-connect-http-plugin)
+![Java CI with Maven](https://github.com/castorm/kafka-connect-http-plugin/workflows/Java%20CI%20with%20Maven/badge.svg)
 
 Set of Kafka Connect connectors to enable Kafka integration with external systems via HTTP.
 
