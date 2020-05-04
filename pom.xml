@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -7,19 +8,12 @@
     <artifactId>kafka-connect-http-plugin</artifactId>
     <version>0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
+    <inceptionYear>2020</inceptionYear>
 
-    <licenses>
-        <license>
-            <name>GNU General Public License v3 (GPLv3)</name>
-            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
-        </license>
-    </licenses>
-
-    <scm>
-        <url>https://github.com/castorm/kafka-connect-http-plugin</url>
-        <connection>scm:git:https://github.com/castorm/kafka-connect-http-plugin.git</connection>
-        <tag>master</tag>
-    </scm>
+    <organization>
+        <name>CastorM</name>
+        <url>http://www.castorm.es</url>
+    </organization>
 
     <developers>
         <developer>
@@ -28,6 +22,24 @@
             <url>http://www.castorm.es</url>
         </developer>
     </developers>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License v3 (GPLv3)</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+        </license>
+    </licenses>
+
+    <issueManagement>
+        <system>github.com</system>
+        <url>https://github.com/castorm/kafka-connect-http-plugin/issues</url>
+    </issueManagement>
+
+    <scm>
+        <url>https://github.com/castorm/kafka-connect-http-plugin</url>
+        <connection>scm:git:https://github.com/castorm/kafka-connect-http-plugin.git</connection>
+        <tag>master</tag>
+    </scm>
 
     <properties>
         <java.version>8</java.version>
@@ -173,6 +185,23 @@
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.22.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <configuration>
+                    <licenseName>gpl_v3</licenseName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>first</id>
+                        <goals>
+                            <goal>update-file-header</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
