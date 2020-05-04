@@ -77,11 +77,6 @@ class JacksonHttpResponseItemMapperTest {
     }
 
     @Test
-    void whenGetMissingTimestamp_thenNotNull() {
-        assertThat(mapper.getTimestamp(deserialize("{\"k1\": 42}"), compile("/k2"))).isNotNull();
-    }
-
-    @Test
     void whenGetOffset_thenOffset() {
         assertThat(mapper.getOffset(deserialize("{\"k1\":\"v1\"}"), ImmutableMap.of("key", compile("/k1"))))
                 .isEqualTo(ImmutableMap.of("key", "v1"));

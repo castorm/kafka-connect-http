@@ -1,5 +1,6 @@
 package com.github.castorm.kafka.connect.http.response.jackson;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
@@ -8,13 +9,13 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
@@ -26,22 +27,29 @@ import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttp
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.itemValuePointer;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.itemsPointer;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.response;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Stream.empty;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class JacksonHttpResponseParserTest {
 
-    @InjectMocks
     JacksonHttpResponseParser parser;
+
+    @Mock
+    Function<Map<String, ?>, JacksonHttpResponseParserConfig> configFactory;
 
     @Mock
     ObjectMapper mapper;
 
     @Mock
     JacksonHttpResponseItemMapper itemMapper;
+
+    @Mock
+    JacksonHttpResponseParserConfig config;
 
     @Mock
     JsonNode root;
@@ -54,18 +62,8 @@ class JacksonHttpResponseParserTest {
 
     @BeforeEach
     void setUp() {
-        parser.configure(configMap());
-    }
-
-    private static Map<String, String> configMap() {
-        return new HashMap<String, String>() {{
-            put("http.source.response.json.items.pointer", itemsPointer);
-            put("http.source.response.json.item.key.pointer", itemKeyPointer);
-            put("http.source.response.json.item.value.pointer", itemValuePointer);
-            put("http.source.response.json.item.timestamp.pointer", itemTimestampPointer);
-            put("http.source.response.json.item.offset.value.pointer", itemOffsetValuePointer);
-            put("http.source.response.json.item.offset.key", itemOffsetKey);
-        }};
+        parser = new JacksonHttpResponseParser(configFactory, mapper, itemMapper);
+        given(configFactory.apply(any())).willReturn(config);
     }
 
     @Test
@@ -79,8 +77,9 @@ class JacksonHttpResponseParserTest {
     @Test
     void givenOneItem_thenKeyMapped() throws IOException {
 
+        given(config.getItemKeyPointer()).willReturn(Optional.of(itemKeyPointer));
         givenItems(Stream.of(item));
-        given(itemMapper.getKey(item, compile(itemKeyPointer))).willReturn("key");
+        given(itemMapper.getKey(item, itemKeyPointer)).willReturn("key");
 
         assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getKey).isEqualTo("key");
     }
@@ -88,8 +87,9 @@ class JacksonHttpResponseParserTest {
     @Test
     void givenOneItem_thenValueMapped() throws IOException {
 
+        given(config.getItemValuePointer()).willReturn(itemValuePointer);
         givenItems(Stream.of(item));
-        given(itemMapper.getValue(item, compile(itemValuePointer))).willReturn(value);
+        given(itemMapper.getValue(item, itemValuePointer)).willReturn(value);
         given(mapper.writeValueAsString(value)).willReturn("value");
 
         assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getValue).isEqualTo("value");
@@ -98,34 +98,56 @@ class JacksonHttpResponseParserTest {
     @Test
     void givenOneItem_thenTimestampMapped() throws IOException {
 
+        given(config.getItemTimestampPointer()).willReturn(Optional.of(itemTimestampPointer));
         givenItems(Stream.of(item));
-        given(itemMapper.getTimestamp(item, compile(itemTimestampPointer))).willReturn(42L);
+        given(itemMapper.getTimestamp(item, itemTimestampPointer)).willReturn(42L);
 
         assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getTimestamp).isEqualTo(42L);
     }
 
     @Test
+    void givenNoTimestampPointer_thenTimestampDefault() throws IOException {
+
+        given(config.getItemTimestampPointer()).willReturn(Optional.empty());
+        givenItems(Stream.of(item));
+
+        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getTimestamp).isNotNull();
+    }
+
+    @Test
     void givenOneItem_thenOffsetMapped() throws IOException {
 
+        given(config.getItemOffsets()).willReturn(ImmutableMap.of(itemOffsetKey, itemOffsetValuePointer));
         givenItems(Stream.of(item));
-        given(itemMapper.getOffset(item, ImmutableMap.of(itemOffsetKey, compile(itemOffsetValuePointer)))).willReturn(ImmutableMap.of("offset-key", "offset-value"));
+        given(itemMapper.getOffset(item, ImmutableMap.of(itemOffsetKey, itemOffsetValuePointer))).willReturn(ImmutableMap.of("offset-key", "offset-value"));
 
         assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getOffset).isEqualTo(ImmutableMap.of("offset-key", "offset-value"));
     }
 
+    @Test
+    void givenNoKeyPointer_thenKeyDefault() throws IOException {
+
+        given(config.getItemKeyPointer()).willReturn(Optional.empty());
+        givenItems(Stream.of(item));
+
+        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getKey).isNotNull();
+    }
+
     private void givenItems(Stream<JsonNode> items) throws IOException {
+        given(config.getItemsPointer()).willReturn(itemsPointer);
+        parser.configure(emptyMap());
         given(mapper.readTree(eq(bytes))).willReturn(root);
-        given(itemMapper.getItems(eq(root), eq(compile(itemsPointer)))).willReturn(items);
+        given(itemMapper.getItems(eq(root), eq(itemsPointer))).willReturn(items);
     }
 
     interface Fixture {
         byte[] bytes = "bytes".getBytes();
         HttpResponse response = HttpResponse.builder().body(bytes).build();
-        String itemsPointer = "/items";
-        String itemKeyPointer = "/key";
-        String itemValuePointer = "/value";
-        String itemTimestampPointer = "/timestamp";
-        String itemOffsetValuePointer = "/offset-value";
+        JsonPointer itemsPointer = compile("/items");
+        JsonPointer itemKeyPointer = compile("/key");
+        JsonPointer itemValuePointer = compile("/value");
+        JsonPointer itemTimestampPointer = compile("/timestamp");
+        JsonPointer itemOffsetValuePointer = compile("/offset-value");
         String itemOffsetKey = "offset-key";
     }
 }

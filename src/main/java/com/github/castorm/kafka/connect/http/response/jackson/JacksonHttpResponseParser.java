@@ -6,36 +6,45 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 
-@RequiredArgsConstructor
 public class JacksonHttpResponseParser implements HttpResponseParser {
+
+    private final Function<Map<String, ?>, JacksonHttpResponseParserConfig> configFactory;
 
     private final ObjectMapper mapper;
 
     private final JacksonHttpResponseItemMapper itemMapper;
 
     private JsonPointer itemsPointer;
-    private JsonPointer itemKeyPointer;
+    private Optional<JsonPointer> itemKeyPointer;
     private JsonPointer itemValuePointer;
-    private JsonPointer itemTimestampPointer;
+    private Optional<JsonPointer> itemTimestampPointer;
     private Map<String, JsonPointer> itemOffsets;
 
     public JacksonHttpResponseParser() {
-        this.mapper = new ObjectMapper();
-        this.itemMapper = new JacksonHttpResponseItemMapper();
+        this(JacksonHttpResponseParserConfig::new, new ObjectMapper(), new JacksonHttpResponseItemMapper());
+    }
+
+    JacksonHttpResponseParser(Function<Map<String, ?>, JacksonHttpResponseParserConfig> configFactory, ObjectMapper mapper, JacksonHttpResponseItemMapper itemMapper) {
+        this.configFactory = configFactory;
+        this.mapper = mapper;
+        this.itemMapper = itemMapper;
     }
 
     @Override
     public void configure(Map<String, ?> configs) {
-        JacksonHttpResponseParserConfig config = new JacksonHttpResponseParserConfig(configs);
+        JacksonHttpResponseParserConfig config = configFactory.apply(configs);
         itemsPointer = config.getItemsPointer();
         itemKeyPointer = config.getItemKeyPointer();
         itemValuePointer = config.getItemValuePointer();
@@ -56,9 +65,9 @@ public class JacksonHttpResponseParser implements HttpResponseParser {
     private HttpResponseItem mapToItem(JsonNode node) {
 
         return HttpResponseItem.builder()
-                .key(itemMapper.getKey(node, itemKeyPointer))
+                .key(itemKeyPointer.map(it ->itemMapper.getKey(node, it)).orElseGet(() -> randomUUID().toString()))
                 .value(serialize(itemMapper.getValue(node, itemValuePointer)))
-                .timestamp(itemMapper.getTimestamp(node, itemTimestampPointer))
+                .timestamp(itemTimestampPointer.map(it -> itemMapper.getTimestamp(node, it)).orElseGet(Instant.now()::toEpochMilli))
                 .offset(itemMapper.getOffset(node, itemOffsets))
                 .build();
     }

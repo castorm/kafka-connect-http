@@ -90,7 +90,6 @@ class HttpSourceConnectorConfigTest {
             return new HashMap<String, String>() {{
                 put("kafka.topic", "topic");
                 put("http.source.url", "foo");
-                put("http.source.response.json.item.key.pointer", "/bar");
                 put("http.source.response.json.item.offset.value.pointer", "/baz");
                 put("http.source.response.json.item.offset.key", "key");
             }};

@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
-import static java.lang.System.currentTimeMillis;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 
@@ -32,11 +31,7 @@ class JacksonHttpResponseItemMapper {
     }
 
     Long getTimestamp(JsonNode node, JsonPointer pointer) {
-        JsonNode value = getAt(node, pointer);
-        if (!value.isMissingNode()) {
-            return value.asLong();
-        }
-        return currentTimeMillis();
+        return getRequiredAt(node, pointer).asLong();
     }
 
     Map<String, Object> getOffset(JsonNode node, Map<String, JsonPointer> pointers) {
@@ -45,9 +40,5 @@ class JacksonHttpResponseItemMapper {
 
     private static JsonNode getRequiredAt(JsonNode body, JsonPointer itemsPointer) {
         return JSON_ROOT.equals(itemsPointer) ? body : body.requiredAt(itemsPointer);
-    }
-
-    private static JsonNode getAt(JsonNode body, JsonPointer itemsPointer) {
-        return JSON_ROOT.equals(itemsPointer) ? body : body.at(itemsPointer);
     }
 }
