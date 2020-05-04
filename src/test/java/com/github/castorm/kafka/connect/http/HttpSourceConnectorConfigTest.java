@@ -25,16 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HttpSourceConnectorConfigTest {
 
     @Test
-    void whenPollIntervalMillis_thenDefault() {
-        assertThat(configWithout("http.source.poll.interval.millis").getPollIntervalMillis()).isEqualTo(60000L);
-    }
-
-    @Test
-    void whenPollIntervalMillis_thenInitialized() {
-        assertThat(config("http.source.poll.interval.millis", "42").getPollIntervalMillis()).isEqualTo(42L);
-    }
-
-    @Test
     void whenClient_thenDefault() {
         assertThat(configWithout("http.client").getClient()).isInstanceOf(OkHttpClient.class);
     }

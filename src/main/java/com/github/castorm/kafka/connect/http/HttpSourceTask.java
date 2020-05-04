@@ -3,10 +3,10 @@ package com.github.castorm.kafka.connect.http;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import com.github.castorm.kafka.connect.http.poll.spi.PollInterceptor;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
@@ -14,15 +14,17 @@ import org.apache.kafka.connect.source.SourceTask;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
-import static java.lang.System.currentTimeMillis;
-import static java.lang.Thread.sleep;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 
-@Slf4j
 public class HttpSourceTask extends SourceTask {
+
+    private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
+
+    private PollInterceptor pollInterceptor;
 
     private HttpRequestFactory requestFactory;
 
@@ -32,36 +34,33 @@ public class HttpSourceTask extends SourceTask {
 
     private SourceRecordMapper recordMapper;
 
-    private Long pollIntervalMillis = 1000L;
+    HttpSourceTask(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
+        this.configFactory = configFactory;
+    }
 
-    private Long lastPollMillis = 0L;
-
-    private boolean upToDate = true;
+    public HttpSourceTask() {
+        this(HttpSourceConnectorConfig::new);
+    }
 
     @Override
     public void start(Map<String, String> settings) {
 
-        HttpSourceConnectorConfig config = new HttpSourceConnectorConfig(settings);
+        HttpSourceConnectorConfig config = configFactory.apply(settings);
 
         Map<String, ?> offset = context.offsetStorageReader().offset(emptyMap());
 
-        pollIntervalMillis = config.getPollIntervalMillis();
+        pollInterceptor = config.getPollInterceptor();
         requestFactory = config.getRequestFactory();
         requestFactory.setOffset(offset);
-
         requestExecutor = config.getClient();
-
         responseParser = config.getResponseParser();
-
         recordMapper = config.getRecordMapper();
     }
 
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
 
-        if (upToDate) {
-            awaitNextTick();
-        }
+        pollInterceptor.beforePoll();
 
         HttpRequest request = requestFactory.createRequest();
 
@@ -71,17 +70,9 @@ public class HttpSourceTask extends SourceTask {
                 .map(recordMapper::map)
                 .collect(toList());
 
-        upToDate = records.isEmpty();
+        pollInterceptor.afterPoll(records);
 
         return records;
-    }
-
-    private void awaitNextTick() throws InterruptedException {
-        long remainingMillis = pollIntervalMillis - (currentTimeMillis() - lastPollMillis);
-        if (remainingMillis > 0) {
-            sleep(remainingMillis);
-        }
-        lastPollMillis = currentTimeMillis();
     }
 
     private HttpResponse execute(HttpRequest request) {
@@ -94,8 +85,6 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void commitRecord(SourceRecord record) {
-
-        log.debug("Committed {}", record);
 
         requestFactory.setOffset(record.sourceOffset());
     }
