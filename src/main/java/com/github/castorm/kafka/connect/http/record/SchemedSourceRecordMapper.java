@@ -14,18 +14,18 @@ import static org.apache.kafka.connect.data.SchemaBuilder.string;
 
 public class SchemedSourceRecordMapper implements SourceRecordMapper {
 
-    private static final String KEY_ID = "id";
+    private static final String SCHEMA_KEY_KEY = "key";
     private static final Schema SCHEMA_KEY = SchemaBuilder.struct()
-            .name("com.theworkshop.kafka.connect.http.basic.Key")
-            .doc("Message Key used for Kafka partitioning")
-            .field(KEY_ID, string().optional().doc("id").build())
+            .name("com.github.castorm.kafka.connect.http.Key")
+            .doc("Message Key")
+            .field(SCHEMA_KEY_KEY, string().optional().doc("HTTP Item identifier").build())
             .build();
 
-    private static final String VALUE_BODY = "body";
+    private static final String SCHEMA_VALUE_BODY = "body";
     private static final Schema SCHEMA_VALUE = SchemaBuilder.struct()
-            .name("com.theworkshop.kafka.connect.http.basic.Value")
+            .name("com.github.castorm.kafka.connect.http.Value")
             .doc("Message Value")
-            .field(VALUE_BODY, string().doc("Response body").build())
+            .field(SCHEMA_VALUE_BODY, string().doc("HTTP Item response body").build())
             .build();
 
     private Map<String, ?> sourcePartition = emptyMap();
@@ -57,10 +57,10 @@ public class SchemedSourceRecordMapper implements SourceRecordMapper {
     }
 
     private static Struct keyStruct(String key) {
-        return new Struct(SCHEMA_KEY).put(KEY_ID, key);
+        return new Struct(SCHEMA_KEY).put(SCHEMA_KEY_KEY, key);
     }
 
     private static Struct valueStruct(String body) {
-        return new Struct(SCHEMA_VALUE).put(VALUE_BODY, body);
+        return new Struct(SCHEMA_VALUE).put(SCHEMA_VALUE_BODY, body);
     }
 }

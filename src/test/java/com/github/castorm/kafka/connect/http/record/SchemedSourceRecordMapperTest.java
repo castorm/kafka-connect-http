@@ -30,7 +30,7 @@ class SchemedSourceRecordMapperTest {
 
     @Test
     void givenKey_whenMap_thenIdMapped() {
-        assertThat(((Struct) mapper.map(item.withKey(value)).key()).get("id")).isEqualTo(value);
+        assertThat(((Struct) mapper.map(item.withKey(value)).key()).get("key")).isEqualTo(value);
     }
 
     @Test
