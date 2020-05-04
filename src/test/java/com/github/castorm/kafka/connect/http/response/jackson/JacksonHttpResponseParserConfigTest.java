@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserConfigTest.Fixture.config;
@@ -18,8 +19,33 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 class JacksonHttpResponseParserConfigTest {
 
     @Test
-    void whenMissingItemKeyPointerConfigured_thenException() {
-        assertThat(catchThrowable(() -> configWithout("http.source.response.json.item.key.pointer"))).isInstanceOf(ConfigException.class);
+    void whenItemsPointerConfigured_thenInitialized() {
+        assertThat(config("http.source.response.json.items.pointer", "/test-pointer").getItemsPointer()).isEqualTo(compile("/test-pointer"));
+    }
+
+    @Test
+    void whenMissingItemKeyPointerConfigured_thenInitialized() {
+        assertThat(configWithout("http.source.response.json.item.key.pointer").getItemKeyPointer()).isEmpty();
+    }
+
+    @Test
+    void whenItemKeyPointerConfigured_thenInitialized() {
+        assertThat(config("http.source.response.json.item.key.pointer", "/test-pointer").getItemKeyPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
+    }
+
+    @Test
+    void whenItemValuePointerConfigured_thenInitialized() {
+        assertThat(config("http.source.response.json.item.value.pointer", "/test-pointer").getItemValuePointer()).isEqualTo(compile("/test-pointer"));
+    }
+
+    @Test
+    void whenMissingTimestampPointerConfigured_thenInitialized() {
+        assertThat(configWithout("http.source.response.json.item.timestamp.pointer").getItemTimestampPointer()).isEmpty();
+    }
+
+    @Test
+    void whenItemTimestampPointerConfigured_thenInitialized() {
+        assertThat(config("http.source.response.json.item.timestamp.pointer", "/test-pointer").getItemTimestampPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
     }
 
     @Test
@@ -30,26 +56,6 @@ class JacksonHttpResponseParserConfigTest {
     @Test
     void whenMissingOffsetValuePointerConfigured_thenException() {
         assertThat(catchThrowable(() -> configWithout("http.source.response.json.item.offset.value.pointer"))).isInstanceOf(ConfigException.class);
-    }
-
-    @Test
-    void whenItemsPointerConfigured_thenInitialized() {
-        assertThat(config("http.source.response.json.items.pointer", "/test-pointer").getItemsPointer()).isEqualTo(compile("/test-pointer"));
-    }
-
-    @Test
-    void whenItemKeyPointerConfigured_thenInitialized() {
-        assertThat(config("http.source.response.json.item.key.pointer", "/test-pointer").getItemKeyPointer()).isEqualTo(compile("/test-pointer"));
-    }
-
-    @Test
-    void whenItemValuePointerConfigured_thenInitialized() {
-        assertThat(config("http.source.response.json.item.value.pointer", "/test-pointer").getItemValuePointer()).isEqualTo(compile("/test-pointer"));
-    }
-
-    @Test
-    void whenItemTimestampPointerConfigured_thenInitialized() {
-        assertThat(config("http.source.response.json.item.timestamp.pointer", "/test-pointer").getItemTimestampPointer()).isEqualTo(compile("/test-pointer"));
     }
 
     @Test
