@@ -9,6 +9,8 @@ deploy:
   api_key: ${api_key}
   file:
     - target/kafka-connect-http-plugin-${project_version}.jar
+    - target/kafka-connect-http-plugin-${project_version}-javadoc.jar
+    - target/kafka-connect-http-plugin-${project_version}-sources.jar
     - target/kafka-connect-http-plugin-${project_version}-package.tar.gz
   skip_cleanup: true
   on:
