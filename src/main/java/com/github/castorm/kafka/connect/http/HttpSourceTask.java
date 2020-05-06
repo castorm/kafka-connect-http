@@ -71,13 +71,13 @@ public class HttpSourceTask extends SourceTask {
 
         pollInterceptor = config.getPollInterceptor();
         requestFactory = config.getRequestFactory();
-        requestFactory.setOffset(resolveInitialOffset(config.getInitialOffset()));
+        requestFactory.setOffset(resolveStartingOffset(config.getInitialOffset()));
         requestExecutor = config.getClient();
         responseParser = config.getResponseParser();
         recordMapper = config.getRecordMapper();
     }
 
-    private Map<String, ?> resolveInitialOffset(Map<String, ?> initialOffset) {
+    private Map<String, ?> resolveStartingOffset(Map<String, ?> initialOffset) {
 
         Map<String, ?> latestOffset = context.offsetStorageReader().offset(emptyMap());
 

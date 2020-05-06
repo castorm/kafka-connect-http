@@ -147,7 +147,7 @@ These are better understood by looking at the source task implementation:
 ```java
 public void start(Map<String, String> settings) {
     ...
-    requestFactory.setOffset(resolveInitialOffset(config.getInitialOffset()));
+    requestFactory.setOffset(resolveStartingOffset(config.getInitialOffset()));
 }
 
 public List<SourceRecord> poll() throws InterruptedException {
