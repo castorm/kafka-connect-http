@@ -10,7 +10,7 @@ If your Kafka Connect deployment is automated and packaged with Maven, you can a
 <dependency>
     <groupId>com.github.castorm</groupId>
     <artifactId>kafka-connect-http-plugin</artifactId>
-    <version>0.1-alpha</version>
+    <version>0.2.6</version>
 </dependency>
 ```
 Otherwise, you'll have to do it manually by downloading the package from our [Releases Page](https://github.com/castorm/kafka-connect-http-plugin/releases).
