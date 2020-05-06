@@ -20,5 +20,4 @@ buildNumber.properties
 .idea
 *.iws
 HttpSourceTaskHarnessTest.java
-
-!.travis.yml
+.DS_Store
