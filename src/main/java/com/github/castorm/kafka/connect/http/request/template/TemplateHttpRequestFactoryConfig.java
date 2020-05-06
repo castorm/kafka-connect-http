@@ -38,12 +38,12 @@ import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 @Getter
 public class TemplateHttpRequestFactoryConfig extends AbstractConfig {
 
-    private static final String URL = "http.source.url";
-    private static final String METHOD = "http.source.method";
-    private static final String HEADERS = "http.source.headers";
-    private static final String QUERY_PARAMS = "http.source.query-params";
-    private static final String BODY = "http.source.body";
-    private static final String TEMPLATE_FACTORY = "http.source.template.factory";
+    private static final String URL = "http.request.url";
+    private static final String METHOD = "http.request.method";
+    private static final String HEADERS = "http.request.headers";
+    private static final String QUERY_PARAMS = "http.request.params";
+    private static final String BODY = "http.request.body";
+    private static final String TEMPLATE_FACTORY = "http.request.template.factory";
 
     private final String url;
 

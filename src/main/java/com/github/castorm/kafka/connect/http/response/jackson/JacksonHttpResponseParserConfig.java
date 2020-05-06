@@ -45,12 +45,12 @@ import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 @Getter
 public class JacksonHttpResponseParserConfig extends AbstractConfig {
 
-    private static final String ITEMS_POINTER = "http.source.response.json.items.pointer";
-    private static final String ITEM_KEY_POINTER = "http.source.response.json.item.key.pointer";
-    private static final String ITEM_VALUE_POINTER = "http.source.response.json.item.value.pointer";
-    private static final String ITEM_TIMESTAMP_POINTER = "http.source.response.json.item.timestamp.pointer";
-    private static final String ITEM_OFFSET_VALUE_POINTER = "http.source.response.json.item.offset.value.pointer";
-    private static final String ITEM_OFFSET_KEY = "http.source.response.json.item.offset.key";
+    private static final String ITEMS_POINTER = "http.response.json.items.pointer";
+    private static final String ITEM_KEY_POINTER = "http.response.json.item.key.pointer";
+    private static final String ITEM_VALUE_POINTER = "http.response.json.item.value.pointer";
+    private static final String ITEM_TIMESTAMP_POINTER = "http.response.json.item.timestamp.pointer";
+    private static final String ITEM_OFFSET_VALUE_POINTER = "http.response.json.item.offset.value.pointer";
+    private static final String ITEM_OFFSET_KEY = "http.response.json.item.offset.key";
 
     private final JsonPointer itemsPointer;
     private final Optional<JsonPointer> itemKeyPointer;

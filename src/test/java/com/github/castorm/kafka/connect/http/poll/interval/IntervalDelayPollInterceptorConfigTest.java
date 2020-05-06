@@ -38,6 +38,6 @@ class IntervalDelayPollInterceptorConfigTest {
 
     @Test
     void whenPollIntervalMillis_thenInitialized() {
-        assertThat(new IntervalDelayPollInterceptorConfig(ImmutableMap.of("http.source.poll.interval.millis", "42")).getPollIntervalMillis()).isEqualTo(42L);
+        assertThat(new IntervalDelayPollInterceptorConfig(ImmutableMap.of("http.poll.interval.millis", "42")).getPollIntervalMillis()).isEqualTo(42L);
     }
 }

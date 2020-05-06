@@ -58,32 +58,32 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenRequestFactory_thenDefault() {
-        assertThat(configWithout("http.source.request.factory").getRequestFactory()).isInstanceOf(TemplateHttpRequestFactory.class);
+        assertThat(configWithout("http.request.factory").getRequestFactory()).isInstanceOf(TemplateHttpRequestFactory.class);
     }
 
     @Test
     void whenRequestFactory_thenInitialized() {
-        assertThat(config("http.source.request.factory", TestRequestFactory.class.getName()).getRequestFactory()).isInstanceOf(TestRequestFactory.class);
+        assertThat(config("http.request.factory", TestRequestFactory.class.getName()).getRequestFactory()).isInstanceOf(TestRequestFactory.class);
     }
 
     @Test
     void whenResponseParser_thenDefault() {
-        assertThat(configWithout("http.source.response.parser").getResponseParser()).isInstanceOf(JacksonHttpResponseParser.class);
+        assertThat(configWithout("http.response.parser").getResponseParser()).isInstanceOf(JacksonHttpResponseParser.class);
     }
 
     @Test
     void whenResponseParser_thenInitialized() {
-        assertThat(config("http.source.response.parser", TestResponseParser.class.getName()).getResponseParser()).isInstanceOf(TestResponseParser.class);
+        assertThat(config("http.response.parser", TestResponseParser.class.getName()).getResponseParser()).isInstanceOf(TestResponseParser.class);
     }
 
     @Test
     void whenRecordMapper_thenDefault() {
-        assertThat(configWithout("http.source.record.mapper").getRecordMapper()).isInstanceOf(SchemedSourceRecordMapper.class);
+        assertThat(configWithout("http.record.mapper").getRecordMapper()).isInstanceOf(SchemedSourceRecordMapper.class);
     }
 
     @Test
     void whenRecordMapper_thenInitialized() {
-        assertThat(config("http.source.record.mapper", TestRecordMapper.class.getName()).getRecordMapper()).isInstanceOf(TestRecordMapper.class);
+        assertThat(config("http.record.mapper", TestRecordMapper.class.getName()).getRecordMapper()).isInstanceOf(TestRecordMapper.class);
     }
 
     public static class TestHttpClient implements HttpClient {
@@ -111,8 +111,8 @@ class HttpSourceConnectorConfigTest {
         static Map<String, String> defaultMap() {
             return new HashMap<String, String>() {{
                 put("kafka.topic", "topic");
-                put("http.source.url", "foo");
-                put("http.source.response.json.item.offset.value.pointer", "/baz");
+                put("http.request.url", "foo");
+                put("http.response.json.item.offset.value.pointer", "/baz");
             }};
         }
 

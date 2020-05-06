@@ -44,7 +44,7 @@ class TemplateHttpRequestFactoryTest {
     @Test
     void givenMethod_whenCreateRequest_thenMethodMapped() {
 
-        given("http.source.method", "POST");
+        given("http.request.method", "POST");
 
         assertThat(factory.createRequest().getMethod()).isEqualTo(POST);
     }
@@ -52,7 +52,7 @@ class TemplateHttpRequestFactoryTest {
     @Test
     void givenUrl_whenCreateRequest_thenMethodMapped() {
 
-        factory.configure(ImmutableMap.of("http.source.url", url));
+        factory.configure(ImmutableMap.of("http.request.url", url));
 
         assertThat(factory.createRequest().getUrl()).isEqualTo(url);
     }
@@ -60,7 +60,7 @@ class TemplateHttpRequestFactoryTest {
     @Test
     void givenHeaders_whenCreateRequest_thenHeadersMapped() {
 
-        given("http.source.headers", "Header:Value");
+        given("http.request.headers", "Header:Value");
 
         assertThat(factory.createRequest().getHeaders()).containsEntry("Header", singletonList("Value"));
     }
@@ -68,7 +68,7 @@ class TemplateHttpRequestFactoryTest {
     @Test
     void givenQueryParams_whenCreateRequest_thenQueryParamsMapped() {
 
-        given("http.source.query-params", "param=value");
+        given("http.request.params", "param=value");
 
         assertThat(factory.createRequest().getQueryParams()).containsEntry("param", singletonList("value"));
     }
@@ -76,13 +76,13 @@ class TemplateHttpRequestFactoryTest {
     @Test
     void givenBody_whenCreateRequest_thenBodyMapped() {
 
-        given("http.source.body", value);
+        given("http.request.body", value);
 
         assertThat(factory.createRequest().getBody()).isEqualTo(value.getBytes());
     }
 
     private void given(String key, String value) {
-        factory.configure(ImmutableMap.of("http.source.url", url, key, value));
+        factory.configure(ImmutableMap.of("http.request.url", url, key, value));
     }
 
     interface Fixture {

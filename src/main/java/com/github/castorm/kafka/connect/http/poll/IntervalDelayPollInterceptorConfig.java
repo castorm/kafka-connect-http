@@ -34,7 +34,7 @@ import static org.apache.kafka.common.config.ConfigDef.Type.LONG;
 @Getter
 public class IntervalDelayPollInterceptorConfig extends AbstractConfig {
 
-    private static final String POLL_INTERVAL_MILLIS = "http.source.poll.interval.millis";
+    private static final String POLL_INTERVAL_MILLIS = "http.poll.interval.millis";
 
     private final Long pollIntervalMillis;
 

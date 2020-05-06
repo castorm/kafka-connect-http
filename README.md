@@ -24,11 +24,11 @@ A HTTP Source connector is broken down into the following components. You can im
 
 | Property | Default |
 |---|---|
-| `http.source.request.factory` | [`com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`](#request) | 
+| `http.request.factory` | [`com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`](#request) | 
 | `http.client` | [`com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`](#client) | 
-| `http.source.response.parser` | [`com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`](#response) | 
-| `http.source.record.mapper` | [`com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`](#record) |
-| `http.source.poll.interceptor` | [`com.github.castorm.kafka.connect.http.poll.IntervalDelayPollInterceptor`](#interceptor) | 
+| `http.response.parser` | [`com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`](#response) | 
+| `http.record.mapper` | [`com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`](#record) |
+| `http.poll.interceptor` | [`com.github.castorm.kafka.connect.http.poll.IntervalDelayPollInterceptor`](#interceptor) | 
 
 Below further details on these components 
 
@@ -44,12 +44,12 @@ Enables offset injection on url, headers, query params and body via templates
 
 | Property | Req | Default | Description |
 |:---|:---:|:---:|:---|
-| `http.source.url` | * | - | HTTP Url |
-| `http.source.method` | - | GET | HTTP Method |
-| `http.source.headers` | - | - | HTTP Headers, Comma separated list of pairs `Name: Value` |
-| `http.source.query-params` | - | - | HTTP Method, Ampersand separated list of pairs `name=value` |
-| `http.source.body` | - | - | HTTP Body |
-| `http.source.template.factory` | - | `NoTemplateFactory` | Template factory |
+| `http.request.url` | * | - | HTTP Url |
+| `http.request.method` | - | GET | HTTP Method |
+| `http.request.headers` | - | - | HTTP Headers, Comma separated list of pairs `Name: Value` |
+| `http.request.params` | - | - | HTTP Method, Ampersand separated list of pairs `name=value` |
+| `http.request.body` | - | - | HTTP Body |
+| `http.request.template.factory` | - | `NoTemplateFactory` | Template factory |
 
 ### TemplateFactory
 #### FreeMarkerTemplateFactory
@@ -86,12 +86,12 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the relevant as
 
 | Property | Req | Default | Description |
 |:---|:---:|:---:|:---|
-| `http.source.response.json.items.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items |
-| `http.source.response.json.item.key.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key |
-| `http.source.response.json.item.value.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body |
-| `http.source.response.json.item.timestamp.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual item to be used as kafka record timestamp |
-| `http.source.response.json.item.offset.value.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value of the individual item to be used as offset for future requests |
-| `http.source.response.json.item.offset.key` | - | offset | Name of the offset property to be used in HTTP Request templates |
+| `http.response.json.items.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items |
+| `http.response.json.item.key.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key |
+| `http.response.json.item.value.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body |
+| `http.response.json.item.timestamp.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual item to be used as kafka record timestamp |
+| `http.response.json.item.offset.value.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value of the individual item to be used as offset for future requests |
+| `http.response.json.item.offset.key` | - | offset | Name of the offset property to be used in HTTP Request templates |
 
 <a name="record"/>
 
@@ -120,7 +120,7 @@ Throttles rate of requests based on a given interval, except when connector is n
 
 | Property | Req | Default | Description |
 |:---|:---:|:---:|:---|
-| `http.source.poll.interval.millis` | - | 60000 | Interval in between requests once up-to-date |
+| `http.poll.interval.millis` | - | 60000 | Interval in between requests once up-to-date |
 
 
 ### Prerequisites

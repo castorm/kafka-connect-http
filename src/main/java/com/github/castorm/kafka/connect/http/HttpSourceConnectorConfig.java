@@ -44,11 +44,11 @@ import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
 @Getter
 class HttpSourceConnectorConfig extends AbstractConfig {
 
-    private static final String POLL_HOOKS = "http.source.poll.interceptor";
+    private static final String POLL_HOOKS = "http.poll.interceptor";
     private static final String CLIENT = "http.client";
-    private static final String REQUEST_FACTORY = "http.source.request.factory";
-    private static final String RESPONSE_PARSER = "http.source.response.parser";
-    private static final String RECORD_MAPPER = "http.source.record.mapper";
+    private static final String REQUEST_FACTORY = "http.request.factory";
+    private static final String RESPONSE_PARSER = "http.response.parser";
+    private static final String RECORD_MAPPER = "http.record.mapper";
 
     private final PollInterceptor pollInterceptor;
     private final HttpRequestFactory requestFactory;

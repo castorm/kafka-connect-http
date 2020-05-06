@@ -41,62 +41,62 @@ class TemplateHttpRequestFactoryConfigTest {
 
     @Test
     void whenMissingUrl_thenException() {
-        assertThat(catchThrowable(() -> configWithout("http.source.url"))).isInstanceOf(ConfigException.class);
+        assertThat(catchThrowable(() -> configWithout("http.request.url"))).isInstanceOf(ConfigException.class);
     }
 
     @Test
     void whenUrl_thenInitialized() {
-        assertThat(config("http.source.url", value).getUrl()).isEqualTo(value);
+        assertThat(config("http.request.url", value).getUrl()).isEqualTo(value);
     }
 
     @Test
     void whenMissingMethod_thenDefault() {
-        assertThat(configWithout("http.source.method").getMethod()).isEqualTo("GET");
+        assertThat(configWithout("http.request.method").getMethod()).isEqualTo("GET");
     }
 
     @Test
     void whenMethod_thenInitialized() {
-        assertThat(config("http.source.method", value).getMethod()).isEqualTo(value);
+        assertThat(config("http.request.method", value).getMethod()).isEqualTo(value);
     }
 
     @Test
     void whenMissingHeaders_thenDefault() {
-        assertThat(configWithout("http.source.headers").getHeaders()).isEqualTo("");
+        assertThat(configWithout("http.request.headers").getHeaders()).isEqualTo("");
     }
 
     @Test
     void whenHeaders_thenInitialized() {
-        assertThat(config("http.source.headers", value).getHeaders()).isEqualTo(value);
+        assertThat(config("http.request.headers", value).getHeaders()).isEqualTo(value);
     }
 
     @Test
     void whenMissingQueryParams_thenDefault() {
-        assertThat(configWithout("http.source.query-params").getQueryParams()).isEqualTo("");
+        assertThat(configWithout("http.request.params").getQueryParams()).isEqualTo("");
     }
 
     @Test
     void whenQueryParams_thenInitialized() {
-        assertThat(config("http.source.query-params", value).getQueryParams()).isEqualTo(value);
+        assertThat(config("http.request.params", value).getQueryParams()).isEqualTo(value);
     }
 
     @Test
     void whenMissingBody_thenDefault() {
-        assertThat(configWithout("http.source.body").getBody()).isEqualTo("");
+        assertThat(configWithout("http.request.body").getBody()).isEqualTo("");
     }
 
     @Test
     void whenBody_thenInitialized() {
-        assertThat(config("http.source.body", value).getBody()).isEqualTo(value);
+        assertThat(config("http.request.body", value).getBody()).isEqualTo(value);
     }
 
     @Test
     void whenMissingTemplateFactory_thenDefault() {
-        assertThat(configWithout("http.source.template.factory").getTemplateFactory()).isInstanceOf(NoTemplateFactory.class);
+        assertThat(configWithout("http.request.template.factory").getTemplateFactory()).isInstanceOf(NoTemplateFactory.class);
     }
 
     @Test
     void whenTemplateFactory_thenInitialized() {
-        assertThat(config("http.source.template.factory", TestTemplateFactory.class.getName()).getTemplateFactory()).isInstanceOf(TestTemplateFactory.class);
+        assertThat(config("http.request.template.factory", TestTemplateFactory.class.getName()).getTemplateFactory()).isInstanceOf(TestTemplateFactory.class);
     }
 
     public static class TestTemplateFactory implements TemplateFactory {
@@ -112,7 +112,7 @@ class TemplateHttpRequestFactoryConfigTest {
 
         static Map<String, String> defaultMap() {
             return new HashMap<String, String>() {{
-                put("http.source.url", "url");
+                put("http.request.url", "url");
             }};
         }
 

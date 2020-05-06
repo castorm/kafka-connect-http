@@ -41,32 +41,32 @@ class JacksonHttpResponseParserConfigTest {
 
     @Test
     void whenItemsPointerConfigured_thenInitialized() {
-        assertThat(config("http.source.response.json.items.pointer", "/test-pointer").getItemsPointer()).isEqualTo(compile("/test-pointer"));
+        assertThat(config("http.response.json.items.pointer", "/test-pointer").getItemsPointer()).isEqualTo(compile("/test-pointer"));
     }
 
     @Test
     void whenMissingItemKeyPointerConfigured_thenInitialized() {
-        assertThat(configWithout("http.source.response.json.item.key.pointer").getItemKeyPointer()).isEmpty();
+        assertThat(configWithout("http.response.json.item.key.pointer").getItemKeyPointer()).isEmpty();
     }
 
     @Test
     void whenItemKeyPointerConfigured_thenInitialized() {
-        assertThat(config("http.source.response.json.item.key.pointer", "/test-pointer").getItemKeyPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
+        assertThat(config("http.response.json.item.key.pointer", "/test-pointer").getItemKeyPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
     }
 
     @Test
     void whenItemValuePointerConfigured_thenInitialized() {
-        assertThat(config("http.source.response.json.item.value.pointer", "/test-pointer").getItemValuePointer()).isEqualTo(compile("/test-pointer"));
+        assertThat(config("http.response.json.item.value.pointer", "/test-pointer").getItemValuePointer()).isEqualTo(compile("/test-pointer"));
     }
 
     @Test
     void whenMissingTimestampPointerConfigured_thenInitialized() {
-        assertThat(configWithout("http.source.response.json.item.timestamp.pointer").getItemTimestampPointer()).isEmpty();
+        assertThat(configWithout("http.response.json.item.timestamp.pointer").getItemTimestampPointer()).isEmpty();
     }
 
     @Test
     void whenItemTimestampPointerConfigured_thenInitialized() {
-        assertThat(config("http.source.response.json.item.timestamp.pointer", "/test-pointer").getItemTimestampPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
+        assertThat(config("http.response.json.item.timestamp.pointer", "/test-pointer").getItemTimestampPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
     }
 
     @Test
@@ -119,8 +119,8 @@ class JacksonHttpResponseParserConfigTest {
 
         static JacksonHttpResponseParserConfig offsetConfig(String keys, String values) {
             Map<String, String> customMap = defaultMap();
-            customMap.put("http.source.response.json.item.offset.value.pointer", values);
-            customMap.put("http.source.response.json.item.offset.key", keys);
+            customMap.put("http.response.json.item.offset.value.pointer", values);
+            customMap.put("http.response.json.item.offset.key", keys);
             return new JacksonHttpResponseParserConfig(customMap);
         }
     }
