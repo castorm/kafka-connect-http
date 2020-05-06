@@ -1,5 +1,5 @@
 # Kafka Connect HTTP Connector
-![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg)![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg)![Release to Maven Central](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20Maven%20Central/badge.svg)
+![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg) ![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg) ![Release to Maven Central](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20Maven%20Central/badge.svg)
 
 Set of Kafka Connect connectors that enable Kafka integration with external systems via HTTP.
 
