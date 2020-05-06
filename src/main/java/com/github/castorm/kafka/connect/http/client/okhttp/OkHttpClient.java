@@ -27,7 +27,6 @@ import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import okhttp3.ConnectionPool;
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -38,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static okhttp3.HttpUrl.parse;
@@ -105,9 +103,7 @@ public class OkHttpClient implements HttpClient {
 
     private static Optional<RequestBody> mapBody(HttpRequest request) {
         if (request.getBody() != null) {
-            String plainText = "text/plain";
-            String contentType = request.getHeaders().getOrDefault("Content-Type", singletonList(plainText)).stream().findFirst().orElse(plainText);
-            return Optional.of(RequestBody.create(request.getBody(), MediaType.parse(contentType)));
+            return Optional.of(RequestBody.create(request.getBody()));
         }
         return empty();
     }
