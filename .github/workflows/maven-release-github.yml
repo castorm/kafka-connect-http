@@ -15,9 +15,11 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - id: install-secret-key
+        name: Install gpg secret key
+        run: echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}" | gpg --batch --import
       - name: Publish package
         run: mvn -B deploy -P release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
