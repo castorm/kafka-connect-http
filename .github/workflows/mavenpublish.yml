@@ -23,12 +23,12 @@ jobs:
         server-password: MAVEN_PASSWORD
 
     - name: Publish to the Maven Central Repository
-      run: mvn -B deploy
+      run: mvn -B deploy -Prelease
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
 
     - name: Publish to GitHub Packages
-      run: mvn -B deploy
+      run: mvn -B deploy -Prelease
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
