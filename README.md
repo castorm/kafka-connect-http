@@ -143,8 +143,13 @@ Throttles rate of requests based on a given interval, except when connector is n
 ### SPI
 The connector can be easily extended by implementing your own version of any of the components below.
 
-These are better understood by looking at the `poll()` implementation in the source task:
+These are better understood by looking at the source task implementation:
 ```java
+public void start(Map<String, String> settings) {
+    ...
+    requestFactory.setOffset(resolveInitialOffset(config.getInitialOffset()));
+}
+
 public List<SourceRecord> poll() throws InterruptedException {
 
     pollInterceptor.beforePoll();
@@ -158,6 +163,10 @@ public List<SourceRecord> poll() throws InterruptedException {
             .collect(toList());
 
     return pollInterceptor.afterPoll(records);
+}
+
+public void commitRecord(SourceRecord record) {
+    requestFactory.setOffset(record.sourceOffset());
 }
 ```
 
