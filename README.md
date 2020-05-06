@@ -133,6 +133,27 @@ Throttles rate of requests based on a given interval, except when connector is n
 ## Development
 ### SPI
 The connector can be easily extended by implementing your own version of any of the components below.
+
+These are better understood by looking at the poll implementation in the source task:
+```java
+public List<SourceRecord> poll() throws InterruptedException {
+
+    pollInterceptor.beforePoll();
+
+    HttpRequest request = requestFactory.createRequest();
+
+    HttpResponse response = execute(request);
+
+    List<SourceRecord> records = responseParser.parse(response).stream()
+            .map(recordMapper::map)
+            .collect(toList());
+
+    pollInterceptor.afterPoll(records);
+
+    return records;
+}
+```
+
 #### HttpRequestFactory
 ```java
 public interface HttpRequestFactory extends Configurable {
