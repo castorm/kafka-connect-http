@@ -39,9 +39,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.item;
@@ -181,6 +184,7 @@ class HttpSourceTaskTest {
         given(client.execute(request)).willReturn(response);
         given(responseParser.parse(response)).willReturn(asList(item));
         given(recordMapper.map(item)).willReturn(record(offset));
+        given(pollInterceptor.afterPoll(asList(record(offset)))).willAnswer(invocation -> invocation.getArgument(0));
 
         assertThat(task.poll()).containsExactly(record(offset));
     }
