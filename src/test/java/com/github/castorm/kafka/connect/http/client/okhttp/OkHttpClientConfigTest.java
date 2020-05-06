@@ -59,7 +59,7 @@ class OkHttpClientConfigTest {
 
     @Test
     void whenKeepAliveDuration_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.client.keep-alive.duration.millis", "42")).getKeepAliveDuration()).isEqualTo(42L);
+        assertThat(config(ImmutableMap.of("http.client.ttl.millis", "42")).getKeepAliveDuration()).isEqualTo(42L);
     }
 
     @Test

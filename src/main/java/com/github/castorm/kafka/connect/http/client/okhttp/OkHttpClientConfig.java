@@ -37,7 +37,7 @@ public class OkHttpClientConfig extends AbstractConfig {
 
     private static final String CONNECTION_TIMEOUT_MILLIS = "http.client.connection.timeout.millis";
     private static final String READ_TIMEOUT_MILLIS = "http.client.read.timeout.millis";
-    private static final String CONNECTION_KEEP_ALIVE_DURATION_MILLIS = "http.client.keep-alive.duration.millis";
+    private static final String CONNECTION_KEEP_ALIVE_DURATION_MILLIS = "http.client.ttl.millis";
     private static final String CONNECTION_MAX_IDLE = "http.client.max-idle";
 
     private final Long connectionTimeoutMillis;
