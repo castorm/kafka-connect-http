@@ -22,7 +22,6 @@ More details on how to [Install Connectors](https://docs.confluent.io/current/co
 
 A HTTP Source connector is broken down into the following components. You can implement your own version of them.
 
-###### Configuration properties
 | Property | Default |
 |---|---|
 | `http.source.request.factory` | [`com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`](#request) | 
@@ -43,9 +42,8 @@ Responsible for creating the `HttpRequest`.
 
 Enables offset injection on url, headers, query params and body via templates
 
-##### Configuration properties
 | Property | Req | Default | Description |
-|:---|---|---|:---|
+|:---|:---:|:---:|:---|
 | `http.source.url` | * | - | HTTP Url |
 | `http.source.method` | - | GET | HTTP Method |
 | `http.source.headers` | - | - | HTTP Headers, Comma separated list of pairs `Name: Value` |
@@ -69,9 +67,8 @@ Responsible for executing the `HttpRequest`, obtaining a `HttpResponse` as a res
 
 Uses a pooled [OkHttp](https://square.github.io/okhttp/) client. 
 
-##### Configuration properties
 | Property | Req | Default | Description |
-|:---|---|---|:---|
+|:---|:---:|:---:|:---|
 | `http.client.connection.timeout.millis` | - | 2000 | Connection timeout |
 | `http.client.read.timeout.millis` | - | 2000 | Read timeout |
 | `http.client.connection.ttl.millis` | - | 300000 | Connection time to live |
@@ -87,9 +84,8 @@ Responsible for parsing the resulting `HttpResponse` into a list of individual i
 
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the relevant aspects of the response. 
 
-##### Configuration properties
 | Property | Req | Default | Description |
-|:---|---|---|:---|
+|:---|:---:|:---:|:---|
 | `http.source.response.json.items.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items |
 | `http.source.response.json.item.key.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key |
 | `http.source.response.json.item.value.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body |
@@ -107,9 +103,8 @@ Responsible for mapping individual items from the response into Kafka Connect `S
 
 Embeds the item properties into a common simple envelope to enable schema evolution. This envelope contains simple a key and a body properties. 
 
-##### Configuration properties
 | Property | Req | Default | Description |
-|:---|---|---|:---|
+|:---|:---:|:---:|:---|
 | `kafka.topic` | * | - | Name of the topic where the record will be sent to |
 
 
@@ -123,9 +118,8 @@ Hooks that enable influencing the poll control flow.
 
 Throttles rate of requests based on a given interval, except when connector is not up-to-date. 
 
-##### Configuration properties
 | Property | Req | Default | Description |
-|:---|---|---|:---|
+|:---|:---:|:---:|:---|
 | `http.source.poll.interval.millis` | - | 60000 | Interval in between requests once up-to-date |
 
 
