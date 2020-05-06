@@ -54,6 +54,10 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/castorm/kafka-connect-http-plugin</url>
+        </repository>
     </distributionManagement>
 
     <properties>
