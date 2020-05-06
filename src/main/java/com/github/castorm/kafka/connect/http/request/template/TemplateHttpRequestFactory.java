@@ -29,8 +29,8 @@ import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactor
 
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.common.HttpUtils.breakDownHeaders;
-import static com.github.castorm.kafka.connect.common.HttpUtils.breakDownQueryParams;
+import static com.github.castorm.kafka.connect.common.MapUtils.breakDownHeaders;
+import static com.github.castorm.kafka.connect.common.MapUtils.breakDownQueryParams;
 
 public class TemplateHttpRequestFactory implements HttpRequestFactory {
 

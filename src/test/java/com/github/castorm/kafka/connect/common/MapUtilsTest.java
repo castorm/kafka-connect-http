@@ -26,14 +26,15 @@ import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap.SimpleEntry;
 
-import static com.github.castorm.kafka.connect.common.HttpUtils.breakDownHeaders;
-import static com.github.castorm.kafka.connect.common.HttpUtils.breakDownQueryParams;
+import static com.github.castorm.kafka.connect.common.MapUtils.breakDownHeaders;
+import static com.github.castorm.kafka.connect.common.MapUtils.breakDownMap;
+import static com.github.castorm.kafka.connect.common.MapUtils.breakDownQueryParams;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-class HttpUtilsTest {
+class MapUtilsTest {
 
     @Test
     void whenBreakDownNullHeaders_thenEmptyMap() {
@@ -103,7 +104,33 @@ class HttpUtilsTest {
     }
 
     @Test
-    void whenBreakDownMultiValueQueryParams_thenBrokenDown() {
-        assertThat(breakDownQueryParams("name1=value1&name1=value2")).containsExactly(new SimpleEntry<>("name1", asList("value1", "value2")));
+    void whenBreakDownNullMap_thenEmptyMap() {
+        assertThat(breakDownMap(null)).isEmpty();
+    }
+
+    @Test
+    void whenBreakDownEmptyStringMap_thenEmptyMap() {
+        assertThat(breakDownMap("")).isEmpty();
+    }
+
+    @Test
+    void whenBreakDownIncompleteMap_thenIllegalState() {
+        assertThat(catchThrowable(() -> breakDownMap("name"))).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void whenBreakDownMap_thenBrokenDown() {
+        assertThat(breakDownMap("name=value")).containsExactly(new SimpleEntry<>("name", "value"));
+    }
+
+    @Test
+    void whenBreakDownMapWithSpaces_thenBrokenDown() {
+        assertThat(breakDownMap("  name  =  value  ")).containsExactly(new SimpleEntry<>("name", "value"));
+    }
+
+    @Test
+    void whenBreakDownTwoFoldMap_thenBrokenDown() {
+        assertThat(breakDownMap("name1=value1,name2=value2"))
+                .contains(new SimpleEntry<>("name1", "value1"), new SimpleEntry<>("name2", "value2"));
     }
 }

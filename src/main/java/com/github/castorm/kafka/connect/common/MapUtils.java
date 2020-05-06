@@ -28,31 +28,45 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @UtilityClass
-public class HttpUtils {
+public class MapUtils {
 
     public static Map<String, List<String>> breakDownHeaders(String headers) {
-        return breakDownPairs(headers, ",", ":");
+        return breakDownMultiValuePairs(headers, ",", ":");
     }
 
     public static Map<String, List<String>> breakDownQueryParams(String queryParams) {
-        return breakDownPairs(queryParams, "&", "=");
+        return breakDownMultiValuePairs(queryParams, "&", "=");
     }
 
-    private static Map<String, List<String>> breakDownPairs(String itemLine, String itemSplitter, String pairSplitter) {
+    public static Map<String, String> breakDownMap(String mapString) {
+        return breakDownPairs(mapString, ",", "=");
+    }
+
+    private static Map<String, String> breakDownPairs(String itemLine, String itemSplitter, String pairSplitter) {
+        return breakDownPairs(itemLine, itemSplitter, pairSplitter, toMap(Entry::getKey, Entry::getValue));
+    }
+
+    private static Map<String, List<String>> breakDownMultiValuePairs(String itemLine, String itemSplitter, String pairSplitter) {
+        return breakDownPairs(itemLine, itemSplitter, pairSplitter, groupingBy(Entry::getKey, mapping(Entry::getValue, toList())));
+    }
+
+    private static <T> Map<String, T> breakDownPairs(String itemLine, String itemSplitter, String pairSplitter, Collector<Entry<String, String>, ?, Map<String, T>> collector) {
         if (itemLine == null || itemLine.length() == 0) {
             return emptyMap();
         }
         return Stream.of(itemLine.split(itemSplitter))
                 .map(headerLine -> toPair(headerLine, pairSplitter))
-                .collect(groupingBy(Entry::getKey, mapping(Entry::getValue, toList())));
+                .collect(collector);
     }
 
     private static Entry<String, String> toPair(String pairLine, String pairSplitter) {

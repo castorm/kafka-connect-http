@@ -33,6 +33,7 @@ import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.Test;
 
@@ -42,12 +43,13 @@ import java.util.Map;
 
 import static com.github.castorm.kafka.connect.http.HttpSourceConnectorConfigTest.Fixture.config;
 import static com.github.castorm.kafka.connect.http.HttpSourceConnectorConfigTest.Fixture.configWithout;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpSourceConnectorConfigTest {
 
     @Test
-    void whenClient_thenDefault() {
+    void whenNoClient_thenDefault() {
         assertThat(configWithout("http.client").getClient()).isInstanceOf(OkHttpClient.class);
     }
 
@@ -57,7 +59,7 @@ class HttpSourceConnectorConfigTest {
     }
 
     @Test
-    void whenRequestFactory_thenDefault() {
+    void whenNoRequestFactory_thenDefault() {
         assertThat(configWithout("http.request.factory").getRequestFactory()).isInstanceOf(TemplateHttpRequestFactory.class);
     }
 
@@ -67,7 +69,7 @@ class HttpSourceConnectorConfigTest {
     }
 
     @Test
-    void whenResponseParser_thenDefault() {
+    void whenNoResponseParser_thenDefault() {
         assertThat(configWithout("http.response.parser").getResponseParser()).isInstanceOf(JacksonHttpResponseParser.class);
     }
 
@@ -77,13 +79,23 @@ class HttpSourceConnectorConfigTest {
     }
 
     @Test
-    void whenRecordMapper_thenDefault() {
+    void whenNoRecordMapper_thenDefault() {
         assertThat(configWithout("http.record.mapper").getRecordMapper()).isInstanceOf(SchemedSourceRecordMapper.class);
     }
 
     @Test
     void whenRecordMapper_thenInitialized() {
         assertThat(config("http.record.mapper", TestRecordMapper.class.getName()).getRecordMapper()).isInstanceOf(TestRecordMapper.class);
+    }
+
+    @Test
+    void whenNoInitialOffset_thenDefault() {
+        assertThat(configWithout("http.offset.initial").getInitialOffset()).isEqualTo(emptyMap());
+    }
+
+    @Test
+    void whenInitialOffset_thenInitialized() {
+        assertThat(config("http.offset.initial", "k=v").getInitialOffset()).isEqualTo(ImmutableMap.of("k", "v"));
     }
 
     public static class TestHttpClient implements HttpClient {

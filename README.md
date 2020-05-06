@@ -30,13 +30,14 @@ Kafka Connect will store internally these offsets so the connector can continue 
 
 The connector breaks down the different responsibilities into the following components.
 
-| Property | Default |
+| Property | Description |
 |---|---|
 | `http.request.factory` | [`com...request.template.TemplateHttpRequestFactory`](#request) | 
 | `http.client` | [`com....client.okhttp.OkHttpClient`](#client) | 
 | `http.response.parser` | [`com...response.jackson.JacksonHttpResponseParser`](#response) | 
 | `http.record.mapper` | [`com...record.SchemedSourceRecordMapper`](#record) |
 | `http.poll.interceptor` | [`com...poll.IntervalDelayPollInterceptor`](#interceptor) | 
+| `http.offset.initial` | Initial offset, comma separated list of pairs `offset=value` | 
 
 Below further details on these components 
 

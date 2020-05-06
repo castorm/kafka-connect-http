@@ -69,14 +69,19 @@ public class HttpSourceTask extends SourceTask {
 
         HttpSourceConnectorConfig config = configFactory.apply(settings);
 
-        Map<String, ?> offset = context.offsetStorageReader().offset(emptyMap());
-
         pollInterceptor = config.getPollInterceptor();
         requestFactory = config.getRequestFactory();
-        requestFactory.setOffset(offset);
+        requestFactory.setOffset(resolveInitialOffset(config.getInitialOffset()));
         requestExecutor = config.getClient();
         responseParser = config.getResponseParser();
         recordMapper = config.getRecordMapper();
+    }
+
+    private Map<String, ?> resolveInitialOffset(Map<String, ?> initialOffset) {
+
+        Map<String, ?> latestOffset = context.offsetStorageReader().offset(emptyMap());
+
+        return !latestOffset.isEmpty() ? latestOffset : initialOffset;
     }
 
     @Override
