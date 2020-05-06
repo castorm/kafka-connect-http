@@ -20,7 +20,15 @@ More details on how to [Install Connectors](https://docs.confluent.io/current/co
 ## Source Connector
 `com.github.castorm.kafka.connect.http.HttpSourceConnector`
 
-A HTTP Source connector is broken down into the following components. You can implement your own version of them.
+The HTTP Source connector is meant to implement [CDC (Change Data Capture)](https://en.wikipedia.org/wiki/Change_data_capture).
+
+### Requirements for CDC
+* The HTTP resource contains an array of items that is ordered by a given property present on every item (we'll call it **offset**)
+* The HTTP resource allows retrieving items starting from a given **offset**
+
+Kafka Connect will store internally these offsets so the connector can continue from where it left after restarting.
+
+The connector breaks down the different responsibilities into the following components.
 
 | Property | Default |
 |---|---|
