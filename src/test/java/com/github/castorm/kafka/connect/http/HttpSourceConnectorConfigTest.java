@@ -113,7 +113,6 @@ class HttpSourceConnectorConfigTest {
                 put("kafka.topic", "topic");
                 put("http.source.url", "foo");
                 put("http.source.response.json.item.offset.value.pointer", "/baz");
-                put("http.source.response.json.item.offset.key", "key");
             }};
         }
 

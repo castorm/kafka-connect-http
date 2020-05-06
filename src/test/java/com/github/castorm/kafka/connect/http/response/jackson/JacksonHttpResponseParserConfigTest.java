@@ -23,7 +23,6 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  */
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.kafka.common.config.ConfigException;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -71,13 +70,8 @@ class JacksonHttpResponseParserConfigTest {
     }
 
     @Test
-    void whenMissingOffsetKeyConfigured_thenException() {
-        assertThat(catchThrowable(() -> configWithout("http.source.response.json.item.offset.key"))).isInstanceOf(ConfigException.class);
-    }
-
-    @Test
-    void whenMissingOffsetValuePointerConfigured_thenException() {
-        assertThat(catchThrowable(() -> configWithout("http.source.response.json.item.offset.value.pointer"))).isInstanceOf(ConfigException.class);
+    void whenItemOffsetPointersHalfConfigured_thenEmpty() {
+        assertThat(offsetConfig("key", null).getItemOffsets()).isEmpty();
     }
 
     @Test
@@ -108,12 +102,6 @@ class JacksonHttpResponseParserConfigTest {
     interface Fixture {
         static Map<String, String> defaultMap() {
             return new HashMap<String, String>() {{
-                put("http.source.response.json.items.pointer", "/");
-                put("http.source.response.json.item.key.pointer", "/");
-                put("http.source.response.json.item.value.pointer", "/");
-                put("http.source.response.json.item.timestamp.pointer", "/");
-                put("http.source.response.json.item.offset.value.pointer", "/");
-                put("http.source.response.json.item.offset.key", "/");
             }};
         }
 

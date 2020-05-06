@@ -10,12 +10,12 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -63,22 +64,32 @@ public class JacksonHttpResponseParserConfig extends AbstractConfig {
         itemKeyPointer = ofNullable(getString(ITEM_KEY_POINTER)).map(JsonPointer::compile);
         itemValuePointer = JsonPointer.compile(getString(ITEM_VALUE_POINTER));
         itemTimestampPointer = ofNullable(getString(ITEM_TIMESTAMP_POINTER)).map(JsonPointer::compile);
+        itemOffsets = resolveItemOffsets(getString(ITEM_OFFSET_KEY), getString(ITEM_OFFSET_VALUE_POINTER));
+    }
 
-        List<JsonPointer> itemOffsetValuePointers = Stream.of(getString(ITEM_OFFSET_VALUE_POINTER).split(","))
+    private static Map<String, JsonPointer> resolveItemOffsets(String offsetKey, String offsetValuePointer) {
+
+        List<JsonPointer> itemOffsetValuePointers = Stream.of(ofNullable(offsetValuePointer).orElse("").split(","))
                 .map(String::trim)
+                .filter(it -> !it.isEmpty())
                 .map(JsonPointer::compile)
                 .collect(toList());
-        List<String> itemOffsetKeys = Stream.of(getString(ITEM_OFFSET_KEY).split(","))
+        List<String> itemOffsetKeys = Stream.of(offsetKey.split(","))
                 .map(String::trim)
+                .filter(it -> !it.isEmpty())
                 .collect(toList());
 
-        if (itemOffsetKeys.size() != itemOffsetValuePointers.size()) {
-            throw new IllegalStateException("Size of " + ITEM_OFFSET_KEY + " and " + ITEM_OFFSET_VALUE_POINTER + " must coincide");
+        if (itemOffsetValuePointers.size() > 0) {
+            if (itemOffsetKeys.size() == itemOffsetValuePointers.size()) {
+                return range(0, itemOffsetKeys.size()).boxed()
+                        .map(i -> new SimpleEntry<>(itemOffsetKeys.get(i), itemOffsetValuePointers.get(i)))
+                        .collect(toMap(Entry::getKey, Entry::getValue));
+            } else {
+                throw new IllegalStateException("Size of " + ITEM_OFFSET_KEY + " and " + ITEM_OFFSET_VALUE_POINTER + " must coincide");
+            }
+        } else {
+            return emptyMap();
         }
-
-        itemOffsets = range(0, itemOffsetKeys.size()).boxed()
-                .map(i -> new SimpleEntry<>(itemOffsetKeys.get(i), itemOffsetValuePointers.get(i)))
-                .collect(toMap(Entry::getKey, Entry::getValue));
     }
 
     public static ConfigDef config() {
@@ -87,7 +98,7 @@ public class JacksonHttpResponseParserConfig extends AbstractConfig {
                 .define(ITEM_KEY_POINTER, STRING, null, HIGH, "Item Key JsonPointer")
                 .define(ITEM_VALUE_POINTER, STRING, "/", HIGH, "Item Value JsonPointer")
                 .define(ITEM_TIMESTAMP_POINTER, STRING, null, HIGH, "Item Timestamp JsonPointer")
-                .define(ITEM_OFFSET_VALUE_POINTER, STRING, HIGH, "Item Offset Value JsonPointer")
-                .define(ITEM_OFFSET_KEY, STRING, HIGH, "Item Offset Key");
+                .define(ITEM_OFFSET_VALUE_POINTER, STRING, null, HIGH, "Item Offset Value JsonPointer")
+                .define(ITEM_OFFSET_KEY, STRING, "offset", HIGH, "Item Offset Key");
     }
 }
