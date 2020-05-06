@@ -92,9 +92,7 @@ public class HttpSourceTask extends SourceTask {
                 .map(recordMapper::map)
                 .collect(toList());
 
-        pollInterceptor.afterPoll(records);
-
-        return records;
+        return pollInterceptor.afterPoll(records);
     }
 
     private HttpResponse execute(HttpRequest request) {

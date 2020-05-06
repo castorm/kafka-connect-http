@@ -74,8 +74,9 @@ public class IntervalDelayPollInterceptor implements PollInterceptor {
     }
 
     @Override
-    public void afterPoll(List<SourceRecord> records) {
+    public List<SourceRecord> afterPoll(List<SourceRecord> records) {
         upToDate = records.isEmpty();
+        return records;
     }
 
     @FunctionalInterface

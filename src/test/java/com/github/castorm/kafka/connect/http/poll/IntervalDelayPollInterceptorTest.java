@@ -34,6 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -104,5 +105,13 @@ class IntervalDelayPollInterceptorTest {
         interceptor.afterPoll(asList(new SourceRecord(null, null, null, null, null)));
 
         assertThat(interceptor.upToDate).isFalse();
+    }
+
+    @Test
+    void whenAfterPollNotEmpty_thenRecordsReturned() {
+
+        List<SourceRecord> records = asList(new SourceRecord(null, null, null, null, null));
+
+        assertThat(interceptor.afterPoll(records)).isEqualTo(records);
     }
 }

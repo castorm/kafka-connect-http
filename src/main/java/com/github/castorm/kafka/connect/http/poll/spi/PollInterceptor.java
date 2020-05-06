@@ -31,5 +31,5 @@ public interface PollInterceptor extends Configurable {
 
     void beforePoll() throws InterruptedException;
 
-    void afterPoll(List<SourceRecord> records);
+    List<SourceRecord> afterPoll(List<SourceRecord> records);
 }
