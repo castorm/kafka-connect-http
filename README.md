@@ -37,13 +37,13 @@ Below further details on these components
 
 ### HttpRequestFactory
 Responsible for creating the `HttpRequest`.
-#### Implementations
-##### TemplateHttpRequestFactory
+
+#### TemplateHttpRequestFactory
 ```com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory```
 
 Enables offset injection on url, headers, query params and body via templates
 
-###### Configuration properties
+##### Configuration properties
 | Property | Req | Default | Description |
 |:---|---|---|:---|
 | `http.source.url` | * | - | HTTP Url |
@@ -53,9 +53,8 @@ Enables offset injection on url, headers, query params and body via templates
 | `http.source.body` | - | - | HTTP Body |
 | `http.source.template.factory` | - | `NoTemplateFactory` | Template factory |
 
-###### TemplateFactory
-####### Implementations
-######## FreeMarkerTemplateFactory
+### TemplateFactory
+#### FreeMarkerTemplateFactory
 ```com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory```
 
 [FreeMarker](https://freemarker.apache.org/) based implementation of `TemplateFactory`
@@ -64,13 +63,13 @@ Enables offset injection on url, headers, query params and body via templates
 
 ### HttpClient
 Responsible for executing the `HttpRequest`, obtaining a `HttpResponse` as a result.
-#### Implementations
-##### OkHttpClient
+
+#### OkHttpClient
 ```com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient```
 
 Uses a pooled [OkHttp](https://square.github.io/okhttp/) client. 
 
-###### Configuration properties
+##### Configuration properties
 | Property | Req | Default | Description |
 |:---|---|---|:---|
 | `http.client.connection.timeout.millis` | - | 2000 | Connection timeout |
@@ -82,13 +81,13 @@ Uses a pooled [OkHttp](https://square.github.io/okhttp/) client.
 
 ### HttpResponseParser
 Responsible for parsing the resulting `HttpResponse` into a list of individual items.
-#### Implementations
-##### JacksonHttpResponseParser
+
+#### JacksonHttpResponseParser
 ```com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser```
 
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the relevant aspects of the response. 
 
-###### Configuration properties
+##### Configuration properties
 | Property | Req | Default | Description |
 |:---|---|---|:---|
 | `http.source.response.json.items.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items |
@@ -102,13 +101,13 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the relevant as
 
 ### SourceRecordMapper
 Responsible for mapping individual items from the response into Kafka Connect `SourceRecord`.
-#### Implementations
-##### SchemedSourceRecordMapper
+
+#### SchemedSourceRecordMapper
 ```com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper```
 
 Embeds the item properties into a common simple envelope to enable schema evolution. This envelope contains simple a key and a body properties. 
 
-###### Configuration properties
+##### Configuration properties
 | Property | Req | Default | Description |
 |:---|---|---|:---|
 | `kafka.topic` | * | - | Name of the topic where the record will be sent to |
@@ -118,13 +117,13 @@ Embeds the item properties into a common simple envelope to enable schema evolut
 
 ### PollInterceptor
 Hooks that enable influencing the poll control flow.
-#### Implementations
-##### IntervalDelayPollInterceptor
+
+#### IntervalDelayPollInterceptor
 ```com.github.castorm.kafka.connect.http.poll.IntervalDelayPollInterceptor```
 
 Throttles rate of requests based on a given interval, except when connector is not up-to-date. 
 
-###### Configuration properties
+##### Configuration properties
 | Property | Req | Default | Description |
 |:---|---|---|:---|
 | `http.source.poll.interval.millis` | - | 60000 | Interval in between requests once up-to-date |
@@ -139,7 +138,7 @@ Throttles rate of requests based on a given interval, except when connector is n
 
 ## Development
 ### SPI
-The connector can be easily extending by implementing your own version of the components below.
+The connector can be easily extended by implementing your own version of the components below.
 #### HttpRequestFactory
 ```java
 public interface HttpRequestFactory extends Configurable {
