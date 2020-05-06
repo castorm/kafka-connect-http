@@ -37,16 +37,7 @@ Below further details on these components
 
 ### HttpRequestFactory
 Responsible for creating the `HttpRequest`.
-```java
-public interface HttpRequestFactory extends Configurable {
-
-    void setOffset(Map<String, ?> offset);
-
-    HttpRequest createRequest();
-}
-```
 #### Implementations
-
 ##### TemplateHttpRequestFactory
 ```com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory```
 
@@ -63,20 +54,7 @@ Enables offset injection on url, headers, query params and body via templates
 | `http.source.template.factory` | - | `NoTemplateFactory` | Template factory |
 
 ###### TemplateFactory
-```java
-public interface TemplateFactory {
-
-    Template create(String template);
-}
-
-public interface Template {
-
-    String apply(Map<String, ?> offset);
-}
-```
-
 ####### Implementations
-
 ######## FreeMarkerTemplateFactory
 ```com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory```
 
@@ -86,12 +64,6 @@ public interface Template {
 
 ### HttpClient
 Responsible for executing the `HttpRequest`, obtaining a `HttpResponse` as a result.
-```java
-public interface HttpClient extends Configurable {
-
-    HttpResponse execute(HttpRequest request) throws IOException;
-}
-```
 #### Implementations
 ##### OkHttpClient
 ```com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient```
@@ -110,12 +82,6 @@ Uses a pooled [OkHttp](https://square.github.io/okhttp/) client.
 
 ### HttpResponseParser
 Responsible for parsing the resulting `HttpResponse` into a list of individual items.
-```java
-public interface HttpResponseParser extends Configurable {
-
-    List<HttpResponseItem> parse(HttpResponse response);
-}
-```
 #### Implementations
 ##### JacksonHttpResponseParser
 ```com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser```
@@ -136,12 +102,6 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the relevant as
 
 ### SourceRecordMapper
 Responsible for mapping individual items from the response into Kafka Connect `SourceRecord`.
-```java
-public interface SourceRecordMapper extends Configurable {
-
-    SourceRecord map(HttpResponseItem item);
-}
-```
 #### Implementations
 ##### SchemedSourceRecordMapper
 ```com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper```
@@ -158,14 +118,6 @@ Embeds the item properties into a common simple envelope to enable schema evolut
 
 ### PollInterceptor
 Hooks that enable influencing the poll control flow.
-```java
-public interface PollInterceptor extends Configurable {
-
-    void beforePoll() throws InterruptedException;
-
-    void afterPoll(List<SourceRecord> records);
-}
-```
 #### Implementations
 ##### IntervalDelayPollInterceptor
 ```com.github.castorm.kafka.connect.http.poll.IntervalDelayPollInterceptor```
@@ -186,12 +138,65 @@ Throttles rate of requests based on a given interval, except when connector is n
 
 
 ## Development
+### SPI
+The connector can be easily extending by implementing your own version of the components below.
+#### HttpRequestFactory
+```java
+public interface HttpRequestFactory extends Configurable {
+
+    void setOffset(Map<String, ?> offset);
+
+    HttpRequest createRequest();
+}
+```
+#### TemplateFactory
+```java
+public interface TemplateFactory {
+
+    Template create(String template);
+}
+
+public interface Template {
+
+    String apply(Map<String, ?> offset);
+}
+```
+#### HttpClient
+```java
+public interface HttpClient extends Configurable {
+
+    HttpResponse execute(HttpRequest request) throws IOException;
+}
+```
+#### HttpResponseParser
+```java
+public interface HttpResponseParser extends Configurable {
+
+    List<HttpResponseItem> parse(HttpResponse response);
+}
+```
+#### SourceRecordMapper
+```java
+public interface SourceRecordMapper extends Configurable {
+
+    SourceRecord map(HttpResponseItem item);
+}
+```
+#### PollInterceptor
+```java
+public interface PollInterceptor extends Configurable {
+
+    void beforePoll() throws InterruptedException;
+
+    void afterPoll(List<SourceRecord> records);
+}
+```
 
 ### Building
 ```
 mvn package
 ```
-### Running the test
+### Running the tests
 ```
 mvn test
 ```
