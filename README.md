@@ -1,5 +1,6 @@
 # Kafka Connect HTTP Connector
 ![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg) ![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg) ![Release to Maven Central](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20Maven%20Central/badge.svg) [![Maven Central](https://img.shields.io/maven-central/v/com.github.castorm/kafka-connect-http-plugin.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.castorm%22%20AND%20a:%22kafka-connect-http-plugin%22)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin?ref=badge_shield)
 
 Set of Kafka Connect connectors that enable Kafka integration with external systems via HTTP.
 
@@ -254,6 +255,9 @@ Pending contributions
 ## License
 
 This project is licensed under the GPLv3 License - see the [LICENSE.txt](LICENSE.txt) file for details
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin?ref=badge_large)
 
 ## Built With
 
