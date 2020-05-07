@@ -164,7 +164,7 @@ These are better understood by looking at the source task implementation:
 ```java
 public void start(Map<String, String> settings) {
     ...
-    requestFactory.setOffset(resolveStartingOffset(config.getInitialOffset()));
+    requestFactory.initializeOffset(context.offsetStorageReader().offset(emptyMap()));
 }
 
 public List<SourceRecord> poll() throws InterruptedException {
@@ -183,7 +183,7 @@ public List<SourceRecord> poll() throws InterruptedException {
 }
 
 public void commitRecord(SourceRecord record) {
-    requestFactory.setOffset(record.sourceOffset());
+    requestFactory.advanceOffset(record.sourceOffset());
 }
 ```
 
@@ -191,7 +191,9 @@ public void commitRecord(SourceRecord record) {
 ```java
 public interface HttpRequestFactory extends Configurable {
 
-    void setOffset(Map<String, ?> offset);
+    void initializeOffset(Map<String, ?> offset);
+
+    void advanceOffset(Map<String, ?> offset);
 
     HttpRequest createRequest();
 }
