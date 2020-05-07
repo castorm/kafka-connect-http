@@ -26,7 +26,7 @@ jobs:
         run: echo -e "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
 
       - name: Release Perform
-        run: mvn -B release:perform -P ossrh
+        run: mvn -B deploy -P package,release,ossrh
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}

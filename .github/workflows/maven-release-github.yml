@@ -23,7 +23,7 @@ jobs:
         run: echo -e "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
 
       - name: Release Perform
-        run: mvn -B release:perform
+        run: mvn -B deploy -P package,release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
