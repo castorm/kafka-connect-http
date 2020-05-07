@@ -10,7 +10,7 @@ If your Kafka Connect deployment is automated and packaged with Maven, you can a
 <dependency>
     <groupId>com.github.castorm</groupId>
     <artifactId>kafka-connect-http-plugin</artifactId>
-    <version>0.2.6</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 Otherwise, you'll have to do it manually by downloading the package from our [Releases Page](https://github.com/castorm/kafka-connect-http-plugin/releases).
@@ -231,11 +231,10 @@ mvn package
 mvn test
 ```
 ### Releasing
-- Update release version: `mvn versions:set -DnewVersion=X.Y.Z`
-- Validate and then commit version: `mvn versions:commit`
+On `master`: 
 - Update [CHANGELOG.md](CHANGELOG.md) and [README.md](README.md) files.
-- Merge to master.
-- Deploy to Maven Central: `mvn clean deploy -P release`
+- Prepare release: `mvn release:prepare`
+- Push to master: `git push`.
 - Create release on Github project.
 
 ## Contributing
