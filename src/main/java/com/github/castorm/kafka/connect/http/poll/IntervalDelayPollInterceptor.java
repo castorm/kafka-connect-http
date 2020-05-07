@@ -41,7 +41,7 @@ public class IntervalDelayPollInterceptor implements PollInterceptor {
 
     private Long lastPollMillis = currentTimeMillis();
 
-    boolean upToDate = true;
+    boolean upToDate = false;
 
     public IntervalDelayPollInterceptor() {
         this(IntervalDelayPollInterceptorConfig::new, Thread::sleep);
