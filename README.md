@@ -1,19 +1,36 @@
 # Kafka Connect HTTP Connector
-![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg) ![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg) ![Release to Maven Central](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20Maven%20Central/badge.svg) [![Maven Central](https://img.shields.io/maven-central/v/com.github.castorm/kafka-connect-http-plugin.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.castorm%22%20AND%20a:%22kafka-connect-http-plugin%22)
+![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg) ![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg) ![Release to Maven Central](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20Maven%20Central/badge.svg) [![Maven Central](https://img.shields.io/maven-central/v/com.github.castorm/kafka-connect-http-plugin.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.castorm%22%20AND%20a:%22kafka-connect-http-plugin%22) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin?ref=badge_shield)
 
 Set of Kafka Connect connectors that enable Kafka integration with external systems via HTTP.
 
 ## Getting Started
 
-If your Kafka Connect deployment is automated and packaged with Maven, you can add the dependency from Maven Central, and unpack it on Kafka Connect plugins folder. 
+If your Kafka Connect deployment is automated and packaged with Maven, you can unpack the artifact on Kafka Connect plugins folder. 
 ```xml
-<dependency>
-    <groupId>com.github.castorm</groupId>
-    <artifactId>kafka-connect-http-plugin</artifactId>
-    <version>0.3.4</version>
-</dependency>
+<plugin>
+    <artifactId>maven-dependency-plugin</artifactId>
+    <execution>
+        <id>copy-kafka-connect-plugins</id>
+        <phase>prepare-package</phase>
+        <goals>
+            <goal>unpack</goal>
+        </goals>
+        <configuration>
+            <outputDirectory>${project.build.directory}/docker-build/plugins</outputDirectory>
+            <artifactItems>
+                <artifactItem>
+                    <groupId>com.github.castorm</groupId>
+                    <artifactId>kafka-connect-http-plugin</artifactId>
+                    <version>0.3.4</version>
+                    <type>tar.gz</type>
+                    <classifier>plugin</classifier>
+                </artifactItem>
+            </artifactItems>
+        </configuration>
+    </execution>
+</plugin>
 ```
-Otherwise, you'll have to do it manually by downloading the package from our [Releases Page](https://github.com/castorm/kafka-connect-http-plugin/releases).
+Otherwise, you'll have to do it manually by downloading the package from the [Releases Page](https://github.com/castorm/kafka-connect-http-plugin/releases).
 
 More details on how to [Install Connectors](https://docs.confluent.io/current/connect/managing/install.html)
 
@@ -32,12 +49,11 @@ The connector breaks down the different responsibilities into the following comp
 
 | Property | Description |
 |---|---|
-| `http.request.factory` | [`com...request.template.TemplateHttpRequestFactory`](#request) | 
+| `http.request.factory` | [`com...request.offset.OffsetTemplateHttpRequestFactory`](#request) | 
 | `http.client` | [`com....client.okhttp.OkHttpClient`](#client) | 
 | `http.response.parser` | [`com...response.jackson.JacksonHttpResponseParser`](#response) | 
 | `http.record.mapper` | [`com...record.SchemedSourceRecordMapper`](#record) |
-| `http.poll.interceptor` | [`com...poll.IntervalDelayPollInterceptor`](#interceptor) | 
-| `http.offset.initial` | Initial offset, comma separated list of pairs `offset=value` | 
+| `http.poll.interceptor` | [`com...poll.IntervalDelayPollInterceptor`](#interceptor) |  
 
 Below further details on these components 
 
@@ -46,8 +62,8 @@ Below further details on these components
 ### HttpRequestFactory
 Responsible for creating the `HttpRequest`.
 
-#### TemplateHttpRequestFactory
-`com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
+#### OffsetTemplateHttpRequestFactory
+`com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactory`
 
 Enables offset injection on url, headers, query params and body via templates
 
@@ -58,11 +74,12 @@ Enables offset injection on url, headers, query params and body via templates
 | `http.request.headers` | - | - | HTTP Headers, Comma separated list of pairs `Name: Value` |
 | `http.request.params` | - | - | HTTP Method, Ampersand separated list of pairs `name=value` |
 | `http.request.body` | - | - | HTTP Body |
+| `http.request.offset.initial` | - | - | Initial offset, comma separated list of pairs `offset=value` |
 | `http.request.template.factory` | - | `NoTemplateFactory` | Template factory |
 
 ### TemplateFactory
 #### FreeMarkerTemplateFactory
-`com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
+`com.github.castorm.kafka.connect.http.request.offset.freemarker.FreeMarkerTemplateFactory`
 
 [FreeMarker](https://freemarker.apache.org/) based implementation of `TemplateFactory`
 
@@ -179,14 +196,14 @@ public interface HttpRequestFactory extends Configurable {
     HttpRequest createRequest();
 }
 ```
-#### TemplateFactory
+#### OffsetTemplateFactory
 ```java
-public interface TemplateFactory {
+public interface OffsetTemplateFactory {
 
-    Template create(String template);
+    OffsetTemplate create(String template);
 }
 
-public interface Template {
+public interface OffsetTemplate {
 
     String apply(Map<String, ?> offset);
 }
@@ -231,11 +248,8 @@ mvn package
 mvn test
 ```
 ### Releasing
-On `master`: 
 - Update [CHANGELOG.md](CHANGELOG.md) and [README.md](README.md) files.
-- Push to master: `git push`.
 - Prepare release: `mvn release:clean release:prepare -P package`
-- Push to master: `git push`.
 
 ## Contributing
 
