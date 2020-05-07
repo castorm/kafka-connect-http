@@ -4,8 +4,9 @@
 name: Release to GitHub
 
 on:
-  release:
-    types: [created]
+  create:
+    tags:
+      - v*
 
 jobs:
   build:
@@ -21,8 +22,6 @@ jobs:
       - name: Install gpg secret key
         run: echo -e "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
 
-      - name: Release Prepare
-        run: mvn -B release:prepare
       - name: Release Perform
         run: mvn -B release:perform
         env:
