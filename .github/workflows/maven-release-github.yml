@@ -4,23 +4,26 @@
 name: Release to GitHub
 
 on:
-  push:
-    tags:
-      - v*
+  release:
+    types: [created]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - uses: actions/setup-java@v1
         with:
           java-version: 1.8
           server-id: github
-      - id: install-secret-key
-        name: Install gpg secret key
+
+      - name: Install gpg secret key
         run: echo -e "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
-      - name: Publish package
+
+      - name: Release Prepare
+        run: mvn -B release:prepare
+      - name: Release Perform
         run: mvn -B release:perform
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

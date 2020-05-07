@@ -4,15 +4,15 @@
 name: Release to Maven Central
 
 on:
-  push:
-    tags:
-      - v*
+  release:
+    types: [created]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v1
         with:
@@ -20,10 +20,13 @@ jobs:
           server-id: ossrh
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-      - id: install-secret-key
-        name: Install gpg secret key
+
+      - name: Install gpg secret key
         run: echo -e "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
-      - name: Publish to the Maven Central Repository
+
+      - name: Release Prepare
+        run: mvn -B release:prepare
+      - name: Release Perform
         run: mvn -B release:perform -P ossrh
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
