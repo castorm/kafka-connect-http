@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.template;
+package com.github.castorm.kafka.connect.http.request.offset.freemarker;
 
 /*-
  * #%L
@@ -22,17 +22,24 @@ package com.github.castorm.kafka.connect.http.request.template;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NoTemplateFactoryTest {
+class FreeMarkerOffsetTemplateFactoryTest {
 
-    NoTemplateFactory factory = new NoTemplateFactory();
+    FreeMarkerOffsetTemplateFactory factory = new FreeMarkerOffsetTemplateFactory();
 
     @Test
-    void givenTemplate_whenApply_thenAsIs() {
-        assertThat(factory.create("template").apply(emptyMap())).isEqualTo("template");
+    void givenTemplate_whenApplyEmpty_thenAsIs() {
+        Assertions.assertThat(factory.create("template").apply(emptyMap())).isEqualTo("template");
+    }
+
+    @Test
+    void givenTemplate_whenApplyValue_thenReplaced() {
+        Assertions.assertThat(factory.create("template ${key}").apply(ImmutableMap.of("key", "value"))).isEqualTo("template value");
     }
 }

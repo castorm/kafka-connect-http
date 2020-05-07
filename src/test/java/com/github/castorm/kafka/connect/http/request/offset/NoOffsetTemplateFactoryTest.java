@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.template;
+package com.github.castorm.kafka.connect.http.request.offset;
 
 /*-
  * #%L
@@ -22,13 +22,17 @@ package com.github.castorm.kafka.connect.http.request.template;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
-import com.github.castorm.kafka.connect.http.request.template.spi.Template;
+import org.junit.jupiter.api.Test;
 
-public class NoTemplateFactory implements TemplateFactory {
+import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 
-    @Override
-    public Template create(String template) {
-        return offset -> template;
+class NoOffsetTemplateFactoryTest {
+
+    NoOffsetTemplateFactory factory = new NoOffsetTemplateFactory();
+
+    @Test
+    void givenTemplate_whenApply_thenAsIs() {
+        assertThat(factory.create("template").apply(emptyMap())).isEqualTo("template");
     }
 }

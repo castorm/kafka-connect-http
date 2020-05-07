@@ -29,7 +29,9 @@ import java.util.Map;
 
 public interface HttpRequestFactory extends Configurable {
 
-    void setOffset(Map<String, ?> offset);
+    void initializeOffset(Map<String, ?> offset);
+
+    void advanceOffset(Map<String, ?> offset);
 
     HttpRequest createRequest();
 }

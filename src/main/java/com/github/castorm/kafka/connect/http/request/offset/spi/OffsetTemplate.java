@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.template.spi;
+package com.github.castorm.kafka.connect.http.request.offset.spi;
 
 /*-
  * #%L
@@ -25,7 +25,7 @@ package com.github.castorm.kafka.connect.http.request.template.spi;
 import java.util.Map;
 
 @FunctionalInterface
-public interface Template {
+public interface OffsetTemplate {
 
     String apply(Map<String, ?> offset);
 }

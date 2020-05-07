@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.template;
+package com.github.castorm.kafka.connect.http.request.offset;
 
 /*-
  * #%L
@@ -27,18 +27,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.github.castorm.kafka.connect.http.model.HttpRequest.HttpMethod.POST;
-import static com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryTest.Fixture.url;
-import static com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryTest.Fixture.value;
+import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryTest.Fixture.url;
+import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryTest.Fixture.value;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TemplateHttpRequestFactoryTest {
+class OffsetTemplateHttpRequestFactoryTest {
 
-    TemplateHttpRequestFactory factory;
+    OffsetTemplateHttpRequestFactory factory;
 
     @BeforeEach
     void setUp() {
-        factory = new TemplateHttpRequestFactory();
+        factory = new OffsetTemplateHttpRequestFactory();
     }
 
     @Test

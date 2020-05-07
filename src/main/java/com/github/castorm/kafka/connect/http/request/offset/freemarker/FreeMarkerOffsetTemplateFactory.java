@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.template.freemarker;
+package com.github.castorm.kafka.connect.http.request.offset.freemarker;
 
 /*-
  * #%L
@@ -22,8 +22,8 @@ package com.github.castorm.kafka.connect.http.request.template.freemarker;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.request.template.spi.Template;
-import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
+import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplate;
+import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
@@ -37,12 +37,12 @@ import java.util.Map;
 
 import static java.util.UUID.randomUUID;
 
-public class FreeMarkerTemplateFactory implements TemplateFactory {
+public class FreeMarkerOffsetTemplateFactory implements OffsetTemplateFactory {
 
     private final Configuration configuration = new Configuration(new Version(2, 3, 30));
 
     @Override
-    public Template create(String template) {
+    public OffsetTemplate create(String template) {
         return offset -> apply(createTemplate(template), offset);
     }
 

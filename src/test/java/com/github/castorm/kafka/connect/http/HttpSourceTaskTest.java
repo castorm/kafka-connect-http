@@ -44,7 +44,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.configuredOffset;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.item;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.record;
@@ -90,7 +89,6 @@ class HttpSourceTaskTest {
         given(config.getClient()).willReturn(client);
         given(config.getResponseParser()).willReturn(responseParser);
         given(config.getRecordMapper()).willReturn(recordMapper);
-        given(config.getInitialOffset()).willReturn(configuredOffset);
         task = new HttpSourceTask(__ -> config);
     }
 
@@ -109,17 +107,7 @@ class HttpSourceTaskTest {
 
         task.start(emptyMap());
 
-        then(requestFactory).should().setOffset(offset);
-    }
-
-    @Test
-    void givenTaskInitializedWithoutOffset_whenStart_thenConfiguredSetOffsetOnRequestFactory() {
-
-        task.initialize(getContext(emptyMap()));
-
-        task.start(emptyMap());
-
-        then(requestFactory).should().setOffset(configuredOffset);
+        then(requestFactory).should().initializeOffset(offset);
     }
 
     @Test
@@ -181,7 +169,7 @@ class HttpSourceTaskTest {
 
         task.commitRecord(record(offset));
 
-        then(requestFactory).should().setOffset(offset);
+        then(requestFactory).should().advanceOffset(offset);
     }
 
     @Test
@@ -244,7 +232,6 @@ class HttpSourceTaskTest {
         HttpRequest request = HttpRequest.builder().build();
         HttpResponse response = HttpResponse.builder().build();
         HttpResponseItem item = HttpResponseItem.builder().build();
-        ImmutableMap<String, String> configuredOffset = ImmutableMap.of("config", "inital");
 
         static SourceRecord record(Map<String, Object> offset) {
             return new SourceRecord(emptyMap(), offset, null, null, null);

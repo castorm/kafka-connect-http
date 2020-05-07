@@ -28,8 +28,8 @@ import com.github.castorm.kafka.connect.http.poll.IntervalDelayPollInterceptor;
 import com.github.castorm.kafka.connect.http.poll.spi.PollInterceptor;
 import com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
+import com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
-import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import lombok.Getter;
@@ -38,10 +38,8 @@ import org.apache.kafka.common.config.ConfigDef;
 
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.common.MapUtils.breakDownMap;
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
-import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 
 @Getter
 class HttpSourceConnectorConfig extends AbstractConfig {
@@ -51,14 +49,12 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private static final String REQUEST_FACTORY = "http.request.factory";
     private static final String RESPONSE_PARSER = "http.response.parser";
     private static final String RECORD_MAPPER = "http.record.mapper";
-    private static final String OFFSET_INITIAL = "http.offset.initial";
 
     private final PollInterceptor pollInterceptor;
     private final HttpRequestFactory requestFactory;
     private final HttpClient client;
     private final HttpResponseParser responseParser;
     private final SourceRecordMapper recordMapper;
-    private final Map<String, String> initialOffset;
 
     HttpSourceConnectorConfig(Map<String, ?> originals) {
         super(config(), originals);
@@ -67,16 +63,14 @@ class HttpSourceConnectorConfig extends AbstractConfig {
         client = getConfiguredInstance(CLIENT, HttpClient.class);
         responseParser = getConfiguredInstance(RESPONSE_PARSER, HttpResponseParser.class);
         recordMapper = getConfiguredInstance(RECORD_MAPPER, SourceRecordMapper.class);
-        initialOffset = breakDownMap(getString(OFFSET_INITIAL));
     }
 
     public static ConfigDef config() {
         return new ConfigDef()
                 .define(POLL_HOOKS, CLASS, IntervalDelayPollInterceptor.class, HIGH, "Poll Interceptor Class")
                 .define(CLIENT, CLASS, OkHttpClient.class, HIGH, "Request Client Class")
-                .define(REQUEST_FACTORY, CLASS, TemplateHttpRequestFactory.class, HIGH, "Request Factory Class")
+                .define(REQUEST_FACTORY, CLASS, OffsetTemplateHttpRequestFactory.class, HIGH, "Request Factory Class")
                 .define(RESPONSE_PARSER, CLASS, JacksonHttpResponseParser.class, HIGH, "Response Parser Class")
-                .define(RECORD_MAPPER, CLASS, SchemedSourceRecordMapper.class, HIGH, "Record Mapper Class")
-                .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset");
+                .define(RECORD_MAPPER, CLASS, SchemedSourceRecordMapper.class, HIGH, "Record Mapper Class");
     }
 }

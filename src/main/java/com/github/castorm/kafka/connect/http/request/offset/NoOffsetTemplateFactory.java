@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.template.spi;
+package com.github.castorm.kafka.connect.http.request.offset;
 
 /*-
  * #%L
@@ -22,8 +22,13 @@ package com.github.castorm.kafka.connect.http.request.template.spi;
  * #L%
  */
 
-@FunctionalInterface
-public interface TemplateFactory {
+import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplate;
+import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
 
-    Template create(String template);
+public class NoOffsetTemplateFactory implements OffsetTemplateFactory {
+
+    @Override
+    public OffsetTemplate create(String template) {
+        return offset -> template;
+    }
 }

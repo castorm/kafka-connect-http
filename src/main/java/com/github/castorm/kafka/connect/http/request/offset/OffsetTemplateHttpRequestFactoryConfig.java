@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.template;
+package com.github.castorm.kafka.connect.http.request.offset;
 
 /*-
  * #%L
@@ -22,13 +22,14 @@ package com.github.castorm.kafka.connect.http.request.template;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
+import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
 import lombok.Getter;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 
 import java.util.Map;
 
+import static com.github.castorm.kafka.connect.common.MapUtils.breakDownMap;
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Importance.LOW;
 import static org.apache.kafka.common.config.ConfigDef.Importance.MEDIUM;
@@ -36,7 +37,7 @@ import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
 import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 
 @Getter
-public class TemplateHttpRequestFactoryConfig extends AbstractConfig {
+public class OffsetTemplateHttpRequestFactoryConfig extends AbstractConfig {
 
     private static final String URL = "http.request.url";
     private static final String METHOD = "http.request.method";
@@ -44,6 +45,7 @@ public class TemplateHttpRequestFactoryConfig extends AbstractConfig {
     private static final String QUERY_PARAMS = "http.request.params";
     private static final String BODY = "http.request.body";
     private static final String TEMPLATE_FACTORY = "http.request.template.factory";
+    private static final String OFFSET_INITIAL = "http.request.offset.initial";
 
     private final String url;
 
@@ -55,25 +57,29 @@ public class TemplateHttpRequestFactoryConfig extends AbstractConfig {
 
     private final String body;
 
-    private final TemplateFactory templateFactory;
+    private final OffsetTemplateFactory offsetTemplateFactory;
 
-    TemplateHttpRequestFactoryConfig(Map<String, ?> originals) {
+    private final Map<String, String> initialOffset;
+
+    OffsetTemplateHttpRequestFactoryConfig(Map<String, ?> originals) {
         super(config(), originals);
         url = getString(URL);
         method = getString(METHOD);
         headers = getString(HEADERS);
         queryParams = getString(QUERY_PARAMS);
         body = getString(BODY);
-        templateFactory = getConfiguredInstance(TEMPLATE_FACTORY, TemplateFactory.class);
+        offsetTemplateFactory = getConfiguredInstance(TEMPLATE_FACTORY, OffsetTemplateFactory.class);
+        initialOffset = breakDownMap(getString(OFFSET_INITIAL));
     }
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(URL, STRING, HIGH, "HTTP URL Template")
-                .define(METHOD, STRING, "GET", HIGH, "HTTP Method Template")
-                .define(HEADERS, STRING, "", MEDIUM, "HTTP Headers Template")
-                .define(QUERY_PARAMS, STRING, "", MEDIUM, "HTTP Query Params Template")
-                .define(BODY, STRING, "", LOW, "HTTP Body Template")
-                .define(TEMPLATE_FACTORY, CLASS, NoTemplateFactory.class, LOW, "Template Factory Class");
+                .define(URL, STRING, HIGH, "HTTP URL OffsetTemplate")
+                .define(METHOD, STRING, "GET", HIGH, "HTTP Method OffsetTemplate")
+                .define(HEADERS, STRING, "", MEDIUM, "HTTP Headers OffsetTemplate")
+                .define(QUERY_PARAMS, STRING, "", MEDIUM, "HTTP Query Params OffsetTemplate")
+                .define(BODY, STRING, "", LOW, "HTTP Body OffsetTemplate")
+                .define(TEMPLATE_FACTORY, CLASS, NoOffsetTemplateFactory.class, LOW, "OffsetTemplate Factory Class")
+                .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset");
     }
 }

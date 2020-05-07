@@ -29,11 +29,10 @@ import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
 import com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
+import com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
-import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
-import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +42,6 @@ import java.util.Map;
 
 import static com.github.castorm.kafka.connect.http.HttpSourceConnectorConfigTest.Fixture.config;
 import static com.github.castorm.kafka.connect.http.HttpSourceConnectorConfigTest.Fixture.configWithout;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpSourceConnectorConfigTest {
@@ -60,7 +58,7 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenNoRequestFactory_thenDefault() {
-        assertThat(configWithout("http.request.factory").getRequestFactory()).isInstanceOf(TemplateHttpRequestFactory.class);
+        assertThat(configWithout("http.request.factory").getRequestFactory()).isInstanceOf(OffsetTemplateHttpRequestFactory.class);
     }
 
     @Test
@@ -88,23 +86,14 @@ class HttpSourceConnectorConfigTest {
         assertThat(config("http.record.mapper", TestRecordMapper.class.getName()).getRecordMapper()).isInstanceOf(TestRecordMapper.class);
     }
 
-    @Test
-    void whenNoInitialOffset_thenDefault() {
-        assertThat(configWithout("http.offset.initial").getInitialOffset()).isEqualTo(emptyMap());
-    }
-
-    @Test
-    void whenInitialOffset_thenInitialized() {
-        assertThat(config("http.offset.initial", "k=v").getInitialOffset()).isEqualTo(ImmutableMap.of("k", "v"));
-    }
-
     public static class TestHttpClient implements HttpClient {
         public HttpResponse execute(HttpRequest request) { return null; }
         public void configure(Map<String, ?> map) {}
     }
 
     public static class TestRequestFactory implements HttpRequestFactory {
-        public void setOffset(Map<String, ?> offset) {}
+        public void initializeOffset(Map<String, ?> offset) {}
+        public void advanceOffset(Map<String, ?> offset) {}
         public HttpRequest createRequest() { return null; }
         public void configure(Map<String, ?> map) {}
     }

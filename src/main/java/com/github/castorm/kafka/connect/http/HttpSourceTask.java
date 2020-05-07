@@ -71,17 +71,10 @@ public class HttpSourceTask extends SourceTask {
 
         pollInterceptor = config.getPollInterceptor();
         requestFactory = config.getRequestFactory();
-        requestFactory.setOffset(resolveStartingOffset(config.getInitialOffset()));
+        requestFactory.initializeOffset(context.offsetStorageReader().offset(emptyMap()));
         requestExecutor = config.getClient();
         responseParser = config.getResponseParser();
         recordMapper = config.getRecordMapper();
-    }
-
-    private Map<String, ?> resolveStartingOffset(Map<String, ?> initialOffset) {
-
-        Map<String, ?> latestOffset = context.offsetStorageReader().offset(emptyMap());
-
-        return !latestOffset.isEmpty() ? latestOffset : initialOffset;
     }
 
     @Override
@@ -111,7 +104,7 @@ public class HttpSourceTask extends SourceTask {
     @Override
     public void commitRecord(SourceRecord record) {
 
-        requestFactory.setOffset(record.sourceOffset());
+        requestFactory.advanceOffset(record.sourceOffset());
     }
 
     @Override
