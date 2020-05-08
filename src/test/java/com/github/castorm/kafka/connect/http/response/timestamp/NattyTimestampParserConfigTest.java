@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.response.jackson;
+package com.github.castorm.kafka.connect.http.response.timestamp;
 
 /*-
  * #%L
@@ -25,28 +25,31 @@ package com.github.castorm.kafka.connect.http.response.jackson;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
+import java.time.ZoneId;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserConfigTest.Fixture.config;
+import static com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParserConfigTest.Fixture.config;
+import static com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParserConfigTest.Fixture.zoneId;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JacksonHttpResponseParserConfigTest {
+class NattyTimestampParserConfigTest {
 
     @Test
     void whenItemsParserClassConfigured_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.response.item.parser.class", "com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParser")).getItemParser())
-                .isInstanceOf(JacksonItemParser.class);
+        assertThat(config(ImmutableMap.of("http.response.item.timestamp.parser.zone", zoneId)).getTimestampZoneId()).contains(ZoneId.of(zoneId));
     }
 
     @Test
-    void whenMissingItemParserClassConfigured_thenInitialized() {
-        assertThat(config(emptyMap()).getItemParser()).isInstanceOf(JacksonItemParser.class);
+    void whenMissingItemParserClassConfigured_thenDefault() {
+        assertThat(config(emptyMap()).getTimestampZoneId()).isEmpty();
     }
 
     interface Fixture {
-        static JacksonHttpResponseParserConfig config(Map<String, String> settings) {
-            return new JacksonHttpResponseParserConfig(settings);
+        String zoneId = "Europe/Paris";
+
+        static NattyTimestampParserConfig config(Map<String, String> settings) {
+            return new NattyTimestampParserConfig(settings);
         }
     }
 }

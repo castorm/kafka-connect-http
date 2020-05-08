@@ -1,8 +1,8 @@
-package com.github.castorm.kafka.connect.http.model;
+package com.github.castorm.kafka.connect.http.response.timestamp.spi;
 
 /*-
  * #%L
- * kafka-connect-http-plugin
+ * Kafka Connect HTTP Plugin
  * %%
  * Copyright (C) 2020 CastorM
  * %%
@@ -22,23 +22,11 @@ package com.github.castorm.kafka.connect.http.model;
  * #L%
  */
 
-import lombok.Builder;
-import lombok.Value;
-import lombok.With;
+import org.apache.kafka.common.Configurable;
 
 import java.time.Instant;
-import java.util.Map;
 
-@With
-@Value
-@Builder
-public class HttpResponseItem {
+public interface TimestampParser extends Configurable {
 
-    String key;
-
-    String value;
-
-    Map<String, Object> offset;
-
-    Instant timestamp;
+    Instant parse(String timestamp);
 }

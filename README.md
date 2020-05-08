@@ -40,8 +40,9 @@ More details on how to [Install Connectors](https://docs.confluent.io/current/co
 The HTTP Source connector is meant to implement [CDC (Change Data Capture)](https://en.wikipedia.org/wiki/Change_data_capture).
 
 ### Requirements for CDC
-* The HTTP resource contains an array of items that is ordered by a given property present on every item (we'll call it **offset**)
+* The HTTP resource contains an array of items that is ordered by a given set of properties present on every item (we'll call them **offset**)
 * The HTTP resource allows retrieving items starting from a given **offset**
+* The **offset** properties are monotonically increasing
 
 Kafka Connect will store internally these offsets so the connector can continue from where it left after restarting.
 
@@ -112,12 +113,30 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the relevant as
 
 | Property | Req | Default | Description |
 |:---|:---:|:---:|:---|
-| `http.response.json.items.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items |
-| `http.response.json.item.key.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key |
-| `http.response.json.item.value.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body |
-| `http.response.json.item.timestamp.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual item to be used as kafka record timestamp |
-| `http.response.json.item.offset.value.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value of the individual item to be used as offset for future requests |
-| `http.response.json.item.offset.key` | - | offset | Name of the offset property to be used in HTTP Request templates |
+| `http.response.items.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items |
+| `http.response.item.key.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key |
+| `http.response.item.value.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body |
+| `http.response.item.timestamp.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual item to be used as kafka record timestamp |
+| `http.response.item.timestamp.parser.class` | - | - | `DateTimeFormatterTimestampParser` | Converts the timestamp property into a `java.time.Instant` |
+| `http.response.item.offset.pointer` | - | - | Comma separated list of key=value pairs where the key is the name of the item in the offset and the value is [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value of the individual item being used as offset for future requests |
+
+#### DateTimeFormatterTimestampParser
+`com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
+TimestampParser based on a `DateTimeFormatter`
+
+| Property | Req | Default | Description |
+|:---|:---:|:---:|:---|
+| `http.response.item.timestamp.parser.pattern` | - | `yyyy-MM-dd'T'HH:mm:ss.SSSX` | `DateTimeFormatter` pattern |
+| `http.response.item.timestamp.parser.zone` | - | `UTC` | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
+
+#### NattyTimestampParser
+`com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser`
+TimestampParser based on [Natty](http://natty.joestelmach.com/) parser
+
+| Property | Req | Default | Description |
+|:---|:---:|:---:|:---|
+| `http.response.item.timestamp.parser.zone` | - | `UTC` | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
+
 
 <a name="record"/>
 
@@ -255,7 +274,7 @@ mvn test
 
 ## Contributing
 
-Contributions are accepted via pull requests, pending definition of code of conduct.
+Contributions are welcome via pull requests, pending definition of code of conduct.
 
 ## Versioning
 
@@ -263,9 +282,7 @@ We use [SemVer](http://semver.org/) for versioning.
 
 ## Authors
 
-* **Cástor Rodríguez** - *Initial work* - [castorm](https://github.com/castorm)
-
-Pending contributions
+* **Cástor Rodríguez** - Only contributor so far - [castorm](https://github.com/castorm)
 
 ## License
 
@@ -278,6 +295,7 @@ This project is licensed under the GPLv3 License - see the [LICENSE.txt](LICENSE
 * [OkHttp](https://square.github.io/okhttp/) - HTTP Client
 * [Jackson](https://github.com/FasterXML/jackson) - Json deserialization
 * [FreeMarker](https://freemarker.apache.org/) - Template engine
+* [Natty](http://natty.joestelmach.com/) - Date parser
 
 ## Acknowledgments
 

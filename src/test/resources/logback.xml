@@ -28,6 +28,15 @@
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
-    <logger name="com.github.castorm.kafka.connect.http" level="TRACE"/>
-    <logger name="okhttp3" level="DEBUG"/>
+    <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient" level="DEBUG"/>
+    <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClientConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.HttpSourceConnectorConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.poll.IntervalDelayPollInterceptorConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParserConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParserConfig" level="WARN"/>
+    <logger name="com.joestelmach.natty" level="WARN"/>
 </configuration>

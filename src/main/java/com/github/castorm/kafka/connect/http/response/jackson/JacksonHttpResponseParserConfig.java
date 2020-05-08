@@ -22,83 +22,35 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  * #L%
  */
 
-import com.fasterxml.jackson.core.JsonPointer;
+import com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser;
+import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
 import lombok.Getter;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.stream.Stream;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.IntStream.range;
-import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
-import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
+import static org.apache.kafka.common.config.ConfigDef.Importance.LOW;
+import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
 
 @Getter
 public class JacksonHttpResponseParserConfig extends AbstractConfig {
 
-    private static final String ITEMS_POINTER = "http.response.json.items.pointer";
-    private static final String ITEM_KEY_POINTER = "http.response.json.item.key.pointer";
-    private static final String ITEM_VALUE_POINTER = "http.response.json.item.value.pointer";
-    private static final String ITEM_TIMESTAMP_POINTER = "http.response.json.item.timestamp.pointer";
-    private static final String ITEM_OFFSET_VALUE_POINTER = "http.response.json.item.offset.value.pointer";
-    private static final String ITEM_OFFSET_KEY = "http.response.json.item.offset.key";
+    private static final String ITEM_ITEM_PARSER_CLASS = "http.response.item.parser.class";
+    private static final String ITEM_ITEM_TIMESTAMP_PARSER_CLASS = "http.response.item.timestamp.parser.class";
 
-    private final JsonPointer itemsPointer;
-    private final Optional<JsonPointer> itemKeyPointer;
-    private final JsonPointer itemValuePointer;
-    private final Optional<JsonPointer> itemTimestampPointer;
-    private final Map<String, JsonPointer> itemOffsets;
+    private final JacksonItemParser itemParser;
+    private final TimestampParser timestampParser;
 
     JacksonHttpResponseParserConfig(Map<String, ?> originals) {
         super(config(), originals);
-        itemsPointer = JsonPointer.compile(getString(ITEMS_POINTER));
-        itemKeyPointer = ofNullable(getString(ITEM_KEY_POINTER)).map(JsonPointer::compile);
-        itemValuePointer = JsonPointer.compile(getString(ITEM_VALUE_POINTER));
-        itemTimestampPointer = ofNullable(getString(ITEM_TIMESTAMP_POINTER)).map(JsonPointer::compile);
-        itemOffsets = resolveItemOffsets(getString(ITEM_OFFSET_KEY), getString(ITEM_OFFSET_VALUE_POINTER));
-    }
-
-    private static Map<String, JsonPointer> resolveItemOffsets(String offsetKey, String offsetValuePointer) {
-
-        List<JsonPointer> itemOffsetValuePointers = Stream.of(ofNullable(offsetValuePointer).orElse("").split(","))
-                .map(String::trim)
-                .filter(it -> !it.isEmpty())
-                .map(JsonPointer::compile)
-                .collect(toList());
-        List<String> itemOffsetKeys = Stream.of(offsetKey.split(","))
-                .map(String::trim)
-                .filter(it -> !it.isEmpty())
-                .collect(toList());
-
-        if (itemOffsetValuePointers.size() > 0) {
-            if (itemOffsetKeys.size() == itemOffsetValuePointers.size()) {
-                return range(0, itemOffsetKeys.size()).boxed()
-                        .map(i -> new SimpleEntry<>(itemOffsetKeys.get(i), itemOffsetValuePointers.get(i)))
-                        .collect(toMap(Entry::getKey, Entry::getValue));
-            } else {
-                throw new IllegalStateException("Size of " + ITEM_OFFSET_KEY + " and " + ITEM_OFFSET_VALUE_POINTER + " must coincide");
-            }
-        } else {
-            return emptyMap();
-        }
+        itemParser = getConfiguredInstance(ITEM_ITEM_PARSER_CLASS, JacksonItemParser.class);
+        timestampParser = getConfiguredInstance(ITEM_ITEM_TIMESTAMP_PARSER_CLASS, TimestampParser.class);
     }
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(ITEMS_POINTER, STRING, "/", HIGH, "Items JsonPointer")
-                .define(ITEM_KEY_POINTER, STRING, null, HIGH, "Item Key JsonPointer")
-                .define(ITEM_VALUE_POINTER, STRING, "/", HIGH, "Item Value JsonPointer")
-                .define(ITEM_TIMESTAMP_POINTER, STRING, null, HIGH, "Item Timestamp JsonPointer")
-                .define(ITEM_OFFSET_VALUE_POINTER, STRING, null, HIGH, "Item Offset Value JsonPointer")
-                .define(ITEM_OFFSET_KEY, STRING, "offset", HIGH, "Item Offset Key");
+                .define(ITEM_ITEM_PARSER_CLASS, CLASS, JacksonItemParser.class, LOW, "Item Timestamp parser class")
+                .define(ITEM_ITEM_TIMESTAMP_PARSER_CLASS, CLASS, DateTimeFormatterTimestampParser.class, LOW, "Item Timestamp parser class");
     }
 }

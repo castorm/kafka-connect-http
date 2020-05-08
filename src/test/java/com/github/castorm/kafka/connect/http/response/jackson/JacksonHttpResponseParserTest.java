@@ -22,11 +22,10 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  * #L%
  */
 
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,25 +33,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
-import java.util.Map;
+import java.time.Instant;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.fasterxml.jackson.core.JsonPointer.compile;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.bytes;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.itemKeyPointer;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.itemOffsetKey;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.itemOffsetValuePointer;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.itemTimestampPointer;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.itemValuePointer;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.itemsPointer;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.response;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.timestampIso;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserTest.Fixture.timestampParsed;
+import static java.time.Instant.ofEpochMilli;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Stream.empty;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
@@ -62,34 +54,27 @@ class JacksonHttpResponseParserTest {
     JacksonHttpResponseParser parser;
 
     @Mock
-    Function<Map<String, ?>, JacksonHttpResponseParserConfig> configFactory;
-
-    @Mock
-    ObjectMapper mapper;
-
-    @Mock
-    JacksonHttpResponseItemMapper itemMapper;
-
-    @Mock
     JacksonHttpResponseParserConfig config;
 
     @Mock
-    JsonNode root;
+    JacksonItemParser itemParser;
+
+    @Mock
+    TimestampParser timestampParser;
 
     @Mock
     JsonNode item;
 
-    @Mock
-    JsonNode value;
-
     @BeforeEach
     void setUp() {
-        parser = new JacksonHttpResponseParser(configFactory, mapper, itemMapper);
-        given(configFactory.apply(any())).willReturn(config);
+        parser = new JacksonHttpResponseParser(__ -> config);
+        given(config.getItemParser()).willReturn(itemParser);
+        given(config.getTimestampParser()).willReturn(timestampParser);
+        parser.configure(emptyMap());
     }
 
     @Test
-    void givenNoItems_thenEmpty() throws IOException {
+    void givenNoItems_thenEmpty() {
 
         givenItems(empty());
 
@@ -97,79 +82,79 @@ class JacksonHttpResponseParserTest {
     }
 
     @Test
-    void givenOneItem_thenKeyMapped() throws IOException {
+    void givenOneItem_thenKeyMapped() {
 
-        given(config.getItemKeyPointer()).willReturn(Optional.of(itemKeyPointer));
         givenItems(Stream.of(item));
-        given(itemMapper.getKey(item, itemKeyPointer)).willReturn("key");
+        given(itemParser.getKey(item)).willReturn(Optional.of("key"));
 
         assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getKey).isEqualTo("key");
     }
 
     @Test
-    void givenOneItem_thenValueMapped() throws IOException {
+    void givenOneItemWithNoNoKey_thenKeyDefault() {
 
-        given(config.getItemValuePointer()).willReturn(itemValuePointer);
         givenItems(Stream.of(item));
-        given(itemMapper.getValue(item, itemValuePointer)).willReturn(value);
-        given(mapper.writeValueAsString(value)).willReturn("value");
+        given(itemParser.getKey(item)).willReturn(Optional.empty());
+
+        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getKey).isNotNull();
+    }
+
+    @Test
+    void givenOneItem_thenValueMapped() {
+
+        givenItems(Stream.of(item));
+        given(itemParser.getValue(item)).willReturn("value");
 
         assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getValue).isEqualTo("value");
     }
 
     @Test
-    void givenOneItem_thenTimestampMapped() throws IOException {
+    void givenOneItem_thenTimestampMapped() {
 
-        given(config.getItemTimestampPointer()).willReturn(Optional.of(itemTimestampPointer));
         givenItems(Stream.of(item));
-        given(itemMapper.getTimestamp(item, itemTimestampPointer)).willReturn(42L);
+        given(itemParser.getTimestamp(item)).willReturn(Optional.of(timestampIso));
+        given(timestampParser.parse(timestampIso)).willReturn(timestampParsed);
 
-        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getTimestamp).isEqualTo(42L);
+        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getTimestamp).isEqualTo(timestampParsed);
     }
 
     @Test
-    void givenNoTimestampPointer_thenTimestampDefault() throws IOException {
+    void givenOneItemWithNoTimestamp_thenDefault() {
 
-        given(config.getItemTimestampPointer()).willReturn(Optional.empty());
         givenItems(Stream.of(item));
+        given(itemParser.getTimestamp(item)).willReturn(Optional.empty());
 
         assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getTimestamp).isNotNull();
     }
 
     @Test
-    void givenOneItem_thenOffsetMapped() throws IOException {
+    void givenOneItem_thenOffsetMapped() {
 
-        given(config.getItemOffsets()).willReturn(ImmutableMap.of(itemOffsetKey, itemOffsetValuePointer));
         givenItems(Stream.of(item));
-        given(itemMapper.getOffset(item, ImmutableMap.of(itemOffsetKey, itemOffsetValuePointer))).willReturn(ImmutableMap.of("offset-key", "offset-value"));
+        given(itemParser.getOffsets(item)).willReturn(ImmutableMap.of("offset-key", "offset-value"));
 
-        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getOffset).isEqualTo(ImmutableMap.of("offset-key", "offset-value"));
+        assertThat(parser.parse(response).stream().findFirst().get().getOffset()).containsEntry("offset-key", "offset-value");
     }
 
     @Test
-    void givenNoKeyPointer_thenKeyDefault() throws IOException {
+    void givenOneItem_thenOffsetMappedWithTimestamp() {
 
-        given(config.getItemKeyPointer()).willReturn(Optional.empty());
         givenItems(Stream.of(item));
+        given(itemParser.getOffsets(item)).willReturn(emptyMap());
+        given(itemParser.getTimestamp(item)).willReturn(Optional.of(timestampIso));
+        given(timestampParser.parse(timestampIso)).willReturn(timestampParsed);
 
-        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getKey).isNotNull();
+        assertThat(parser.parse(response).stream().findFirst().get().getOffset()).containsEntry("timestamp_iso", timestampParsed.toString());
     }
 
-    private void givenItems(Stream<JsonNode> items) throws IOException {
-        given(config.getItemsPointer()).willReturn(itemsPointer);
-        parser.configure(emptyMap());
-        given(mapper.readTree(eq(bytes))).willReturn(root);
-        given(itemMapper.getItems(eq(root), eq(itemsPointer))).willReturn(items);
+    private void givenItems(Stream<JsonNode> items) {
+        given(itemParser.getItems(eq(bytes))).willReturn(items);
     }
 
     interface Fixture {
         byte[] bytes = "bytes".getBytes();
         HttpResponse response = HttpResponse.builder().body(bytes).build();
-        JsonPointer itemsPointer = compile("/items");
-        JsonPointer itemKeyPointer = compile("/key");
-        JsonPointer itemValuePointer = compile("/value");
-        JsonPointer itemTimestampPointer = compile("/timestamp");
-        JsonPointer itemOffsetValuePointer = compile("/offset-value");
-        String itemOffsetKey = "offset-key";
+        String timestampIso = ofEpochMilli(42L).toString();
+        Instant timestampParsed = ofEpochMilli(43L);
     }
 }

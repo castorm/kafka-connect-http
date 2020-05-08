@@ -75,7 +75,7 @@ public class SchemedSourceRecordMapper implements SourceRecordMapper {
                 key,
                 value.schema(),
                 value,
-                item.getTimestamp());
+                item.getTimestamp().toEpochMilli());
     }
 
     private static Struct keyStruct(String key) {

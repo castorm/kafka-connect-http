@@ -25,6 +25,7 @@ package com.github.castorm.kafka.connect.http.client.okhttp;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -40,7 +41,9 @@ import java.util.Optional;
 import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static okhttp3.HttpUrl.parse;
+import static okhttp3.logging.HttpLoggingInterceptor.Level.BASIC;
 
+@Slf4j
 public class OkHttpClient implements HttpClient {
 
     private okhttp3.OkHttpClient client;
@@ -50,12 +53,14 @@ public class OkHttpClient implements HttpClient {
 
         OkHttpClientConfig config = new OkHttpClientConfig(configs);
 
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(log::debug);
+        interceptor.setLevel(BASIC);
         client = new okhttp3.OkHttpClient.Builder()
                 .connectionPool(new ConnectionPool(config.getMaxIdleConnections(), config.getKeepAliveDuration(), MILLISECONDS))
                 .connectTimeout(config.getConnectionTimeoutMillis(), MILLISECONDS)
                 .readTimeout(config.getReadTimeoutMillis(), MILLISECONDS)
                 .retryOnConnectionFailure(true)
-                .addInterceptor(new HttpLoggingInterceptor())
+                .addInterceptor(interceptor)
                 .build();
     }
 

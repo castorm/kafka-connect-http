@@ -31,6 +31,8 @@ import org.junit.jupiter.api.Test;
 import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.item;
 import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.value;
+import static java.time.Instant.now;
+import static java.time.Instant.ofEpochMilli;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SchemedSourceRecordMapperTest {
@@ -67,7 +69,7 @@ class SchemedSourceRecordMapperTest {
 
     @Test
     void givenTimestamp_whenMap_thenTimestampMapped() {
-        assertThat(mapper.map(item.withTimestamp(42L)).timestamp()).isEqualTo(42L);
+        assertThat(mapper.map(item.withTimestamp(ofEpochMilli(42L))).timestamp()).isEqualTo(42L);
     }
 
     @Test
@@ -87,7 +89,7 @@ class SchemedSourceRecordMapperTest {
 
     interface Fixture {
         String value = "value";
-        HttpResponseItem item = HttpResponseItem.builder().value(value).build();
+        HttpResponseItem item = HttpResponseItem.builder().value(value).timestamp(now()).build();
         ImmutableMap<String, Object> offset = ImmutableMap.of("k", "v");
     }
 }
