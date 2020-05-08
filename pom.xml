@@ -70,7 +70,7 @@
         <junit.version>5.6.2</junit.version>
         <mockito.version>3.3.3</mockito.version>
         <assertj.version>3.16.0</assertj.version>
-        <awaitility.version>3.0.0</awaitility.version>
+        <awaitility.version>4.0.2</awaitility.version>
 
         <logback.version>1.2.3</logback.version>
         <slf4j.version>1.7.30</slf4j.version>
