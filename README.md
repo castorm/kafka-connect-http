@@ -60,6 +60,11 @@ Below further details on these components
 
 <a name="request"/>
 
+### Examples
+
+See [Examples](examples), e.g. 
+- [Jira Search Issues API](examples/jira-search-issues.md)
+
 ### HttpRequestFactory
 Responsible for creating the `HttpRequest`.
 
