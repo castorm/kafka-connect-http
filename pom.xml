@@ -65,7 +65,7 @@
         <okhttp.version>4.6.0</okhttp.version>
         <jackson.version>2.11.0</jackson.version>
         <freemarker.version>2.3.30</freemarker.version>
-        <natty.version>0.11</natty.version>
+        <natty.version>0.13</natty.version>
 
         <junit.version>5.5.2</junit.version>
         <mockito.version>2.28.2</mockito.version>
