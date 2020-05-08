@@ -67,7 +67,7 @@
         <freemarker.version>2.3.30</freemarker.version>
         <natty.version>0.13</natty.version>
 
-        <junit.version>5.5.2</junit.version>
+        <junit.version>5.6.2</junit.version>
         <mockito.version>2.28.2</mockito.version>
         <assertj.version>3.12.2</assertj.version>
         <awaitility.version>3.0.0</awaitility.version>
