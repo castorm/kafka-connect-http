@@ -68,7 +68,7 @@
         <natty.version>0.13</natty.version>
 
         <junit.version>5.6.2</junit.version>
-        <mockito.version>2.28.2</mockito.version>
+        <mockito.version>3.3.3</mockito.version>
         <assertj.version>3.16.0</assertj.version>
         <awaitility.version>3.0.0</awaitility.version>
 
