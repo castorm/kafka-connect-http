@@ -1,5 +1,5 @@
 # Kafka Connect HTTP Connector
-![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg) ![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg) ![Release to Maven Central](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20Maven%20Central/badge.svg) [![Maven Central](https://img.shields.io/maven-central/v/com.github.castorm/kafka-connect-http-plugin.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.castorm%22%20AND%20a:%22kafka-connect-http-plugin%22) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin?ref=badge_shield) [![DepShield Badge](https://depshield.sonatype.org/badges/owner/repository/depshield.svg)](https://depshield.github.io)
+![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg) ![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg) ![Release to Maven Central](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20Maven%20Central/badge.svg) [![Maven Central](https://img.shields.io/maven-central/v/com.github.castorm/kafka-connect-http-plugin.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.castorm%22%20AND%20a:%22kafka-connect-http-plugin%22) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin?ref=badge_shield) [![DepShield Badge](https://depshield.sonatype.org/badges/castorm/Fkafka-connect-http-plugin/depshield.svg)](https://depshield.github.io)
 
 Set of Kafka Connect connectors that enable Kafka integration with external systems via HTTP.
 
@@ -63,7 +63,7 @@ Below further details on these components
 ### Examples
 
 See [Examples](examples), e.g. 
--  [Jira Search Issues API](examples/jira-search-issues.md)
+*  [Jira Search Issues API](examples/jira-search-issues.md)
 
 ### HttpRequestFactory
 Responsible for creating the `HttpRequest`.
@@ -177,9 +177,9 @@ Throttles rate of requests based on a given interval, except when connector is n
 
 ### Prerequisites
 
--  Kafka deployment
--  Kafka Connect deployment
--  Ability to access the Kafka Connect deployment in order to extend its classpath 
+*  Kafka deployment
+*  Kafka Connect deployment
+*  Ability to access the Kafka Connect deployment in order to extend its classpath 
 
 
 ## Development
@@ -276,8 +276,8 @@ mvn package
 mvn test
 ```
 ### Releasing
-- Update [CHANGELOG.md](CHANGELOG.md) and [README.md](README.md) files.
-- Prepare release: `mvn release:clean release:prepare -P package`
+*  Update [CHANGELOG.md](CHANGELOG.md) and [README.md](README.md) files.
+*  Prepare release: `mvn release:clean release:prepare -P package`
 
 ## Contributing
 

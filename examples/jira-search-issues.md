@@ -2,7 +2,7 @@
 Documentation: [Search for issues using JQL (GET)](https://developer.atlassian.com/cloud/jira/platform/rest/v3/#api-rest-api-3-search-get)
 
 ####  Sample Request
-```
+```bash
 curl --request GET \
   --url '/rest/api/3/search?jql=project%20%3D%20HSP' \
   --user 'email@example.com:<api_token>' \
