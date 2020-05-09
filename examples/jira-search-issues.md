@@ -44,11 +44,14 @@ And based on the results we would be updating the `updated` filter for subsequen
 {
     "name": "sample-search-issues.jira.source",
     "config": {
+        "connector.class": "com.github.castorm.kafka.connect.http.HttpSourceConnector",
+        "tasks.max": "1",
+        "http.offset.initial": "timestamp_iso=2020-05-08T07:55:44Z",
         "http.request.url": "https://your-host-here/rest/api/2/search",
         "http.request.headers": "Authorization: Basic TBD, Accept: application/json",
         "http.request.params": "jql=updated>=\"${timestamp_iso?datetime.iso?string['yyyy/MM/dd HH:mm']}\" ORDER BY updated ASC&maxResults=100",
-        "http.request.offset.initial": "timestamp_iso=2020-05-08T07:55:44Z",
         "http.request.template.factory": "com.github.castorm.kafka.connect.http.request.offset.freemarker.FreeMarkerOffsetTemplateFactory",
+        "http.response.filter.factory": "com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory",
         "http.response.items.pointer": "/issues",
         "http.response.item.key.pointer": "/id",
         "http.response.item.value.pointer": "/",

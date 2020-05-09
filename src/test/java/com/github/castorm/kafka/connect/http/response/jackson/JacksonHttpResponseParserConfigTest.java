@@ -35,7 +35,7 @@ class JacksonHttpResponseParserConfigTest {
 
     @Test
     void whenItemsParserClassConfigured_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.response.item.parser.class", "com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParser")).getItemParser())
+        assertThat(config(ImmutableMap.of("http.response.item.parser", "com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParser")).getItemParser())
                 .isInstanceOf(JacksonItemParser.class);
     }
 

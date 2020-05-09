@@ -36,8 +36,8 @@ import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
 @Getter
 public class JacksonHttpResponseParserConfig extends AbstractConfig {
 
-    private static final String ITEM_ITEM_PARSER_CLASS = "http.response.item.parser.class";
-    private static final String ITEM_ITEM_TIMESTAMP_PARSER_CLASS = "http.response.item.timestamp.parser.class";
+    private static final String ITEM_ITEM_PARSER_CLASS = "http.response.item.parser";
+    private static final String ITEM_ITEM_TIMESTAMP_PARSER_CLASS = "http.response.item.timestamp.parser";
 
     private final JacksonItemParser itemParser;
     private final TimestampParser timestampParser;
