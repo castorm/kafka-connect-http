@@ -41,7 +41,7 @@ jobs:
           path: staging
 
       - name: Prepare site
-        run: mkdir site && cp target/site/* site
+        run: mkdir site && cp -r target/site/* site
       - name: Archive site
         uses: actions/upload-artifact@v1
         with:
