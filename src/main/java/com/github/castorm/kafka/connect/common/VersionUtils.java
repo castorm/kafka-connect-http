@@ -25,10 +25,12 @@ package com.github.castorm.kafka.connect.common;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Properties;
+
+import static java.nio.file.Files.newInputStream;
 
 @Slf4j
 @UtilityClass
@@ -37,7 +39,7 @@ public class VersionUtils {
     private static final String DEFAULT_VERSION = "0.0.0.0";
 
     public static String getVersion() {
-        try (InputStream input = new FileInputStream("version.properties")) {
+        try (InputStream input = newInputStream(Paths.get("version.properties"))) {
             Properties properties = new Properties();
             properties.load(input);
             return properties.getProperty("version", DEFAULT_VERSION);
