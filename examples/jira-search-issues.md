@@ -1,7 +1,7 @@
 # Jira API Search Issues
 Documentation: [Search for issues using JQL (GET)](https://developer.atlassian.com/cloud/jira/platform/rest/v3/#api-rest-api-3-search-get)
 
-#### Sample Request
+####  Sample Request
 ```
 curl --request GET \
   --url '/rest/api/3/search?jql=project%20%3D%20HSP' \
@@ -9,7 +9,7 @@ curl --request GET \
   --header 'Accept: application/json'
 ```
 
-#### Sample Response
+####  Sample Response
 ```json
 {
   "expand": "names,schema",
@@ -30,7 +30,7 @@ curl --request GET \
 }
 ```
 
-### Recommended approach: CDC
+###  Recommended approach: CDC
 We can leverage the fact that issues contain an `updated` property which is monotonically increasing, and the fact that 
 the API allows for the data to be **filtered** and **ordered** based on `updated` property.
 
@@ -39,7 +39,7 @@ Based on this, we could prepare a first query with the following query parameter
 
 And based on the results we would be updating the `updated` filter for subsequent queries.
 
-#### Sample Configuration
+####  Sample Configuration
 ```json
 {
     "name": "sample-search-issues.jira.source",

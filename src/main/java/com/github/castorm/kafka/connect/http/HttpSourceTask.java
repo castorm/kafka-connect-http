@@ -109,6 +109,7 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void stop() {
+        // Nothing to do, no resources to release
     }
 
     @Override

@@ -26,7 +26,6 @@ import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplate;
 import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.config.ConfigException;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -49,67 +48,67 @@ class OffsetTemplateHttpRequestFactoryConfigTest {
 
     @Test
     void whenUrl_thenInitialized() {
-        Assertions.assertThat(config("http.request.url", value).getUrl()).isEqualTo(value);
+        assertThat(config("http.request.url", value).getUrl()).isEqualTo(value);
     }
 
     @Test
     void whenMissingMethod_thenDefault() {
-        Assertions.assertThat(configWithout("http.request.method").getMethod()).isEqualTo("GET");
+        assertThat(configWithout("http.request.method").getMethod()).isEqualTo("GET");
     }
 
     @Test
     void whenMethod_thenInitialized() {
-        Assertions.assertThat(config("http.request.method", value).getMethod()).isEqualTo(value);
+        assertThat(config("http.request.method", value).getMethod()).isEqualTo(value);
     }
 
     @Test
     void whenMissingHeaders_thenDefault() {
-        Assertions.assertThat(configWithout("http.request.headers").getHeaders()).isEqualTo("");
+        assertThat(configWithout("http.request.headers").getHeaders()).isEqualTo("");
     }
 
     @Test
     void whenHeaders_thenInitialized() {
-        Assertions.assertThat(config("http.request.headers", value).getHeaders()).isEqualTo(value);
+        assertThat(config("http.request.headers", value).getHeaders()).isEqualTo(value);
     }
 
     @Test
     void whenMissingQueryParams_thenDefault() {
-        Assertions.assertThat(configWithout("http.request.params").getQueryParams()).isEqualTo("");
+        assertThat(configWithout("http.request.params").getQueryParams()).isEqualTo("");
     }
 
     @Test
     void whenQueryParams_thenInitialized() {
-        Assertions.assertThat(config("http.request.params", value).getQueryParams()).isEqualTo(value);
+        assertThat(config("http.request.params", value).getQueryParams()).isEqualTo(value);
     }
 
     @Test
     void whenMissingBody_thenDefault() {
-        Assertions.assertThat(configWithout("http.request.body").getBody()).isEqualTo("");
+        assertThat(configWithout("http.request.body").getBody()).isEqualTo("");
     }
 
     @Test
     void whenBody_thenInitialized() {
-        Assertions.assertThat(config("http.request.body", value).getBody()).isEqualTo(value);
+        assertThat(config("http.request.body", value).getBody()).isEqualTo(value);
     }
 
     @Test
     void whenMissingTemplateFactory_thenDefault() {
-        Assertions.assertThat(configWithout("http.request.template.factory").getOffsetTemplateFactory()).isInstanceOf(NoOffsetTemplateFactory.class);
+        assertThat(configWithout("http.request.template.factory").getOffsetTemplateFactory()).isInstanceOf(NoOffsetTemplateFactory.class);
     }
 
     @Test
     void whenTemplateFactory_thenInitialized() {
-        Assertions.assertThat(config("http.request.template.factory", TestOffsetTemplateFactory.class.getName()).getOffsetTemplateFactory()).isInstanceOf(TestOffsetTemplateFactory.class);
+        assertThat(config("http.request.template.factory", TestOffsetTemplateFactory.class.getName()).getOffsetTemplateFactory()).isInstanceOf(TestOffsetTemplateFactory.class);
     }
 
     @Test
     void whenNoInitialOffset_thenDefault() {
-        Assertions.assertThat(configWithout("http.request.offset.initial").getInitialOffset()).isEqualTo(emptyMap());
+        assertThat(configWithout("http.request.offset.initial").getInitialOffset()).isEqualTo(emptyMap());
     }
 
     @Test
     void whenInitialOffset_thenInitialized() {
-        Assertions.assertThat(config("http.request.offset.initial", "k=v").getInitialOffset()).isEqualTo(ImmutableMap.of("k", "v"));
+        assertThat(config("http.request.offset.initial", "k=v").getInitialOffset()).isEqualTo(ImmutableMap.of("k", "v"));
     }
 
     public static class TestOffsetTemplateFactory implements OffsetTemplateFactory {

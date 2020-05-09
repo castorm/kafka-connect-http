@@ -23,7 +23,6 @@ package com.github.castorm.kafka.connect.http.request.offset.freemarker;
  */
 
 import com.google.common.collect.ImmutableMap;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyMap;
@@ -35,11 +34,11 @@ class FreeMarkerOffsetTemplateFactoryTest {
 
     @Test
     void givenTemplate_whenApplyEmpty_thenAsIs() {
-        Assertions.assertThat(factory.create("template").apply(emptyMap())).isEqualTo("template");
+        assertThat(factory.create("template").apply(emptyMap())).isEqualTo("template");
     }
 
     @Test
     void givenTemplate_whenApplyValue_thenReplaced() {
-        Assertions.assertThat(factory.create("template ${key}").apply(ImmutableMap.of("key", "value"))).isEqualTo("template value");
+        assertThat(factory.create("template ${key}").apply(ImmutableMap.of("key", "value"))).isEqualTo("template value");
     }
 }

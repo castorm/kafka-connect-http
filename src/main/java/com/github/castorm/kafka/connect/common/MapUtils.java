@@ -56,10 +56,6 @@ public class MapUtils {
         return breakDownPairs(itemLine, itemSplitter, pairSplitter, toMap(Entry::getKey, Entry::getValue));
     }
 
-    private static Map<String, List<String>> breakDownMultiValuePairs(String itemLine, String itemSplitter, String pairSplitter) {
-        return breakDownPairs(itemLine, itemSplitter, pairSplitter, groupingBy(Entry::getKey, mapping(Entry::getValue, toList())));
-    }
-
     private static <T> Map<String, T> breakDownPairs(String itemLine, String itemSplitter, String pairSplitter, Collector<Entry<String, String>, ?, Map<String, T>> collector) {
         if (itemLine == null || itemLine.length() == 0) {
             return emptyMap();
@@ -67,6 +63,10 @@ public class MapUtils {
         return Stream.of(itemLine.split(itemSplitter))
                 .map(headerLine -> toPair(headerLine, pairSplitter))
                 .collect(collector);
+    }
+
+    private static Map<String, List<String>> breakDownMultiValuePairs(String itemLine, String itemSplitter, String pairSplitter) {
+        return breakDownPairs(itemLine, itemSplitter, pairSplitter, groupingBy(Entry::getKey, mapping(Entry::getValue, toList())));
     }
 
     private static Entry<String, String> toPair(String pairLine, String pairSplitter) {

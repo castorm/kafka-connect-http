@@ -54,7 +54,7 @@ public class IntervalDelayPollInterceptor implements PollInterceptor {
 
     @Override
     public void configure(Map<String, ?> settings) {
-        pollIntervalMillis = new IntervalDelayPollInterceptorConfig(settings).getPollIntervalMillis();
+        pollIntervalMillis = configFactory.apply(settings).getPollIntervalMillis();
     }
 
     @Override

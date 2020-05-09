@@ -1,5 +1,5 @@
 # Kafka Connect HTTP Connector
-![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg) ![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg) ![Release to Maven Central](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20Maven%20Central/badge.svg) [![Maven Central](https://img.shields.io/maven-central/v/com.github.castorm/kafka-connect-http-plugin.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.castorm%22%20AND%20a:%22kafka-connect-http-plugin%22) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin?ref=badge_shield)
+![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg) ![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg) ![Release to Maven Central](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20Maven%20Central/badge.svg) [![Maven Central](https://img.shields.io/maven-central/v/com.github.castorm/kafka-connect-http-plugin.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.castorm%22%20AND%20a:%22kafka-connect-http-plugin%22) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin?ref=badge_shield) [![DepShield Badge](https://depshield.sonatype.org/badges/owner/repository/depshield.svg)](https://depshield.github.io)
 
 Set of Kafka Connect connectors that enable Kafka integration with external systems via HTTP.
 
@@ -40,21 +40,21 @@ More details on how to [Install Connectors](https://docs.confluent.io/current/co
 The HTTP Source connector is meant to implement [CDC (Change Data Capture)](https://en.wikipedia.org/wiki/Change_data_capture).
 
 ### Requirements for CDC
-* The HTTP resource contains an array of items that is ordered by a given set of properties present on every item (we'll call them **offset**)
-* The HTTP resource allows retrieving items starting from a given **offset**
-* The **offset** properties are monotonically increasing
+*  The HTTP resource contains an array of items that is ordered by a given set of properties present on every item (we'll call them **offset**)
+*  The HTTP resource allows retrieving items starting from a given **offset**
+*  The **offset** properties are monotonically increasing
 
 Kafka Connect will store internally these offsets so the connector can continue from where it left after restarting.
 
 The connector breaks down the different responsibilities into the following components.
 
-| Property | Description |
-|---|---|
-| `http.request.factory` | [`com...request.offset.OffsetTemplateHttpRequestFactory`](#request) | 
-| `http.client` | [`com....client.okhttp.OkHttpClient`](#client) | 
-| `http.response.parser` | [`com...response.jackson.JacksonHttpResponseParser`](#response) | 
-| `http.record.mapper` | [`com...record.SchemedSourceRecordMapper`](#record) |
-| `http.poll.interceptor` | [`com...poll.IntervalDelayPollInterceptor`](#interceptor) |  
+| Property                | Description                                                         |
+|-------------------------|---------------------------------------------------------------------|
+| `http.request.factory`  | [`com...request.offset.OffsetTemplateHttpRequestFactory`](#request) | 
+| `http.client`           | [`com....client.okhttp.OkHttpClient`](#client)                      | 
+| `http.response.parser`  | [`com...response.jackson.JacksonHttpResponseParser`](#response)     | 
+| `http.record.mapper`    | [`com...record.SchemedSourceRecordMapper`](#record)                 |
+| `http.poll.interceptor` | [`com...poll.IntervalDelayPollInterceptor`](#interceptor)           |  
 
 Below further details on these components 
 
@@ -63,7 +63,7 @@ Below further details on these components
 ### Examples
 
 See [Examples](examples), e.g. 
-- [Jira Search Issues API](examples/jira-search-issues.md)
+-  [Jira Search Issues API](examples/jira-search-issues.md)
 
 ### HttpRequestFactory
 Responsible for creating the `HttpRequest`.
@@ -73,15 +73,15 @@ Responsible for creating the `HttpRequest`.
 
 Enables offset injection on url, headers, query params and body via templates
 
-| Property | Req | Default | Description |
-|:---|:---:|:---:|:---|
-| `http.request.url` | * | - | HTTP Url |
-| `http.request.method` | - | GET | HTTP Method |
-| `http.request.headers` | - | - | HTTP Headers, Comma separated list of pairs `Name: Value` |
-| `http.request.params` | - | - | HTTP Method, Ampersand separated list of pairs `name=value` |
-| `http.request.body` | - | - | HTTP Body |
-| `http.request.offset.initial` | - | - | Initial offset, comma separated list of pairs `offset=value` |
-| `http.request.template.factory` | - | `NoTemplateFactory` | Template factory |
+| Property                        | Req | Default             | Description                                                  |
+|:--------------------------------|:---:|:-------------------:|:-------------------------------------------------------------|
+| `http.request.url`              | *   | -                   | HTTP Url                                                     |
+| `http.request.method`           | -   | GET                 | HTTP Method                                                  |
+| `http.request.headers`          | -   | -                   | HTTP Headers, Comma separated list of pairs `Name: Value`    |
+| `http.request.params`           | -   | -                   | HTTP Method, Ampersand separated list of pairs `name=value`  |
+| `http.request.body`             | -   | -                   | HTTP Body                                                    |
+| `http.request.offset.initial`   | -   | -                   | Initial offset, comma separated list of pairs `offset=value` |
+| `http.request.template.factory` | -   | `NoTemplateFactory` | Template factory                                             |
 
 ### TemplateFactory
 #### FreeMarkerTemplateFactory
@@ -99,12 +99,12 @@ Responsible for executing the `HttpRequest`, obtaining a `HttpResponse` as a res
 
 Uses a pooled [OkHttp](https://square.github.io/okhttp/) client. 
 
-| Property | Req | Default | Description |
-|:---|:---:|:---:|:---|
-| `http.client.connection.timeout.millis` | - | 2000 | Connection timeout |
-| `http.client.read.timeout.millis` | - | 2000 | Read timeout |
-| `http.client.connection.ttl.millis` | - | 300000 | Connection time to live |
-| `http.client.max-idle` | - | 5 | Max. idle connections in the pool |
+| Property                                | Req | Default | Description                       |
+|:----------------------------------------|:---:|:-------:|:----------------------------------|
+| `http.client.connection.timeout.millis` | -   | 2000    | Connection timeout                |
+| `http.client.read.timeout.millis`       | -   | 2000    | Read timeout                      |
+| `http.client.connection.ttl.millis`     | -   | 300000  | Connection time to live           |
+| `http.client.max-idle`                  | -   | 5       | Max. idle connections in the pool |
 
 <a name="response"/>
 
@@ -127,20 +127,22 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the relevant as
 
 #### DateTimeFormatterTimestampParser
 `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
+
 TimestampParser based on a `DateTimeFormatter`
 
-| Property | Req | Default | Description |
-|:---|:---:|:---:|:---|
-| `http.response.item.timestamp.parser.pattern` | - | `yyyy-MM-dd'T'HH:mm:ss.SSSX` | `DateTimeFormatter` pattern |
-| `http.response.item.timestamp.parser.zone` | - | `UTC` | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
+| Property                                      | Req | Default                      | Description                                                                                                                    |
+|:----------------------------------------------|:---:|:----------------------------:|:-------------------------------------------------------------------------------------------------------------------------------|
+| `http.response.item.timestamp.parser.pattern` | -   | `yyyy-MM-dd'T'HH:mm:ss.SSSX` | `DateTimeFormatter` pattern                                                                                                    |
+| `http.response.item.timestamp.parser.zone`    | -   | `UTC`                        | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
 
 #### NattyTimestampParser
 `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser`
+
 TimestampParser based on [Natty](http://natty.joestelmach.com/) parser
 
-| Property | Req | Default | Description |
-|:---|:---:|:---:|:---|
-| `http.response.item.timestamp.parser.zone` | - | `UTC` | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
+| Property                                   | Req | Default | Description                                                                                                                    |
+|:-------------------------------------------|:---:|:-------:|:-------------------------------------------------------------------------------------------------------------------------------|
+| `http.response.item.timestamp.parser.zone` | -   | `UTC`   | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
 
 
 <a name="record"/>
@@ -153,9 +155,9 @@ Responsible for mapping individual items from the response into Kafka Connect `S
 
 Embeds the item properties into a common simple envelope to enable schema evolution. This envelope contains simple a key and a body properties. 
 
-| Property | Req | Default | Description |
-|:---|:---:|:---:|:---|
-| `kafka.topic` | * | - | Name of the topic where the record will be sent to |
+| Property      | Req | Default | Description                                        |
+|:--------------|:---:|:-------:|:---------------------------------------------------|
+| `kafka.topic` | *   | -       | Name of the topic where the record will be sent to |
 
 
 <a name="interceptor"/>
@@ -168,16 +170,16 @@ Hooks that enable influencing the poll control flow.
 
 Throttles rate of requests based on a given interval, except when connector is not up-to-date. 
 
-| Property | Req | Default | Description |
-|:---|:---:|:---:|:---|
-| `http.poll.interval.millis` | - | 60000 | Interval in between requests once up-to-date |
+| Property                    | Req | Default | Description                                  |
+|:----------------------------|:---:|:-------:|:---------------------------------------------|
+| `http.poll.interval.millis` | -   | 60000   | Interval in between requests once up-to-date |
 
 
 ### Prerequisites
 
-- Kafka deployment
-- Kafka Connect deployment
-- Ability to access the Kafka Connect deployment in order to extend its classpath 
+-  Kafka deployment
+-  Kafka Connect deployment
+-  Ability to access the Kafka Connect deployment in order to extend its classpath 
 
 
 ## Development
@@ -287,7 +289,7 @@ We use [SemVer](http://semver.org/) for versioning.
 
 ## Authors
 
-* **Cástor Rodríguez** - Only contributor so far - [castorm](https://github.com/castorm)
+*  **Cástor Rodríguez** - Only contributor so far - [castorm](https://github.com/castorm)
 
 ## License
 
@@ -295,12 +297,12 @@ This project is licensed under the GPLv3 License - see the [LICENSE.txt](LICENSE
 
 ## Built With
 
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [Kafka Connect](https://kafka.apache.org/documentation/#connect) - The framework for our connectors
-* [OkHttp](https://square.github.io/okhttp/) - HTTP Client
-* [Jackson](https://github.com/FasterXML/jackson) - Json deserialization
-* [FreeMarker](https://freemarker.apache.org/) - Template engine
-* [Natty](http://natty.joestelmach.com/) - Date parser
+*  [Maven](https://maven.apache.org/) - Dependency Management
+*  [Kafka Connect](https://kafka.apache.org/documentation/#connect) - The framework for our connectors
+*  [OkHttp](https://square.github.io/okhttp/) - HTTP Client
+*  [Jackson](https://github.com/FasterXML/jackson) - Json deserialization
+*  [FreeMarker](https://freemarker.apache.org/) - Template engine
+*  [Natty](http://natty.joestelmach.com/) - Date parser
 
 ## Acknowledgments
 
