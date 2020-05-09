@@ -1,8 +1,8 @@
-package com.github.castorm.kafka.connect.http.model;
+package com.github.castorm.kafka.connect.http.response;
 
 /*-
  * #%L
- * kafka-connect-http-plugin
+ * Kafka Connect HTTP Plugin
  * %%
  * Copyright (C) 2020 CastorM
  * %%
@@ -22,18 +22,18 @@ package com.github.castorm.kafka.connect.http.model;
  * #L%
  */
 
-import lombok.Builder;
-import lombok.Value;
-import lombok.With;
+import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
+import lombok.RequiredArgsConstructor;
 
-@With
-@Value
-@Builder
-public class HttpResponseItem {
+import java.util.function.Predicate;
 
-    String key;
+@RequiredArgsConstructor
+public class OffsetFilterFactory implements HttpResponseFilterFactory {
 
-    String value;
-
-    Offset offset;
+    @Override
+    public Predicate<HttpResponseItem> create(Offset offset) {
+        return record -> record.getOffset().getTimestamp().isAfter(offset.getTimestamp());
+    }
 }

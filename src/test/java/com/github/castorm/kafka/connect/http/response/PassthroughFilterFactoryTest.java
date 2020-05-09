@@ -1,8 +1,8 @@
-package com.github.castorm.kafka.connect.http.model;
+package com.github.castorm.kafka.connect.http.response;
 
 /*-
  * #%L
- * kafka-connect-http-plugin
+ * Kafka Connect HTTP Plugin
  * %%
  * Copyright (C) 2020 CastorM
  * %%
@@ -22,18 +22,17 @@ package com.github.castorm.kafka.connect.http.model;
  * #L%
  */
 
-import lombok.Builder;
-import lombok.Value;
-import lombok.With;
+import com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory;
+import org.junit.jupiter.api.Test;
 
-@With
-@Value
-@Builder
-public class HttpResponseItem {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    String key;
+class PassthroughFilterFactoryTest {
 
-    String value;
+    PassthroughFilterFactory factory = new PassthroughFilterFactory();
 
-    Offset offset;
+    @Test
+    void givenFactoryWithNull_whenTestNull_thenTrue() {
+        assertThat(factory.create(null).test(null)).isTrue();
+    }
 }

@@ -25,11 +25,11 @@ package com.github.castorm.kafka.connect.http.response.jackson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -74,14 +74,10 @@ public class JacksonHttpResponseParser implements HttpResponseParser {
                 .map(timestampParser::parse)
                 .orElseGet(Instant::now);
 
-        Map<String, Object> offsets = new HashMap<>(itemParser.getOffsets(node));
-        offsets.put("timestamp_iso", timestamp.toString());
-
         return HttpResponseItem.builder()
                 .key(itemParser.getKey(node).orElseGet(() -> randomUUID().toString()))
                 .value(itemParser.getValue(node))
-                .timestamp(timestamp)
-                .offset(offsets)
+                .offset(Offset.of(itemParser.getOffsets(node), timestamp))
                 .build();
     }
 }

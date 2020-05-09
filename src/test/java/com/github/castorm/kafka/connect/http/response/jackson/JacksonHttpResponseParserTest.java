@@ -25,6 +25,7 @@ package com.github.castorm.kafka.connect.http.response.jackson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
@@ -115,7 +116,7 @@ class JacksonHttpResponseParserTest {
         given(itemParser.getTimestamp(item)).willReturn(Optional.of(timestampIso));
         given(timestampParser.parse(timestampIso)).willReturn(timestampParsed);
 
-        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getTimestamp).isEqualTo(timestampParsed);
+        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getOffset).extracting(Offset::getTimestamp).isEqualTo(timestampParsed);
     }
 
     @Test
@@ -124,7 +125,7 @@ class JacksonHttpResponseParserTest {
         givenItems(Stream.of(item));
         given(itemParser.getTimestamp(item)).willReturn(Optional.empty());
 
-        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getTimestamp).isNotNull();
+        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getOffset).extracting(Offset::getTimestamp).isNotNull();
     }
 
     @Test
@@ -133,18 +134,7 @@ class JacksonHttpResponseParserTest {
         givenItems(Stream.of(item));
         given(itemParser.getOffsets(item)).willReturn(ImmutableMap.of("offset-key", "offset-value"));
 
-        assertThat(parser.parse(response).stream().findFirst().get().getOffset()).containsEntry("offset-key", "offset-value");
-    }
-
-    @Test
-    void givenOneItem_thenOffsetMappedWithTimestamp() {
-
-        givenItems(Stream.of(item));
-        given(itemParser.getOffsets(item)).willReturn(emptyMap());
-        given(itemParser.getTimestamp(item)).willReturn(Optional.of(timestampIso));
-        given(timestampParser.parse(timestampIso)).willReturn(timestampParsed);
-
-        assertThat(parser.parse(response).stream().findFirst().get().getOffset()).containsEntry("timestamp_iso", timestampParsed.toString());
+        assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("offset-key")).isEqualTo("offset-value");
     }
 
     private void givenItems(Stream<JsonNode> items) {

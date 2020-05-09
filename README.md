@@ -1,6 +1,7 @@
 # Kafka Connect HTTP Connector
 [![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg)](https://github.com/castorm/kafka-connect-http-plugin/actions?query=workflow%3ABuild)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/35046c6e1af4450bb53f8625c9f286e5)](https://app.codacy.com/manual/castorm/kafka-connect-http-plugin?utm_source=github.com&utm_medium=referral&utm_content=castorm/kafka-connect-http-plugin&utm_campaign=Badge_Grade_Dashboard)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/48a1f47d73ba4131b0ec2f9376c06fb0)](https://www.codacy.com/manual/castorm/kafka-connect-http-plugin?utm_source=github.com&utm_medium=referral&utm_content=castorm/kafka-connect-http-plugin&utm_campaign=Badge_Coverage)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin?ref=badge_shield)
 [![DepShield Badge](https://depshield.sonatype.org/badges/castorm/kafka-connect-http-plugin/depshield.svg)](https://depshield.github.io)
 [![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg)](https://github.com/castorm/kafka-connect-http-plugin/actions?query=workflow%3A%22Release+to+GitHub%22)
@@ -54,13 +55,15 @@ Kafka Connect will store internally these offsets so the connector can continue 
 
 The connector breaks down the different responsibilities into the following components.
 
-| Property                | Description                                                         |
-|-------------------------|---------------------------------------------------------------------|
-| `http.request.factory`  | [`com...request.offset.OffsetTemplateHttpRequestFactory`](#request) | 
-| `http.client`           | [`com....client.okhttp.OkHttpClient`](#client)                      | 
-| `http.response.parser`  | [`com...response.jackson.JacksonHttpResponseParser`](#response)     | 
-| `http.record.mapper`    | [`com...record.SchemedSourceRecordMapper`](#record)                 |
-| `http.poll.interceptor` | [`com...poll.IntervalDelayPollInterceptor`](#interceptor)           |  
+| Property                       | Description                                                         |
+|--------------------------------|---------------------------------------------------------------------|
+| `http.request.factory`         | [`com...request.offset.OffsetTemplateHttpRequestFactory`](#request) | 
+| `http.client`                  | [`com....client.okhttp.OkHttpClient`](#client)                      | 
+| `http.response.parser`         | [`com...response.jackson.JacksonHttpResponseParser`](#response)     | 
+| `http.response.filter.factory` | [`com...response.spi.HttpResponseFilterFactory`](#filter)           | 
+| `http.record.mapper`           | [`com...record.SchemedSourceRecordMapper`](#record)                 |
+| `http.poll.interceptor`        | [`com...poll.IntervalDelayPollInterceptor`](#interceptor)           |  
+| `http.offset.initial`          | Initial offset, comma separated list of pairs `offset=value`        |  
 
 Below further details on these components 
 
@@ -86,7 +89,6 @@ Enables offset injection on url, headers, query params and body via templates
 | `http.request.headers`          | -   | -                   | HTTP Headers, Comma separated list of pairs `Name: Value`    |
 | `http.request.params`           | -   | -                   | HTTP Method, Ampersand separated list of pairs `name=value`  |
 | `http.request.body`             | -   | -                   | HTTP Body                                                    |
-| `http.request.offset.initial`   | -   | -                   | Initial offset, comma separated list of pairs `offset=value` |
 | `http.request.template.factory` | -   | `NoTemplateFactory` | Template factory                                             |
 
 ### TemplateFactory
@@ -150,6 +152,18 @@ TimestampParser based on [Natty](http://natty.joestelmach.com/) parser
 |:-------------------------------------------|:---:|:-------:|:-------------------------------------------------------------------------------------------------------------------------------|
 | `http.response.item.timestamp.parser.zone` | -   | `UTC`   | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
 
+<a name="filter"/>
+
+### HttpResponseFilterFactory
+Responsible for filtering out items from the `HttpResponse` 
+
+#### PassthroughFilterFactory
+Default filter which doesn't actually filter anything out.
+
+#### OffsetFilterFactory
+De-duplicates based on offset's timestamp, filtering out records already processed. Assumes records will be ordered by timestamp.
+Useful when timestamp is used to filter the HTTP resource, but the filter doesn't have full timestamp granularity.
+
 <a name="record"/>
 
 ### SourceRecordMapper
@@ -191,20 +205,16 @@ The connector can be easily extended by implementing your own version of any of 
 
 These are better understood by looking at the source task implementation:
 ```java
-public void start(Map<String, String> settings) {
-    ...
-    requestFactory.initializeOffset(context.offsetStorageReader().offset(emptyMap()));
-}
-
 public List<SourceRecord> poll() throws InterruptedException {
 
     pollInterceptor.beforePoll();
 
-    HttpRequest request = requestFactory.createRequest();
+    HttpRequest request = requestFactory.createRequest(lastConfirmedOffset);
 
     HttpResponse response = requestExecutor.execute(request);
 
     List<SourceRecord> records = responseParser.parse(response).stream()
+            .filter(responseFilterFactory.create(lastConfirmedOffset))
             .map(recordMapper::map)
             .collect(toList());
 
@@ -212,7 +222,7 @@ public List<SourceRecord> poll() throws InterruptedException {
 }
 
 public void commitRecord(SourceRecord record) {
-    requestFactory.advanceOffset(record.sourceOffset());
+    lastConfirmedOffset = Offset.of(record.sourceOffset());
 }
 ```
 
@@ -220,11 +230,7 @@ public void commitRecord(SourceRecord record) {
 ```java
 public interface HttpRequestFactory extends Configurable {
 
-    void initializeOffset(Map<String, ?> offset);
-
-    void advanceOffset(Map<String, ?> offset);
-
-    HttpRequest createRequest();
+    HttpRequest createRequest(Offset offset);
 }
 ```
 
@@ -237,7 +243,7 @@ public interface OffsetTemplateFactory {
 
 public interface OffsetTemplate {
 
-    String apply(Map<String, ?> offset);
+    String apply(Offset offset);
 }
 ```
 
@@ -254,6 +260,14 @@ public interface HttpClient extends Configurable {
 public interface HttpResponseParser extends Configurable {
 
     List<HttpResponseItem> parse(HttpResponse response);
+}
+```
+
+#### HttpResponseFilterFactory
+```java
+public interface HttpResponseFilterFactory extends Configurable {
+
+    Predicate<HttpResponseItem> create(Offset offset);
 }
 ```
 

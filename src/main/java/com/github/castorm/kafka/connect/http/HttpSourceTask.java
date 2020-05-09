@@ -25,10 +25,14 @@ package com.github.castorm.kafka.connect.http;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.poll.spi.PollInterceptor;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
+import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import edu.emory.mathcs.backport.java.util.Collections;
+import lombok.Getter;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
@@ -40,6 +44,7 @@ import java.util.function.Function;
 
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
 import static java.util.Collections.emptyMap;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 public class HttpSourceTask extends SourceTask {
@@ -56,6 +61,11 @@ public class HttpSourceTask extends SourceTask {
 
     private SourceRecordMapper recordMapper;
 
+    private HttpResponseFilterFactory responseFilterFactory;
+
+    @Getter
+    private Offset lastConfirmedOffset;
+
     HttpSourceTask(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
         this.configFactory = configFactory;
     }
@@ -71,10 +81,12 @@ public class HttpSourceTask extends SourceTask {
 
         pollInterceptor = config.getPollInterceptor();
         requestFactory = config.getRequestFactory();
-        requestFactory.initializeOffset(context.offsetStorageReader().offset(emptyMap()));
+        Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
+        lastConfirmedOffset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset());
         requestExecutor = config.getClient();
         responseParser = config.getResponseParser();
         recordMapper = config.getRecordMapper();
+        responseFilterFactory = config.getResponseFilterFactory();
     }
 
     @Override
@@ -82,11 +94,12 @@ public class HttpSourceTask extends SourceTask {
 
         pollInterceptor.beforePoll();
 
-        HttpRequest request = requestFactory.createRequest();
+        HttpRequest request = requestFactory.createRequest(lastConfirmedOffset);
 
         HttpResponse response = execute(request);
 
         List<SourceRecord> records = responseParser.parse(response).stream()
+                .filter(responseFilterFactory.create(lastConfirmedOffset))
                 .map(recordMapper::map)
                 .collect(toList());
 
@@ -103,8 +116,7 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void commitRecord(SourceRecord record) {
-
-        requestFactory.advanceOffset(record.sourceOffset());
+        lastConfirmedOffset = Offset.of(record.sourceOffset());
     }
 
     @Override

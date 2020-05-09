@@ -24,7 +24,6 @@ package com.github.castorm.kafka.connect.http.request.offset;
 
 import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplate;
 import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
-import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.config.ConfigException;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +34,6 @@ import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplat
 import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryConfigTest.Fixture.configWithout;
 import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryConfigTest.Fixture.defaultMap;
 import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryConfigTest.Fixture.value;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -99,16 +97,6 @@ class OffsetTemplateHttpRequestFactoryConfigTest {
     @Test
     void whenTemplateFactory_thenInitialized() {
         assertThat(config("http.request.template.factory", TestOffsetTemplateFactory.class.getName()).getOffsetTemplateFactory()).isInstanceOf(TestOffsetTemplateFactory.class);
-    }
-
-    @Test
-    void whenNoInitialOffset_thenDefault() {
-        assertThat(configWithout("http.request.offset.initial").getInitialOffset()).isEqualTo(emptyMap());
-    }
-
-    @Test
-    void whenInitialOffset_thenInitialized() {
-        assertThat(config("http.request.offset.initial", "k=v").getInitialOffset()).isEqualTo(ImmutableMap.of("k", "v"));
     }
 
     public static class TestOffsetTemplateFactory implements OffsetTemplateFactory {

@@ -22,13 +22,18 @@ package com.github.castorm.kafka.connect.http.client.spi;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
+import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import org.apache.kafka.common.Configurable;
 
 import java.io.IOException;
+import java.util.Map;
 
 public interface HttpClient extends Configurable {
 
     HttpResponse execute(HttpRequest request) throws IOException;
+
+    default void configure(Map<String, ?> map) {
+        // Do nothing
+    }
 }

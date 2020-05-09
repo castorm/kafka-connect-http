@@ -23,16 +23,20 @@ package com.github.castorm.kafka.connect.http.record;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.Offset;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.data.Struct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+
 import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.item;
+import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.now;
 import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.value;
 import static java.time.Instant.now;
-import static java.time.Instant.ofEpochMilli;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SchemedSourceRecordMapperTest {
@@ -64,12 +68,12 @@ class SchemedSourceRecordMapperTest {
 
     @Test
     void givenOffset_whenMap_thenOffsetMapped() {
-        assertThat(mapper.map(item.withOffset(offset)).sourceOffset()).isEqualTo(offset);
+        assertThat(mapper.map(item.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
     }
 
     @Test
     void givenTimestamp_whenMap_thenTimestampMapped() {
-        assertThat(mapper.map(item.withTimestamp(ofEpochMilli(42L))).timestamp()).isEqualTo(42L);
+        assertThat(mapper.map(item.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
     }
 
     @Test
@@ -88,8 +92,9 @@ class SchemedSourceRecordMapperTest {
     }
 
     interface Fixture {
+        Instant now = now();
         String value = "value";
-        HttpResponseItem item = HttpResponseItem.builder().value(value).timestamp(now()).build();
-        ImmutableMap<String, Object> offset = ImmutableMap.of("k", "v");
+        HttpResponseItem item = HttpResponseItem.builder().value(value).offset(Offset.of(emptyMap(), now())).build();
+        Offset offset = Offset.of(ImmutableMap.of("k", "v"), now);
     }
 }

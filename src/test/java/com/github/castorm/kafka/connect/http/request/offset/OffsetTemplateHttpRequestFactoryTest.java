@@ -22,13 +22,16 @@ package com.github.castorm.kafka.connect.http.request.offset;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.model.Offset;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.github.castorm.kafka.connect.http.model.HttpRequest.HttpMethod.POST;
+import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryTest.Fixture.url;
 import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryTest.Fixture.value;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +49,7 @@ class OffsetTemplateHttpRequestFactoryTest {
 
         given("http.request.method", "POST");
 
-        assertThat(factory.createRequest().getMethod()).isEqualTo(POST);
+        assertThat(factory.createRequest(offset).getMethod()).isEqualTo(POST);
     }
 
     @Test
@@ -54,7 +57,7 @@ class OffsetTemplateHttpRequestFactoryTest {
 
         factory.configure(ImmutableMap.of("http.request.url", url));
 
-        assertThat(factory.createRequest().getUrl()).isEqualTo(url);
+        assertThat(factory.createRequest(offset).getUrl()).isEqualTo(url);
     }
 
     @Test
@@ -62,7 +65,7 @@ class OffsetTemplateHttpRequestFactoryTest {
 
         given("http.request.headers", "Header:Value");
 
-        assertThat(factory.createRequest().getHeaders()).containsEntry("Header", singletonList("Value"));
+        assertThat(factory.createRequest(offset).getHeaders()).containsEntry("Header", singletonList("Value"));
     }
 
     @Test
@@ -70,7 +73,7 @@ class OffsetTemplateHttpRequestFactoryTest {
 
         given("http.request.params", "param=value");
 
-        assertThat(factory.createRequest().getQueryParams()).containsEntry("param", singletonList("value"));
+        assertThat(factory.createRequest(offset).getQueryParams()).containsEntry("param", singletonList("value"));
     }
 
     @Test
@@ -78,7 +81,7 @@ class OffsetTemplateHttpRequestFactoryTest {
 
         given("http.request.body", value);
 
-        assertThat(factory.createRequest().getBody()).isEqualTo(value.getBytes());
+        assertThat(factory.createRequest(offset).getBody()).isEqualTo(value.getBytes());
     }
 
     private void given(String key, String value) {
@@ -88,5 +91,6 @@ class OffsetTemplateHttpRequestFactoryTest {
     interface Fixture {
         String value = "value";
         String url = "url";
+        Offset offset = Offset.of(emptyMap());
     }
 }

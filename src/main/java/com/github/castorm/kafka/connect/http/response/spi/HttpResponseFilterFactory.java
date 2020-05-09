@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.model;
+package com.github.castorm.kafka.connect.http.response.spi;
 
 /*-
  * #%L
@@ -22,18 +22,18 @@ package com.github.castorm.kafka.connect.http.model;
  * #L%
  */
 
-import lombok.Builder;
-import lombok.Value;
-import lombok.With;
+import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.Offset;
+import org.apache.kafka.common.Configurable;
 
-@With
-@Value
-@Builder
-public class HttpResponseItem {
+import java.util.Map;
+import java.util.function.Predicate;
 
-    String key;
+public interface HttpResponseFilterFactory extends Configurable {
 
-    String value;
+    Predicate<HttpResponseItem> create(Offset offset);
 
-    Offset offset;
+    default void configure(Map<String, ?> map) {
+        // Do nothing
+    }
 }

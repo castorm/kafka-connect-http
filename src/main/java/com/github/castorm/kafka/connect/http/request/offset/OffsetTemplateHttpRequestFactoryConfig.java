@@ -29,7 +29,6 @@ import org.apache.kafka.common.config.ConfigDef;
 
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.common.MapUtils.breakDownMap;
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Importance.LOW;
 import static org.apache.kafka.common.config.ConfigDef.Importance.MEDIUM;
@@ -45,7 +44,6 @@ public class OffsetTemplateHttpRequestFactoryConfig extends AbstractConfig {
     private static final String QUERY_PARAMS = "http.request.params";
     private static final String BODY = "http.request.body";
     private static final String TEMPLATE_FACTORY = "http.request.template.factory";
-    private static final String OFFSET_INITIAL = "http.request.offset.initial";
 
     private final String url;
 
@@ -59,8 +57,6 @@ public class OffsetTemplateHttpRequestFactoryConfig extends AbstractConfig {
 
     private final OffsetTemplateFactory offsetTemplateFactory;
 
-    private final Map<String, String> initialOffset;
-
     OffsetTemplateHttpRequestFactoryConfig(Map<String, ?> originals) {
         super(config(), originals);
         url = getString(URL);
@@ -69,7 +65,6 @@ public class OffsetTemplateHttpRequestFactoryConfig extends AbstractConfig {
         queryParams = getString(QUERY_PARAMS);
         body = getString(BODY);
         offsetTemplateFactory = getConfiguredInstance(TEMPLATE_FACTORY, OffsetTemplateFactory.class);
-        initialOffset = breakDownMap(getString(OFFSET_INITIAL));
     }
 
     public static ConfigDef config() {
@@ -79,7 +74,6 @@ public class OffsetTemplateHttpRequestFactoryConfig extends AbstractConfig {
                 .define(HEADERS, STRING, "", MEDIUM, "HTTP Headers OffsetTemplate")
                 .define(QUERY_PARAMS, STRING, "", MEDIUM, "HTTP Query Params OffsetTemplate")
                 .define(BODY, STRING, "", LOW, "HTTP Body OffsetTemplate")
-                .define(TEMPLATE_FACTORY, CLASS, NoOffsetTemplateFactory.class, LOW, "OffsetTemplate Factory Class")
-                .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset");
+                .define(TEMPLATE_FACTORY, CLASS, NoOffsetTemplateFactory.class, LOW, "OffsetTemplate Factory Class");
     }
 }

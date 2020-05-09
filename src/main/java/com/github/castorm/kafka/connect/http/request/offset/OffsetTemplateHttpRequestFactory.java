@@ -23,6 +23,7 @@ package com.github.castorm.kafka.connect.http.request.offset;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
+import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplate;
 import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
@@ -44,17 +45,12 @@ public class OffsetTemplateHttpRequestFactory implements HttpRequestFactory {
 
     private OffsetTemplate bodyTpl;
 
-    private Map<String, ?> currentOffset;
-
-    private Map<String, String> initialOffset;
-
     @Override
     public void configure(Map<String, ?> configs) {
         OffsetTemplateHttpRequestFactoryConfig config = new OffsetTemplateHttpRequestFactoryConfig(configs);
         OffsetTemplateFactory offsetTemplateFactory = config.getOffsetTemplateFactory();
 
         method = config.getMethod();
-        initialOffset = config.getInitialOffset();
         urlTpl = offsetTemplateFactory.create(config.getUrl());
         headersTpl = offsetTemplateFactory.create(config.getHeaders());
         queryParamsTpl = offsetTemplateFactory.create(config.getQueryParams());
@@ -62,23 +58,14 @@ public class OffsetTemplateHttpRequestFactory implements HttpRequestFactory {
     }
 
     @Override
-    public void initializeOffset(Map<String, ?> storedOffset) {
-        this.currentOffset = !storedOffset.isEmpty() ? storedOffset : initialOffset;
-    }
-
-    @Override
-    public void advanceOffset(Map<String, ?> offset) {
-        this.currentOffset = offset;
-    }
-
-    @Override
-    public HttpRequest createRequest() {
+    public HttpRequest createRequest(Offset offset) {
+        Map<String, ?> offsetMap = offset.toMap();
         return HttpRequest.builder()
                 .method(HttpRequest.HttpMethod.valueOf(method))
-                .url(urlTpl.apply(currentOffset))
-                .headers(breakDownHeaders(headersTpl.apply(currentOffset)))
-                .queryParams(breakDownQueryParams(queryParamsTpl.apply(currentOffset)))
-                .body(bodyTpl.apply(currentOffset).getBytes())
+                .url(urlTpl.apply(offsetMap))
+                .headers(breakDownHeaders(headersTpl.apply(offsetMap)))
+                .queryParams(breakDownQueryParams(queryParamsTpl.apply(offsetMap)))
+                .body(bodyTpl.apply(offsetMap).getBytes())
                 .build();
     }
 }

@@ -2,6 +2,10 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.4.0 (05/09/2020)
+-   Timestamp offset filtering
+-   Breaking changes on SPI `HttpRequestFactory` caused by introducing `Offset` class in the model 
+
 ## v0.3.5 (05/08/2020)
 -   Support for response item timestamp parsing via [DateTimeFormatter](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html) with optional TimeZone
 -   Support for response item timestamp parsing via [Natty](http://natty.joestelmach.com/) with optional TimeZone
