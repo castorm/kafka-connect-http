@@ -114,6 +114,6 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public String version() {
-        return getVersion(getClass());
+        return getVersion();
     }
 }

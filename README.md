@@ -162,7 +162,7 @@ Embeds the item properties into a common simple envelope to enable schema evolut
 
 | Property      | Req | Default | Description                                        |
 |:--------------|:---:|:-------:|:---------------------------------------------------|
-| `kafka.topic` | *    | -       | Name of the topic where the record will be sent to |
+| `kafka.topic` | *   | -       | Name of the topic where the record will be sent to |
 
 <a name="interceptor"/>
 

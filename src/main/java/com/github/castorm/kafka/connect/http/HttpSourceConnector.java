@@ -66,6 +66,6 @@ public class HttpSourceConnector extends SourceConnector {
 
     @Override
     public String version() {
-        return getVersion(getClass());
+        return getVersion();
     }
 }

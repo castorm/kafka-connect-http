@@ -23,15 +23,27 @@ package com.github.castorm.kafka.connect.common;
  */
 
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+@Slf4j
 @UtilityClass
 public class VersionUtils {
 
-    public static String getVersion(Class<?> clazz) {
-        try {
-            return clazz.getPackage().getImplementationVersion();
-        } catch (Exception ex) {
-            return "0.0.0.0";
+    private static final String DEFAULT_VERSION = "0.0.0.0";
+
+    public static String getVersion() {
+        try (InputStream input = new FileInputStream("version.properties")) {
+            Properties properties = new Properties();
+            properties.load(input);
+            return properties.getProperty("version", DEFAULT_VERSION);
+        } catch (IOException ex) {
+            log.error("Error loading version.properties");
+            return DEFAULT_VERSION;
         }
     }
 }

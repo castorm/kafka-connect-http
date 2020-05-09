@@ -25,6 +25,7 @@ package com.github.castorm.kafka.connect.http;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpSourceConnectorTest {
@@ -54,5 +55,18 @@ class HttpSourceConnectorTest {
         connector.start(myMap);
 
         assertThat(connector.taskConfigs(3)).containsExactly(myMap, myMap, myMap);
+    }
+
+    @Test
+    void whenStop_thenSettingsNull() {
+
+        connector.stop();
+
+        assertThat(connector.taskConfigs(1)).isEqualTo(singletonList(null));
+    }
+
+    @Test
+    void whenGetVersion_thenNotEmpty() {
+        assertThat(connector.version()).isNotEmpty();
     }
 }
