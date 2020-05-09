@@ -46,9 +46,9 @@ More details on how to [Install Connectors](https://docs.confluent.io/current/co
 The HTTP Source connector is meant to implement [CDC (Change Data Capture)](https://en.wikipedia.org/wiki/Change_data_capture).
 
 ### Requirements for CDC
-*  The HTTP resource contains an array of items that is ordered by a given set of properties present on every item (we'll call them **offset**)
-*  The HTTP resource allows retrieving items starting from a given **offset**
-*  The **offset** properties are monotonically increasing
+*   The HTTP resource contains an array of items that is ordered by a given set of properties present on every item (we'll call them **offset**)
+*   The HTTP resource allows retrieving items starting from a given **offset**
+*   The **offset** properties are monotonically increasing
 
 Kafka Connect will store internally these offsets so the connector can continue from where it left after restarting.
 
@@ -69,7 +69,7 @@ Below further details on these components
 ### Examples
 
 See [Examples](examples), e.g. 
-*  [Jira Search Issues API](examples/jira-search-issues.md)
+*   [Jira Search Issues API](examples/jira-search-issues.md)
 
 ### HttpRequestFactory
 Responsible for creating the `HttpRequest`.
@@ -81,7 +81,7 @@ Enables offset injection on url, headers, query params and body via templates
 
 | Property                        | Req | Default             | Description                                                  |
 |:--------------------------------|:---:|:-------------------:|:-------------------------------------------------------------|
-| `http.request.url`              | *   | -                   | HTTP Url                                                     |
+| `http.request.url`              | *    | -                   | HTTP Url                                                     |
 | `http.request.method`           | -   | GET                 | HTTP Method                                                  |
 | `http.request.headers`          | -   | -                   | HTTP Headers, Comma separated list of pairs `Name: Value`    |
 | `http.request.params`           | -   | -                   | HTTP Method, Ampersand separated list of pairs `name=value`  |
@@ -163,7 +163,7 @@ Embeds the item properties into a common simple envelope to enable schema evolut
 
 | Property      | Req | Default | Description                                        |
 |:--------------|:---:|:-------:|:---------------------------------------------------|
-| `kafka.topic` | *   | -       | Name of the topic where the record will be sent to |
+| `kafka.topic` | *    | -       | Name of the topic where the record will be sent to |
 
 
 <a name="interceptor"/>
@@ -183,9 +183,9 @@ Throttles rate of requests based on a given interval, except when connector is n
 
 ### Prerequisites
 
-*  Kafka deployment
-*  Kafka Connect deployment
-*  Ability to access the Kafka Connect deployment in order to extend its classpath 
+*   Kafka deployment
+*   Kafka Connect deployment
+*   Ability to access the Kafka Connect deployment in order to extend its classpath 
 
 
 ## Development
@@ -282,8 +282,8 @@ mvn package
 mvn test
 ```
 ### Releasing
-*  Update [CHANGELOG.md](CHANGELOG.md) and [README.md](README.md) files.
-*  Prepare release: `mvn release:clean release:prepare -P package`
+*   Update [CHANGELOG.md](CHANGELOG.md) and [README.md](README.md) files.
+*   Prepare release: `mvn release:clean release:prepare -P package`
 
 ## Contributing
 
@@ -295,7 +295,7 @@ We use [SemVer](http://semver.org/) for versioning.
 
 ## Authors
 
-*  **Cástor Rodríguez** - Only contributor so far - [castorm](https://github.com/castorm)
+*   **Cástor Rodríguez** - Only contributor so far - [castorm](https://github.com/castorm)
 
 ## License
 
@@ -303,12 +303,12 @@ This project is licensed under the GPLv3 License - see the [LICENSE.txt](LICENSE
 
 ## Built With
 
-*  [Maven](https://maven.apache.org/) - Dependency Management
-*  [Kafka Connect](https://kafka.apache.org/documentation/#connect) - The framework for our connectors
-*  [OkHttp](https://square.github.io/okhttp/) - HTTP Client
-*  [Jackson](https://github.com/FasterXML/jackson) - Json deserialization
-*  [FreeMarker](https://freemarker.apache.org/) - Template engine
-*  [Natty](http://natty.joestelmach.com/) - Date parser
+*   [Maven](https://maven.apache.org/) - Dependency Management
+*   [Kafka Connect](https://kafka.apache.org/documentation/#connect) - The framework for our connectors
+*   [OkHttp](https://square.github.io/okhttp/) - HTTP Client
+*   [Jackson](https://github.com/FasterXML/jackson) - Json deserialization
+*   [FreeMarker](https://freemarker.apache.org/) - Template engine
+*   [Natty](http://natty.joestelmach.com/) - Date parser
 
 ## Acknowledgments
 
