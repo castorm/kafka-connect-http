@@ -81,7 +81,7 @@ Enables offset injection on url, headers, query params and body via templates
 
 | Property                        | Req | Default             | Description                                                  |
 |:--------------------------------|:---:|:-------------------:|:-------------------------------------------------------------|
-| `http.request.url`              | *    | -                   | HTTP Url                                                     |
+| `http.request.url`              | *   | -                   | HTTP Url                                                     |
 | `http.request.method`           | -   | GET                 | HTTP Method                                                  |
 | `http.request.headers`          | -   | -                   | HTTP Headers, Comma separated list of pairs `Name: Value`    |
 | `http.request.params`           | -   | -                   | HTTP Method, Ampersand separated list of pairs `name=value`  |
@@ -122,14 +122,14 @@ Responsible for parsing the resulting `HttpResponse` into a list of individual i
 
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the relevant aspects of the response. 
 
-| Property | Req | Default | Description |
-|:---|:---:|:---:|:---|
-| `http.response.items.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items |
-| `http.response.item.key.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key |
-| `http.response.item.value.pointer` | - | / | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body |
-| `http.response.item.timestamp.pointer` | - | - | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual item to be used as kafka record timestamp |
-| `http.response.item.timestamp.parser.class` | - | - | `DateTimeFormatterTimestampParser` | Converts the timestamp property into a `java.time.Instant` |
-| `http.response.item.offset.pointer` | - | - | Comma separated list of key=value pairs where the key is the name of the item in the offset and the value is [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value of the individual item being used as offset for future requests |
+| Property                                    | Req | Default | Description                                                                                                                                                                                                                                  |
+|:--------------------------------------------|:---:|:-------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `http.response.items.pointer`               | -   | /       | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items                                                                                                                                              |
+| `http.response.item.key.pointer`            | -   | -       | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key                                                                                                                   |
+| `http.response.item.value.pointer`          | -   | /       | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body                                                                                                                                    |
+| `http.response.item.timestamp.pointer`      | -   | -       | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual item to be used as kafka record timestamp                                                                                                              |
+| `http.response.item.timestamp.parser.class` | -   | -       | `DateTimeFormatterTimestampParser` | Converts the timestamp property into a `java.time.Instant`                                                                                                                                              |
+| `http.response.item.offset.pointer`         | -   | -       | Comma separated list of key=value pairs where the key is the name of the item in the offset and the value is [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value of the individual item being used as offset for future requests |
 
 #### DateTimeFormatterTimestampParser
 `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
@@ -150,7 +150,6 @@ TimestampParser based on [Natty](http://natty.joestelmach.com/) parser
 |:-------------------------------------------|:---:|:-------:|:-------------------------------------------------------------------------------------------------------------------------------|
 | `http.response.item.timestamp.parser.zone` | -   | `UTC`   | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
 
-
 <a name="record"/>
 
 ### SourceRecordMapper
@@ -164,7 +163,6 @@ Embeds the item properties into a common simple envelope to enable schema evolut
 | Property      | Req | Default | Description                                        |
 |:--------------|:---:|:-------:|:---------------------------------------------------|
 | `kafka.topic` | *    | -       | Name of the topic where the record will be sent to |
-
 
 <a name="interceptor"/>
 
@@ -180,15 +178,14 @@ Throttles rate of requests based on a given interval, except when connector is n
 |:----------------------------|:---:|:-------:|:---------------------------------------------|
 | `http.poll.interval.millis` | -   | 60000   | Interval in between requests once up-to-date |
 
-
 ### Prerequisites
 
 *   Kafka deployment
 *   Kafka Connect deployment
 *   Ability to access the Kafka Connect deployment in order to extend its classpath 
 
-
 ## Development
+
 ### SPI
 The connector can be easily extended by implementing your own version of any of the components below.
 
@@ -230,6 +227,7 @@ public interface HttpRequestFactory extends Configurable {
     HttpRequest createRequest();
 }
 ```
+
 #### OffsetTemplateFactory
 ```java
 public interface OffsetTemplateFactory {
@@ -242,6 +240,7 @@ public interface OffsetTemplate {
     String apply(Map<String, ?> offset);
 }
 ```
+
 #### HttpClient
 ```java
 public interface HttpClient extends Configurable {
@@ -249,6 +248,7 @@ public interface HttpClient extends Configurable {
     HttpResponse execute(HttpRequest request) throws IOException;
 }
 ```
+
 #### HttpResponseParser
 ```java
 public interface HttpResponseParser extends Configurable {
@@ -256,6 +256,7 @@ public interface HttpResponseParser extends Configurable {
     List<HttpResponseItem> parse(HttpResponse response);
 }
 ```
+
 #### SourceRecordMapper
 ```java
 public interface SourceRecordMapper extends Configurable {
@@ -263,6 +264,7 @@ public interface SourceRecordMapper extends Configurable {
     SourceRecord map(HttpResponseItem item);
 }
 ```
+
 #### PollInterceptor
 ```java
 public interface PollInterceptor extends Configurable {
@@ -274,11 +276,11 @@ public interface PollInterceptor extends Configurable {
 ```
 
 ### Building
-```
+```bash
 mvn package
 ```
 ### Running the tests
-```
+```bash
 mvn test
 ```
 ### Releasing
