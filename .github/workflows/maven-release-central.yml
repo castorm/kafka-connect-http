@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Java for publishing to Maven Central Repository
+      - name: Set up Java
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
@@ -22,11 +22,11 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
-      - name: Install gpg secret key
+      - name: Install GPG Private Key
         run: echo -e "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
 
-      - name: Release Perform
-        run: mvn -B deploy -P package,release,ossrh
+      - name: Release
+        run: mvn -B deploy -P package,sign,ossrh
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}

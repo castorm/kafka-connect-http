@@ -9,33 +9,61 @@ on:
   pull_request:
     branches: [ master ]
 
-jobs:
-  build:
+defaults:
+  run:
     runs-on: ubuntu-latest
+
+
+jobs:
+  build-prepare:
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
 
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-    - name: Cache Maven packages
-      uses: actions/cache@v1
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+  build:
+    needs: build-prepare
+    steps:
+      - name: Build with Maven
+        run: mvn -B package -P package
 
-    - name: Build with Maven
-      run: mvn -B package -P package
+      - name: Prepare staging
+        run: mkdir staging && cp target/*.jar staging && cp target/*.tar.gz staging
+      - name: Archive staging
+        uses: actions/upload-artifact@v1
+        with:
+          name: Package
+          path: staging
 
-    - name: Move packages to staging
-      run: mkdir staging && cp target/*.jar staging && cp target/*.tar.gz staging
+      - name: Prepare site
+        run: mkdir site && cp target/site/* site
+      - name: Archive site
+        uses: actions/upload-artifact@v1
+        with:
+          name: Coverage report
+          path: site
 
-    - name: Upload staging
-      uses: actions/upload-artifact@v1
-      with:
-        name: Package
-        path: staging
+  upload-coverage:
+    needs: build
+    steps:
+      - name: Download site
+        uses: actions/download-artifact@v1
+        with:
+          name: site
+      - name: Upload coverage to codacy
+        uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: site/jacoco-ut/jacoco.xml
+
