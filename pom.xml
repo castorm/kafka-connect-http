@@ -198,6 +198,7 @@
                     <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
                     <excludes>
                         <exclude>**/model/*</exclude>
+                        <exclude>**/spi/*</exclude>
                     </excludes>
                 </configuration>
             </plugin>
