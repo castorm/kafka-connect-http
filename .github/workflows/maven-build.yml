@@ -11,11 +11,11 @@ on:
 
 defaults:
   run:
-    runs-on: ubuntu-latest
 
 
 jobs:
   build-prepare:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -34,6 +34,7 @@ jobs:
 
   build:
     needs: build-prepare
+    runs-on: ubuntu-latest
     steps:
       - name: Build with Maven
         run: mvn -B package -P package
@@ -56,6 +57,7 @@ jobs:
 
   upload-coverage:
     needs: build
+    runs-on: ubuntu-latest
     steps:
       - name: Download site
         uses: actions/download-artifact@v1
