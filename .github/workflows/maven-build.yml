@@ -48,17 +48,9 @@ jobs:
           name: Coverage report
           path: site
 
-  upload-coverage:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download site
-        uses: actions/download-artifact@v1
-        with:
-          name: site
-      - name: Upload coverage to codacy
+      - name: Publish coverage
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: site/jacoco-ut/jacoco.xml
+          coverage-reports: target/site/jacoco-ut/jacoco.xml
 
