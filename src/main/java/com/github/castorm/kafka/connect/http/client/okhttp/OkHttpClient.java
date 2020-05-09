@@ -100,8 +100,8 @@ public class OkHttpClient implements HttpClient {
             case PATCH:
                 mapBody(request).ifPresent(builder::patch);
                 break;
-            default:
             case GET:
+            default:
                 builder.get();
                 break;
         }
