@@ -122,14 +122,14 @@ Responsible for parsing the resulting `HttpResponse` into a list of individual i
 
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the relevant aspects of the response. 
 
-| Property                                    | Req | Default | Description                                                                                                                                                                                                                                  |
-|:--------------------------------------------|:---:|:-------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `http.response.items.pointer`               | -   | /       | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items                                                                                                                                              |
-| `http.response.item.key.pointer`            | -   | -       | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key                                                                                                                   |
-| `http.response.item.value.pointer`          | -   | /       | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body                                                                                                                                    |
-| `http.response.item.timestamp.pointer`      | -   | -       | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual item to be used as kafka record timestamp                                                                                                              |
-| `http.response.item.timestamp.parser.class` | -   | -       | `DateTimeFormatterTimestampParser` | Converts the timestamp property into a `java.time.Instant`                                                                                                                                              |
-| `http.response.item.offset.pointer`         | -   | -       | Comma separated list of key=value pairs where the key is the name of the item in the offset and the value is [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value of the individual item being used as offset for future requests |
+| Property                                    | Req | Default                            | Description                                                                                                                                                                                                                                  |
+|:--------------------------------------------|:---:|:----------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `http.response.items.pointer`               | -   | /                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items                                                                                                                                              |
+| `http.response.item.key.pointer`            | -   | -                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key                                                                                                                   |
+| `http.response.item.value.pointer`          | -   | /                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body                                                                                                                                    |
+| `http.response.item.timestamp.pointer`      | -   | -                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual item to be used as kafka record timestamp                                                                                                              |
+| `http.response.item.timestamp.parser.class` | -   | `DateTimeFormatterTimestampParser` | Converts the timestamp property into a `java.time.Instant`                                                                                                                                                                                   |
+| `http.response.item.offset.pointer`         | -   | -                                  | Comma separated list of key=value pairs where the key is the name of the item in the offset and the value is [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value of the individual item being used as offset for future requests |
 
 #### DateTimeFormatterTimestampParser
 `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
@@ -314,4 +314,4 @@ This project is licensed under the GPLv3 License - see the [LICENSE.txt](LICENSE
 
 ## Acknowledgments
 
-* Inspired by https://github.com/llofberg/kafka-connect-rest
+*   Inspired by [llofberg/kafka-connect-rest](https://github.com/llofberg/kafka-connect-rest)
