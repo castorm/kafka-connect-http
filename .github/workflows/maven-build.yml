@@ -9,9 +9,6 @@ on:
   pull_request:
     branches: [ master ]
 
-defaults:
-  run:
-
 
 jobs:
   build-prepare:
