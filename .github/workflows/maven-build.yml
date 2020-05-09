@@ -11,7 +11,7 @@ on:
 
 
 jobs:
-  build-prepare:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -29,10 +29,6 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-  build:
-    needs: build-prepare
-    runs-on: ubuntu-latest
-    steps:
       - name: Build with Maven
         run: mvn -B package -P package
 
