@@ -34,7 +34,7 @@ import static org.apache.kafka.common.config.ConfigDef.Type.LONG;
 @Getter
 public class FixedIntervalThrottlerConfig extends AbstractConfig {
 
-    private static final String THROTTLE_INTERVAL_MILLIS = "http.throttle.interval.millis";
+    static final String THROTTLE_INTERVAL_MILLIS = "http.throttler.interval.millis";
 
     private final Long pollIntervalMillis;
 

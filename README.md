@@ -184,13 +184,25 @@ Embeds the item properties into a common simple envelope to enable schema evolut
 Controls the rate at which HTTP requests are executed.
 
 #### FixedIntervalThrottler
-`com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottler`
+`com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
 
-Throttles rate of requests based on a given interval. 
+Throttles rate of requests based on a fixed interval. 
 
-| Property                        | Default | Description                  |
-|:--------------------------------|:-------:|:-----------------------------|
-| `http.throttle.interval.millis` | 10000   | Interval in between requests |
+| Property                         | Default | Description                  |
+|:---------------------------------|:-------:|:-----------------------------|
+| `http.throttler.interval.millis` | 10000   | Interval in between requests |
+
+#### AdaptableIntervalThrottler
+`com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler`
+
+Throttles rate of requests based on a fixed interval. However, it has two modes of operation, with two different intervals:
+*   Up to date: No new items, or they have been created since last poll 
+*   Catching up: There were new items in last poll and they were created long ago
+
+| Property                                 | Default | Description                                   |
+|:-----------------------------------------|:-------:|:----------------------------------------------|
+| `http.throttler.interval.millis`         | 10000   | Interval in between requests when tailing     |
+| `http.throttler.catchup.interval.millis` | 1000    | Interval in between requests when catching up |
 
 ### Prerequisites
 

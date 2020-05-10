@@ -29,6 +29,8 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.time.Instant.EPOCH;
+
 @ToString
 @EqualsAndHashCode
 public class Offset {
@@ -39,6 +41,14 @@ public class Offset {
 
     private Offset(Map<String, ?> properties) {
         this.properties = properties;
+    }
+
+    public static Offset of(Map<String, ?> properties) {
+        Map<String, Object> props = new HashMap<>(properties);
+        if (!properties.containsKey(TIMESTAMP_ISO_KEY)) {
+            props.put(TIMESTAMP_ISO_KEY, EPOCH.toString());
+        }
+        return new Offset(props);
     }
 
     public static Offset of(Map<String, ?> properties, Instant timestamp) {

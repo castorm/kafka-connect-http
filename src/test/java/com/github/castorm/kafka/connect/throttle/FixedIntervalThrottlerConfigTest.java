@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.throttle.interval;
+package com.github.castorm.kafka.connect.throttle;
 
 /*-
  * #%L
@@ -22,7 +22,6 @@ package com.github.castorm.kafka.connect.http.throttle.interval;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
@@ -38,6 +37,6 @@ class FixedIntervalThrottlerConfigTest {
 
     @Test
     void whenPollIntervalMillis_thenInitialized() {
-        assertThat(new FixedIntervalThrottlerConfig(ImmutableMap.of("http.throttle.interval.millis", "42")).getPollIntervalMillis()).isEqualTo(42L);
+        assertThat(new FixedIntervalThrottlerConfig(ImmutableMap.of("http.throttler.interval.millis", "42")).getPollIntervalMillis()).isEqualTo(42L);
     }
 }

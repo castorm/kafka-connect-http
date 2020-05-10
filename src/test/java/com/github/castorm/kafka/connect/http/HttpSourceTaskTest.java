@@ -55,7 +55,6 @@ import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.o
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.record;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.request;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.response;
-import static java.time.Instant.EPOCH;
 import static java.time.Instant.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -124,7 +123,7 @@ class HttpSourceTaskTest {
 
         task.start(emptyMap());
 
-        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap, EPOCH));
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap));
     }
 
     @Test
@@ -136,7 +135,7 @@ class HttpSourceTaskTest {
 
         task.start(emptyMap());
 
-        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetInitialMap, EPOCH));
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetInitialMap));
     }
 
     @Test
@@ -282,7 +281,7 @@ class HttpSourceTaskTest {
     interface Fixture {
         Map<String, Object> offsetMap = ImmutableMap.of("k", "v");
         Map<String, String> offsetInitialMap = ImmutableMap.of("k2", "v2");
-        Offset offset = Offset.of(offsetMap, EPOCH);
+        Offset offset = Offset.of(offsetMap);
         HttpRequest request = HttpRequest.builder().build();
         HttpResponse response = HttpResponse.builder().build();
         HttpResponseItem item = HttpResponseItem.builder().build();

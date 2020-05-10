@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.throttle;
+package com.github.castorm.kafka.connect.throttle;
 
 /*-
  * #%L
@@ -23,9 +23,7 @@ package com.github.castorm.kafka.connect.http.throttle;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler;
 import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler.Sleeper;
-import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -37,9 +35,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottlerTest.Fixture.intervalMillis;
-import static com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottlerTest.Fixture.lastPollMillis;
-import static com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottlerTest.Fixture.offset;
+import static com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerTest.Fixture.intervalMillis;
+import static com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerTest.Fixture.lastPollMillis;
+import static com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerTest.Fixture.offset;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;

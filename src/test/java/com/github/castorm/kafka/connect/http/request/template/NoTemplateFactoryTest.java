@@ -23,10 +23,8 @@ package com.github.castorm.kafka.connect.http.request.template;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory;
 import org.junit.jupiter.api.Test;
 
-import static java.time.Instant.EPOCH;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,6 +34,6 @@ class NoTemplateFactoryTest {
 
     @Test
     void givenTemplate_whenApply_thenAsIs() {
-        assertThat(factory.create("template").apply(Offset.of(emptyMap(), EPOCH))).isEqualTo("template");
+        assertThat(factory.create("template").apply(Offset.of(emptyMap()))).isEqualTo("template");
     }
 }

@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
-import static java.time.Instant.EPOCH;
 import static java.time.Instant.ofEpochMilli;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
@@ -84,7 +83,7 @@ public class HttpSourceTask extends SourceTask {
         throttler = config.getThrottler();
         requestFactory = config.getRequestFactory();
         Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
-        offset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset(), EPOCH);
+        offset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset());
         requestExecutor = config.getClient();
         responseParser = config.getResponseParser();
         recordMapper = config.getRecordMapper();

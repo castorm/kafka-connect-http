@@ -24,6 +24,8 @@ package com.github.castorm.kafka.connect.throttle;
 
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.throttle.spi.Throttler;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -31,21 +33,27 @@ import java.util.function.Supplier;
 
 import static java.lang.System.currentTimeMillis;
 
+@Slf4j
 public class FixedIntervalThrottler implements Throttler {
 
     private final Function<Map<String, ?>, FixedIntervalThrottlerConfig> configFactory;
 
     private final Sleeper sleeper;
 
+    @Getter
     private Long intervalMillis;
 
     private Long lastPollMillis;
 
     public FixedIntervalThrottler() {
-        this(FixedIntervalThrottlerConfig::new, Thread::sleep, System::currentTimeMillis);
+        this(FixedIntervalThrottlerConfig::new);
     }
 
-    public FixedIntervalThrottler(Function<Map<String, ?>, FixedIntervalThrottlerConfig> configFactory, Sleeper sleeper, Supplier<Long> lastPollMillisInitializer) {
+    FixedIntervalThrottler(Function<Map<String, ?>, FixedIntervalThrottlerConfig> configFactory) {
+        this(configFactory, Thread::sleep, System::currentTimeMillis);
+    }
+
+    FixedIntervalThrottler(Function<Map<String, ?>, FixedIntervalThrottlerConfig> configFactory, Sleeper sleeper, Supplier<Long> lastPollMillisInitializer) {
         this.configFactory = configFactory;
         this.sleeper = sleeper;
         this.lastPollMillis = lastPollMillisInitializer.get();
@@ -61,10 +69,11 @@ public class FixedIntervalThrottler implements Throttler {
     public void throttle(Offset offset) throws InterruptedException {
         long now = currentTimeMillis();
         long sinceLastPollMillis = now - lastPollMillis;
-        if (intervalMillis > sinceLastPollMillis) {
-            sleeper.sleep(intervalMillis - sinceLastPollMillis);
+        long sleepMillis = intervalMillis - sinceLastPollMillis;
+        if (sleepMillis > 0) {
+            sleeper.sleep(sleepMillis);
         }
-        lastPollMillis = now;
+        lastPollMillis = currentTimeMillis();
     }
 
     @FunctionalInterface
