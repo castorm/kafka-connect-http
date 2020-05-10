@@ -32,8 +32,11 @@ import com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
+import com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory;
+import com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottler;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.Test;
@@ -48,6 +51,16 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpSourceConnectorConfigTest {
+
+    @Test
+    void whenNoThrottler_thenDefault() {
+        assertThat(configWithout("http.throttler").getThrottler()).isInstanceOf(FixedIntervalThrottler.class);
+    }
+
+    @Test
+    void whenThrottler_thenInitialized() {
+        assertThat(config("http.throttler", FixedIntervalThrottler.class.getName()).getThrottler()).isInstanceOf(FixedIntervalThrottler.class);
+    }
 
     @Test
     void whenNoClient_thenDefault() {
@@ -77,6 +90,16 @@ class HttpSourceConnectorConfigTest {
     @Test
     void whenResponseParser_thenInitialized() {
         assertThat(config("http.response.parser", TestResponseParser.class.getName()).getResponseParser()).isInstanceOf(TestResponseParser.class);
+    }
+
+    @Test
+    void whenNoResponseFilterFactory_thenDefault() {
+        assertThat(configWithout("http.response.filter.factory").getResponseFilterFactory()).isInstanceOf(PassthroughFilterFactory.class);
+    }
+
+    @Test
+    void whenResponseFilterFactory_thenInitialized() {
+        assertThat(config("http.response.filter.factory", OffsetTimestampFilterFactory.class.getName()).getResponseFilterFactory()).isInstanceOf(OffsetTimestampFilterFactory.class);
     }
 
     @Test

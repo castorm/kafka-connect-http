@@ -22,8 +22,6 @@ package com.github.castorm.kafka.connect.common;
  * #L%
  */
 
-import lombok.experimental.UtilityClass;
-
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +35,6 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-@UtilityClass
 public class MapUtils {
 
     public static Map<String, List<String>> breakDownHeaders(String headers) {

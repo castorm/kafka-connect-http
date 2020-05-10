@@ -24,8 +24,6 @@ package com.github.castorm.kafka.connect.http;
 
 import com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
-import com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottler;
-import com.github.castorm.kafka.connect.http.throttle.spi.Throttler;
 import com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactory;
@@ -34,6 +32,8 @@ import com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottler;
+import com.github.castorm.kafka.connect.http.throttle.spi.Throttler;
 import lombok.Getter;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
@@ -49,7 +49,7 @@ import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 @Getter
 class HttpSourceConnectorConfig extends AbstractConfig {
 
-    private static final String POLL_INTERCEPTOR = "http.throttler";
+    private static final String THROTTLER = "http.throttler";
     private static final String CLIENT = "http.client";
     private static final String REQUEST_FACTORY = "http.request.factory";
     private static final String RESPONSE_PARSER = "http.response.parser";
@@ -67,7 +67,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
 
     HttpSourceConnectorConfig(Map<String, ?> originals) {
         super(config(), originals);
-        throttler = getConfiguredInstance(POLL_INTERCEPTOR, Throttler.class);
+        throttler = getConfiguredInstance(THROTTLER, Throttler.class);
         requestFactory = getConfiguredInstance(REQUEST_FACTORY, HttpRequestFactory.class);
         client = getConfiguredInstance(CLIENT, HttpClient.class);
         responseParser = getConfiguredInstance(RESPONSE_PARSER, HttpResponseParser.class);
@@ -78,7 +78,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(POLL_INTERCEPTOR, CLASS, FixedIntervalThrottler.class, HIGH, "Poll Interceptor Class")
+                .define(THROTTLER, CLASS, FixedIntervalThrottler.class, HIGH, "Poll Throttler Class")
                 .define(CLIENT, CLASS, OkHttpClient.class, HIGH, "Request Client Class")
                 .define(REQUEST_FACTORY, CLASS, OffsetTemplateHttpRequestFactory.class, HIGH, "Request Factory Class")
                 .define(RESPONSE_PARSER, CLASS, JacksonHttpResponseParser.class, HIGH, "Response Parser Class")

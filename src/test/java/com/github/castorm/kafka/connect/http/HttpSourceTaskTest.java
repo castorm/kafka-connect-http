@@ -66,6 +66,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class HttpSourceTaskTest {
@@ -95,13 +96,16 @@ class HttpSourceTaskTest {
 
     @BeforeEach
     void setUp() {
+        task = new HttpSourceTask(__ -> config);
+    }
+
+    private void givenTaskConfiguration() {
         given(config.getThrottler()).willReturn(throttler);
         given(config.getRequestFactory()).willReturn(requestFactory);
         given(config.getClient()).willReturn(client);
         given(config.getResponseParser()).willReturn(responseParser);
         given(config.getRecordMapper()).willReturn(recordMapper);
         given(config.getResponseFilterFactory()).willReturn(recordFilterFactory);
-        task = new HttpSourceTask(__ -> config);
     }
 
     private static SourceTaskContext getContext(Map<String, Object> offset) {
@@ -115,6 +119,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskInitializedWithRestoredOffset_whenStart_thenLastOffsetIsRestored() {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
 
         task.start(emptyMap());
@@ -125,6 +130,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskInitializedWithoutRestoredOffsetButWithInitialOffset_whenStart_thenLastOffsetIsInitial() {
 
+        givenTaskConfiguration();
         given(config.getInitialOffset()).willReturn(offsetInitialMap);
         task.initialize(getContext(emptyMap()));
 
@@ -136,6 +142,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskInitialized_whenStart_thenGetPollIntervalMillis() {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
 
         task.start(emptyMap());
@@ -146,6 +153,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskInitialized_whenStart_thenGetRequestFactory() {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
 
         task.start(emptyMap());
@@ -156,6 +164,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskInitialized_whenStart_thenGetClient() {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
 
         task.start(emptyMap());
@@ -166,6 +175,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskInitialized_whenStart_thenGetRecordMapper() {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
 
         task.start(emptyMap());
@@ -176,6 +186,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskInitialized_whenStart_thenGetResponseParser() {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
 
         task.start(emptyMap());
@@ -186,6 +197,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskStarted_whenCommitRecord_thenOffsetUpdated() {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
         task.start(emptyMap());
         reset(requestFactory);
@@ -198,6 +210,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskStarted_whenPoll_thenThrottled() throws InterruptedException, IOException {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
@@ -214,6 +227,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskStarted_whenPoll_thenResultsReturned() throws InterruptedException, IOException {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
@@ -228,6 +242,7 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskStarted_whenPoll_thenFilterFilters() throws InterruptedException, IOException {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
@@ -241,12 +256,27 @@ class HttpSourceTaskTest {
     @Test
     void givenTaskStartedAndExecuteFails_whenPoll_thenRetriableException() throws IOException {
 
+        givenTaskConfiguration();
         task.initialize(getContext(offsetMap));
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willThrow(new IOException());
 
         assertThat(catchThrowable(() -> task.poll())).isInstanceOf(RetriableException.class);
+    }
+
+    @Test
+    void whenGetVersion_thenNotEmpty() {
+
+        assertThat(task.version()).isNotEmpty();
+    }
+
+    @Test
+    void whenStop_thenNothingHappens() {
+
+        task.stop();
+
+        verifyNoInteractions(throttler, requestFactory, responseParser, recordFilterFactory, recordMapper);
     }
 
     interface Fixture {
