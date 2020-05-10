@@ -55,7 +55,7 @@ class DateTimeFormatterTimestampParserTest {
     @Test
     void givenFormatter_whenParse_thenDelegated() {
 
-        given(config.getItemTimestampFormatter()).willReturn(formatter);
+        given(config.getRecordTimestampFormatter()).willReturn(formatter);
         parser.configure(emptyMap());
 
         assertThat(parser.parse(date)).isEqualTo(OffsetDateTime.parse(date, formatter).toInstant());

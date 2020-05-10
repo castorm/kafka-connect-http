@@ -4,7 +4,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## master
 -   `PollInterceptor` refactored into `Throttler`
--   `FixedIntervalThrottler` is becomes default `Throttler` with an interval of 10s
+-   Implemented `FixedIntervalThrottler` with default interval of 10s
+-   Implemented `AdaptableIntervalThrottler` with up-to-date interval of 10s catch-up interval of 1s
 
 ## v0.4.0 (05/09/2020)
 -   Timestamp offset filtering

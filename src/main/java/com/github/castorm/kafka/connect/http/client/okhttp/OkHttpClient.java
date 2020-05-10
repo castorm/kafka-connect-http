@@ -26,6 +26,7 @@ import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -41,6 +42,7 @@ import java.util.Optional;
 import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static okhttp3.HttpUrl.parse;
+import static okhttp3.RequestBody.create;
 import static okhttp3.logging.HttpLoggingInterceptor.Level.BASIC;
 
 @Slf4j
@@ -53,15 +55,19 @@ public class OkHttpClient implements HttpClient {
 
         OkHttpClientConfig config = new OkHttpClientConfig(configs);
 
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(log::debug);
-        interceptor.setLevel(BASIC);
         client = new okhttp3.OkHttpClient.Builder()
                 .connectionPool(new ConnectionPool(config.getMaxIdleConnections(), config.getKeepAliveDuration(), MILLISECONDS))
                 .connectTimeout(config.getConnectionTimeoutMillis(), MILLISECONDS)
                 .readTimeout(config.getReadTimeoutMillis(), MILLISECONDS)
                 .retryOnConnectionFailure(true)
-                .addInterceptor(interceptor)
+                .addInterceptor(createLoggingInterceptor())
                 .build();
+    }
+
+    private static HttpLoggingInterceptor createLoggingInterceptor() {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(log::debug);
+        interceptor.setLevel(BASIC);
+        return interceptor;
     }
 
     @Override
@@ -69,9 +75,11 @@ public class OkHttpClient implements HttpClient {
 
         Request request = fromHttpRequest(httpRequest);
 
-        Response response = client.newCall(request).execute();
+        Call call = client.newCall(request);
 
-        return toHttpResponse(response);
+        try (Response response = call.execute()) {
+            return toHttpResponse(response);
+        }
     }
 
     private static Request fromHttpRequest(HttpRequest request) {
@@ -80,6 +88,12 @@ public class OkHttpClient implements HttpClient {
         addHeaders(builder, request);
         addMethodWithBody(builder, request);
         return builder.build();
+    }
+
+    private static HttpUrl mapUrl(String url, Map<String, List<String>> queryParams) {
+        HttpUrl.Builder urlBuilder = parse(url).newBuilder();
+        queryParams.forEach((k, list) -> list.forEach(v -> urlBuilder.addEncodedQueryParameter(k, v)));
+        return urlBuilder.build();
     }
 
     private static void addHeaders(Request.Builder builder, HttpRequest request) {
@@ -109,15 +123,9 @@ public class OkHttpClient implements HttpClient {
 
     private static Optional<RequestBody> mapBody(HttpRequest request) {
         if (request.getBody() != null) {
-            return Optional.of(RequestBody.create(request.getBody()));
+            return Optional.of(create(request.getBody()));
         }
         return empty();
-    }
-
-    private static HttpUrl mapUrl(String url, Map<String, List<String>> queryParams) {
-        HttpUrl.Builder urlBuilder = parse(url).newBuilder();
-        queryParams.forEach((k, list) -> list.forEach(v -> urlBuilder.addEncodedQueryParameter(k, v)));
-        return urlBuilder.build();
     }
 
     private static HttpResponse toHttpResponse(Response response) throws IOException {

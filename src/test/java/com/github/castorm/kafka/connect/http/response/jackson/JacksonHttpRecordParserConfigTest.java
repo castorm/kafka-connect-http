@@ -30,42 +30,42 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserConfigTest.Fixture.config;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserConfigTest.Fixture.configWithout;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserConfigTest.Fixture.offsetConfig;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserConfigTest.Fixture.config;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserConfigTest.Fixture.configWithout;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserConfigTest.Fixture.offsetConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-class JacksonItemParserConfigTest {
+class JacksonHttpRecordParserConfigTest {
 
     @Test
     void whenItemsPointerConfigured_thenInitialized() {
-        assertThat(config("http.response.items.pointer", "/test-pointer").getItemsPointer()).isEqualTo(compile("/test-pointer"));
+        assertThat(config("http.response.records.pointer", "/test-pointer").getRecordsPointer()).isEqualTo(compile("/test-pointer"));
     }
 
     @Test
     void whenMissingItemKeyPointerConfigured_thenInitialized() {
-        assertThat(configWithout("http.response.item.key.pointer").getKeyPointer()).isEmpty();
+        assertThat(configWithout("http.response.record.key.pointer").getKeyPointer()).isEmpty();
     }
 
     @Test
     void whenItemKeyPointerConfigured_thenInitialized() {
-        assertThat(config("http.response.item.key.pointer", "/test-pointer").getKeyPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
+        assertThat(config("http.response.record.key.pointer", "/test-pointer").getKeyPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
     }
 
     @Test
     void whenItemValuePointerConfigured_thenInitialized() {
-        assertThat(config("http.response.item.value.pointer", "/test-pointer").getValuePointer()).isEqualTo(compile("/test-pointer"));
+        assertThat(config("http.response.record.value.pointer", "/test-pointer").getValuePointer()).isEqualTo(compile("/test-pointer"));
     }
 
     @Test
     void whenMissingTimestampPointerConfigured_thenInitialized() {
-        assertThat(configWithout("http.response.item.timestamp.pointer").getTimestampPointer()).isEmpty();
+        assertThat(configWithout("http.response.record.timestamp.pointer").getTimestampPointer()).isEmpty();
     }
 
     @Test
     void whenItemTimestampPointerConfigured_thenInitialized() {
-        assertThat(config("http.response.item.timestamp.pointer", "/test-pointer").getTimestampPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
+        assertThat(config("http.response.record.timestamp.pointer", "/test-pointer").getTimestampPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
     }
 
     @Test
@@ -99,22 +99,22 @@ class JacksonItemParserConfigTest {
     }
 
     interface Fixture {
-        static JacksonItemParserConfig config(String key, String value) {
+        static JacksonHttpRecordParserConfig config(String key, String value) {
             Map<String, String> customMap = new HashMap<>();
             customMap.put(key, value);
-            return new JacksonItemParserConfig(customMap);
+            return new JacksonHttpRecordParserConfig(customMap);
         }
 
-        static JacksonItemParserConfig configWithout(String key) {
+        static JacksonHttpRecordParserConfig configWithout(String key) {
             Map<String, String> customMap = new HashMap<>();
             customMap.remove(key);
-            return new JacksonItemParserConfig(customMap);
+            return new JacksonHttpRecordParserConfig(customMap);
         }
 
-        static JacksonItemParserConfig offsetConfig(String values) {
+        static JacksonHttpRecordParserConfig offsetConfig(String values) {
             Map<String, String> customMap = new HashMap<>();
-            customMap.put("http.response.item.offset.pointer", values);
-            return new JacksonItemParserConfig(customMap);
+            customMap.put("http.response.record.offset.pointer", values);
+            return new JacksonHttpRecordParserConfig(customMap);
         }
     }
 }

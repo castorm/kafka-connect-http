@@ -22,16 +22,16 @@ package com.github.castorm.kafka.connect.http.response;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
+import com.github.castorm.kafka.connect.http.response.spi.HttpRecordFilterFactory;
 
 import java.util.function.Predicate;
 
-public class PassthroughFilterFactory implements HttpResponseFilterFactory {
+public class PassthroughFilterFactory implements HttpRecordFilterFactory {
 
     @Override
-    public Predicate<HttpResponseItem> create(Offset offset) {
+    public Predicate<HttpRecord> create(Offset offset) {
         return __ -> true;
     }
 }

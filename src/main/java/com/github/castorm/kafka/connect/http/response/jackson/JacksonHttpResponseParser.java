@@ -24,7 +24,7 @@ package com.github.castorm.kafka.connect.http.response.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
@@ -41,7 +41,7 @@ public class JacksonHttpResponseParser implements HttpResponseParser {
 
     private final Function<Map<String, ?>, JacksonHttpResponseParserConfig> configFactory;
 
-    private JacksonItemParser itemParser;
+    private JacksonHttpRecordParser recordParser;
 
     private TimestampParser timestampParser;
 
@@ -56,28 +56,28 @@ public class JacksonHttpResponseParser implements HttpResponseParser {
     @Override
     public void configure(Map<String, ?> configs) {
         JacksonHttpResponseParserConfig config = configFactory.apply(configs);
-        itemParser = config.getItemParser();
+        recordParser = config.getRecordParser();
         timestampParser = config.getTimestampParser();
     }
 
     @Override
-    public List<HttpResponseItem> parse(HttpResponse response) {
+    public List<HttpRecord> parse(HttpResponse response) {
 
-        return itemParser.getItems(response.getBody())
-                .map(this::mapToItem)
+        return recordParser.getRecords(response.getBody())
+                .map(this::mapToRecord)
                 .collect(toList());
     }
 
-    private HttpResponseItem mapToItem(JsonNode node) {
+    private HttpRecord mapToRecord(JsonNode node) {
 
-        Instant timestamp = itemParser.getTimestamp(node)
+        Instant timestamp = recordParser.getTimestamp(node)
                 .map(timestampParser::parse)
                 .orElseGet(Instant::now);
 
-        return HttpResponseItem.builder()
-                .key(itemParser.getKey(node).orElseGet(() -> randomUUID().toString()))
-                .value(itemParser.getValue(node))
-                .offset(Offset.of(itemParser.getOffsets(node), timestamp))
+        return HttpRecord.builder()
+                .key(recordParser.getKey(node).orElseGet(() -> randomUUID().toString()))
+                .value(recordParser.getValue(node))
+                .offset(Offset.of(recordParser.getOffsets(node), timestamp))
                 .build();
     }
 }

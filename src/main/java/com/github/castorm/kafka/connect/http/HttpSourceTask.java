@@ -28,7 +28,7 @@ import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
-import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
+import com.github.castorm.kafka.connect.http.response.spi.HttpRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.spi.Throttler;
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -62,7 +62,7 @@ public class HttpSourceTask extends SourceTask {
 
     private SourceRecordMapper recordMapper;
 
-    private HttpResponseFilterFactory responseFilterFactory;
+    private HttpRecordFilterFactory recordFilterFactory;
 
     @Getter
     private Offset offset;
@@ -86,8 +86,8 @@ public class HttpSourceTask extends SourceTask {
         offset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset());
         requestExecutor = config.getClient();
         responseParser = config.getResponseParser();
+        recordFilterFactory = config.getRecordFilterFactory();
         recordMapper = config.getRecordMapper();
-        responseFilterFactory = config.getResponseFilterFactory();
     }
 
     @Override
@@ -100,7 +100,7 @@ public class HttpSourceTask extends SourceTask {
         HttpResponse response = execute(request);
 
         return responseParser.parse(response).stream()
-                .filter(responseFilterFactory.create(offset))
+                .filter(recordFilterFactory.create(offset))
                 .map(recordMapper::map)
                 .collect(toList());
     }

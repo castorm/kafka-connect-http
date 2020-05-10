@@ -58,6 +58,6 @@ public class OkHttpClientConfig extends AbstractConfig {
                 .define(CONNECTION_TIMEOUT_MILLIS, LONG, 2000, HIGH, "Connection Timeout Millis")
                 .define(READ_TIMEOUT_MILLIS, LONG, 2000, HIGH, "Read Timeout Millis")
                 .define(CONNECTION_KEEP_ALIVE_DURATION_MILLIS, LONG, 300000, HIGH, "Keep Alive Duration Millis")
-                .define(CONNECTION_MAX_IDLE, INT, 5, HIGH, "Max Idle Connections");
+                .define(CONNECTION_MAX_IDLE, INT, 1, HIGH, "Max Idle Connections");
     }
 }

@@ -44,7 +44,7 @@ public class DateTimeFormatterTimestampParser implements TimestampParser {
 
     @Override
     public void configure(Map<String, ?> settings) {
-        timestampFormatter = configFactory.apply(settings).getItemTimestampFormatter();
+        timestampFormatter = configFactory.apply(settings).getRecordTimestampFormatter();
     }
 
     @Override

@@ -36,21 +36,21 @@ import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
 @Getter
 public class JacksonHttpResponseParserConfig extends AbstractConfig {
 
-    private static final String ITEM_ITEM_PARSER_CLASS = "http.response.item.parser";
-    private static final String ITEM_ITEM_TIMESTAMP_PARSER_CLASS = "http.response.item.timestamp.parser";
+    private static final String RECORD_PARSER_CLASS = "http.response.record.parser";
+    private static final String RECORD_TIMESTAMP_PARSER_CLASS = "http.response.record.timestamp.parser";
 
-    private final JacksonItemParser itemParser;
+    private final JacksonHttpRecordParser recordParser;
     private final TimestampParser timestampParser;
 
     JacksonHttpResponseParserConfig(Map<String, ?> originals) {
         super(config(), originals);
-        itemParser = getConfiguredInstance(ITEM_ITEM_PARSER_CLASS, JacksonItemParser.class);
-        timestampParser = getConfiguredInstance(ITEM_ITEM_TIMESTAMP_PARSER_CLASS, TimestampParser.class);
+        recordParser = getConfiguredInstance(RECORD_PARSER_CLASS, JacksonHttpRecordParser.class);
+        timestampParser = getConfiguredInstance(RECORD_TIMESTAMP_PARSER_CLASS, TimestampParser.class);
     }
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(ITEM_ITEM_PARSER_CLASS, CLASS, JacksonItemParser.class, LOW, "Item Timestamp parser class")
-                .define(ITEM_ITEM_TIMESTAMP_PARSER_CLASS, CLASS, DateTimeFormatterTimestampParser.class, LOW, "Item Timestamp parser class");
+                .define(RECORD_PARSER_CLASS, CLASS, JacksonHttpRecordParser.class, LOW, "Record parser class")
+                .define(RECORD_TIMESTAMP_PARSER_CLASS, CLASS, DateTimeFormatterTimestampParser.class, LOW, "Record Timestamp parser class");
     }
 }

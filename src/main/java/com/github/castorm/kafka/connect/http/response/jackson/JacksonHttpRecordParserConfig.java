@@ -41,23 +41,23 @@ import static org.apache.kafka.common.config.ConfigDef.Importance.MEDIUM;
 import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 
 @Getter
-public class JacksonItemParserConfig extends AbstractConfig {
+public class JacksonHttpRecordParserConfig extends AbstractConfig {
 
-    private static final String ITEMS_POINTER = "http.response.items.pointer";
-    private static final String ITEM_KEY_POINTER = "http.response.item.key.pointer";
-    private static final String ITEM_VALUE_POINTER = "http.response.item.value.pointer";
-    private static final String ITEM_TIMESTAMP_POINTER = "http.response.item.timestamp.pointer";
-    private static final String ITEM_OFFSET_VALUE_POINTER = "http.response.item.offset.pointer";
+    private static final String ITEMS_POINTER = "http.response.records.pointer";
+    private static final String ITEM_KEY_POINTER = "http.response.record.key.pointer";
+    private static final String ITEM_VALUE_POINTER = "http.response.record.value.pointer";
+    private static final String ITEM_TIMESTAMP_POINTER = "http.response.record.timestamp.pointer";
+    private static final String ITEM_OFFSET_VALUE_POINTER = "http.response.record.offset.pointer";
 
-    private final JsonPointer itemsPointer;
+    private final JsonPointer recordsPointer;
     private final Optional<JsonPointer> keyPointer;
     private final JsonPointer valuePointer;
     private final Optional<JsonPointer> timestampPointer;
     private final Map<String, JsonPointer> offsetPointers;
 
-    JacksonItemParserConfig(Map<String, ?> originals) {
+    JacksonHttpRecordParserConfig(Map<String, ?> originals) {
         super(config(), originals);
-        itemsPointer = compile(getString(ITEMS_POINTER));
+        recordsPointer = compile(getString(ITEMS_POINTER));
         keyPointer = ofNullable(getString(ITEM_KEY_POINTER)).map(JsonPointer::compile);
         valuePointer = compile(getString(ITEM_VALUE_POINTER));
         timestampPointer = ofNullable(getString(ITEM_TIMESTAMP_POINTER)).map(JsonPointer::compile);

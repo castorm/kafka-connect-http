@@ -36,7 +36,7 @@ import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 @Getter
 public class NattyTimestampParserConfig extends AbstractConfig {
 
-    private static final String ITEM_TIMESTAMP_ZONE = "http.response.item.timestamp.parser.zone";
+    private static final String ITEM_TIMESTAMP_ZONE = "http.response.record.timestamp.parser.zone";
 
     private final Optional<ZoneId> timestampZoneId;
 

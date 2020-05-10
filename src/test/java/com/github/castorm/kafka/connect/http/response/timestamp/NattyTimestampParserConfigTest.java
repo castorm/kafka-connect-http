@@ -37,7 +37,7 @@ class NattyTimestampParserConfigTest {
 
     @Test
     void whenItemsParserClassConfigured_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.response.item.timestamp.parser.zone", zoneId)).getTimestampZoneId()).contains(ZoneId.of(zoneId));
+        assertThat(config(ImmutableMap.of("http.response.record.timestamp.parser.zone", zoneId)).getTimestampZoneId()).contains(ZoneId.of(zoneId));
     }
 
     @Test

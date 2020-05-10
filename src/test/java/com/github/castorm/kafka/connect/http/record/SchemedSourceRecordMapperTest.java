@@ -22,7 +22,7 @@ package com.github.castorm.kafka.connect.http.record;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.data.Struct;
@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
-import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.item;
+import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.record;
 import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.now;
 import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.value;
@@ -53,48 +53,48 @@ class SchemedSourceRecordMapperTest {
 
         mapper.configure(ImmutableMap.of("kafka.topic", "topic"));
 
-        assertThat(mapper.map(item).topic()).isEqualTo("topic");
+        assertThat(mapper.map(record).topic()).isEqualTo("topic");
     }
 
     @Test
     void givenKey_whenMap_thenIdMapped() {
-        assertThat(((Struct) mapper.map(item.withKey(value)).key()).get("key")).isEqualTo(value);
+        assertThat(((Struct) mapper.map(record.withKey(value)).key()).get("key")).isEqualTo(value);
     }
 
     @Test
     void givenValue_whenMap_thenBodyMapped() {
-        assertThat(((Struct) mapper.map(item.withValue(value)).value()).get("body")).isEqualTo(value);
+        assertThat(((Struct) mapper.map(record.withValue(value)).value()).get("body")).isEqualTo(value);
     }
 
     @Test
     void givenOffset_whenMap_thenOffsetMapped() {
-        assertThat(mapper.map(item.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
+        assertThat(mapper.map(record.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
     }
 
     @Test
     void givenTimestamp_whenMap_thenTimestampMapped() {
-        assertThat(mapper.map(item.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
+        assertThat(mapper.map(record.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
     }
 
     @Test
     void whenMap_thenNoPartitionMapped() {
-        assertThat(mapper.map(item).kafkaPartition()).isNull();
+        assertThat(mapper.map(record).kafkaPartition()).isNull();
     }
 
     @Test
     void whenMap_thenKeySchemaMapped() {
-        assertThat(mapper.map(item).keySchema()).isNotNull();
+        assertThat(mapper.map(record).keySchema()).isNotNull();
     }
 
     @Test
     void whenMap_thenValueSchemaMapped() {
-        assertThat(mapper.map(item).valueSchema()).isNotNull();
+        assertThat(mapper.map(record).valueSchema()).isNotNull();
     }
 
     interface Fixture {
         Instant now = now();
         String value = "value";
-        HttpResponseItem item = HttpResponseItem.builder().value(value).offset(Offset.of(emptyMap(), now())).build();
+        HttpRecord record = HttpRecord.builder().value(value).offset(Offset.of(emptyMap(), now())).build();
         Offset offset = Offset.of(ImmutableMap.of("k", "v"), now);
     }
 }

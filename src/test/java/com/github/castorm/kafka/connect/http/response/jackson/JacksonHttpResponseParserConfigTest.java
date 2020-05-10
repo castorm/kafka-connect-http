@@ -35,13 +35,13 @@ class JacksonHttpResponseParserConfigTest {
 
     @Test
     void whenItemsParserClassConfigured_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.response.item.parser", "com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParser")).getItemParser())
-                .isInstanceOf(JacksonItemParser.class);
+        assertThat(config(ImmutableMap.of("http.response.record.parser", "com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParser")).getRecordParser())
+                .isInstanceOf(JacksonHttpRecordParser.class);
     }
 
     @Test
     void whenMissingItemParserClassConfigured_thenInitialized() {
-        assertThat(config(emptyMap()).getItemParser()).isInstanceOf(JacksonItemParser.class);
+        assertThat(config(emptyMap()).getRecordParser()).isInstanceOf(JacksonHttpRecordParser.class);
     }
 
     interface Fixture {

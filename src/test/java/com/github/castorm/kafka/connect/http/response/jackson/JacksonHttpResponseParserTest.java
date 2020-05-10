@@ -23,8 +23,8 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  */
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
 import com.google.common.collect.ImmutableMap;
@@ -58,18 +58,18 @@ class JacksonHttpResponseParserTest {
     JacksonHttpResponseParserConfig config;
 
     @Mock
-    JacksonItemParser itemParser;
+    JacksonHttpRecordParser recordParser;
 
     @Mock
     TimestampParser timestampParser;
 
     @Mock
-    JsonNode item;
+    JsonNode record;
 
     @BeforeEach
     void setUp() {
         parser = new JacksonHttpResponseParser(__ -> config);
-        given(config.getItemParser()).willReturn(itemParser);
+        given(config.getRecordParser()).willReturn(recordParser);
         given(config.getTimestampParser()).willReturn(timestampParser);
         parser.configure(emptyMap());
     }
@@ -77,7 +77,7 @@ class JacksonHttpResponseParserTest {
     @Test
     void givenNoItems_thenEmpty() {
 
-        givenItems(empty());
+        givenRecords(empty());
 
         assertThat(parser.parse(response)).isEmpty();
     }
@@ -85,60 +85,60 @@ class JacksonHttpResponseParserTest {
     @Test
     void givenOneItem_thenKeyMapped() {
 
-        givenItems(Stream.of(item));
-        given(itemParser.getKey(item)).willReturn(Optional.of("key"));
+        givenRecords(Stream.of(record));
+        given(recordParser.getKey(record)).willReturn(Optional.of("key"));
 
-        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getKey).isEqualTo("key");
+        assertThat(parser.parse(response)).first().extracting(HttpRecord::getKey).isEqualTo("key");
     }
 
     @Test
     void givenOneItemWithNoNoKey_thenKeyDefault() {
 
-        givenItems(Stream.of(item));
-        given(itemParser.getKey(item)).willReturn(Optional.empty());
+        givenRecords(Stream.of(record));
+        given(recordParser.getKey(record)).willReturn(Optional.empty());
 
-        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getKey).isNotNull();
+        assertThat(parser.parse(response)).first().extracting(HttpRecord::getKey).isNotNull();
     }
 
     @Test
     void givenOneItem_thenValueMapped() {
 
-        givenItems(Stream.of(item));
-        given(itemParser.getValue(item)).willReturn("value");
+        givenRecords(Stream.of(record));
+        given(recordParser.getValue(record)).willReturn("value");
 
-        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getValue).isEqualTo("value");
+        assertThat(parser.parse(response)).first().extracting(HttpRecord::getValue).isEqualTo("value");
     }
 
     @Test
     void givenOneItem_thenTimestampMapped() {
 
-        givenItems(Stream.of(item));
-        given(itemParser.getTimestamp(item)).willReturn(Optional.of(timestampIso));
+        givenRecords(Stream.of(record));
+        given(recordParser.getTimestamp(record)).willReturn(Optional.of(timestampIso));
         given(timestampParser.parse(timestampIso)).willReturn(timestampParsed);
 
-        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getOffset).extracting(Offset::getTimestamp).isEqualTo(timestampParsed);
+        assertThat(parser.parse(response)).first().extracting(HttpRecord::getOffset).extracting(Offset::getTimestamp).isEqualTo(timestampParsed);
     }
 
     @Test
     void givenOneItemWithNoTimestamp_thenDefault() {
 
-        givenItems(Stream.of(item));
-        given(itemParser.getTimestamp(item)).willReturn(Optional.empty());
+        givenRecords(Stream.of(record));
+        given(recordParser.getTimestamp(record)).willReturn(Optional.empty());
 
-        assertThat(parser.parse(response)).first().extracting(HttpResponseItem::getOffset).extracting(Offset::getTimestamp).isNotNull();
+        assertThat(parser.parse(response)).first().extracting(HttpRecord::getOffset).extracting(Offset::getTimestamp).isNotNull();
     }
 
     @Test
     void givenOneItem_thenOffsetMapped() {
 
-        givenItems(Stream.of(item));
-        given(itemParser.getOffsets(item)).willReturn(ImmutableMap.of("offset-key", "offset-value"));
+        givenRecords(Stream.of(record));
+        given(recordParser.getOffsets(record)).willReturn(ImmutableMap.of("offset-key", "offset-value"));
 
         assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("offset-key")).isEqualTo("offset-value");
     }
 
-    private void givenItems(Stream<JsonNode> items) {
-        given(itemParser.getItems(eq(bytes))).willReturn(items);
+    private void givenRecords(Stream<JsonNode> records) {
+        given(recordParser.getRecords(eq(bytes))).willReturn(records);
     }
 
     interface Fixture {

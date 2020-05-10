@@ -42,43 +42,43 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 
 @RequiredArgsConstructor
-public class JacksonItemParser implements Configurable {
+public class JacksonHttpRecordParser implements Configurable {
 
     private static final JsonPointer JSON_ROOT = compile("/");
 
-    private final Function<Map<String, ?>, JacksonItemParserConfig> configFactory;
+    private final Function<Map<String, ?>, JacksonHttpRecordParserConfig> configFactory;
 
     private final Supplier<ObjectMapper> objectMapperFactory;
 
     private ObjectMapper objectMapper;
-    private JsonPointer itemsPointer;
+    private JsonPointer recordsPointer;
     private Optional<JsonPointer> keyPointer;
     private JsonPointer valuePointer;
     private Map<String, JsonPointer> offsetPointers;
     private Optional<JsonPointer> timestampPointer;
 
-    public JacksonItemParser() {
-        this(JacksonItemParserConfig::new, ObjectMapper::new);
+    public JacksonHttpRecordParser() {
+        this(JacksonHttpRecordParserConfig::new, ObjectMapper::new);
     }
 
     @Override
     public void configure(Map<String, ?> settings) {
-        JacksonItemParserConfig config = configFactory.apply(settings);
+        JacksonHttpRecordParserConfig config = configFactory.apply(settings);
         objectMapper = objectMapperFactory.get();
-        itemsPointer = config.getItemsPointer();
+        recordsPointer = config.getRecordsPointer();
         keyPointer = config.getKeyPointer();
         valuePointer = config.getValuePointer();
         offsetPointers = config.getOffsetPointers();
         timestampPointer = config.getTimestampPointer();
     }
 
-    Stream<JsonNode> getItems(byte[] body) {
+    Stream<JsonNode> getRecords(byte[] body) {
 
         JsonNode deserializedBody = deserialize(body);
 
-        JsonNode items = getRequiredAt(deserializedBody, itemsPointer);
+        JsonNode records = getRequiredAt(deserializedBody, recordsPointer);
 
-        return items.isArray() ? stream(items.spliterator(), false) : Stream.of(items);
+        return records.isArray() ? stream(records.spliterator(), false) : Stream.of(records);
     }
 
     Optional<String> getKey(JsonNode node) {
@@ -102,8 +102,8 @@ public class JacksonItemParser implements Configurable {
         return offsetPointers.entrySet().stream().collect(toMap(Entry::getKey, entry -> getRequiredAt(node, entry.getValue()).asText()));
     }
 
-    private static JsonNode getRequiredAt(JsonNode body, JsonPointer itemsPointer) {
-        return JSON_ROOT.equals(itemsPointer) ? body : body.requiredAt(itemsPointer);
+    private static JsonNode getRequiredAt(JsonNode body, JsonPointer recordsPointer) {
+        return JSON_ROOT.equals(recordsPointer) ? body : body.requiredAt(recordsPointer);
     }
 
     @SneakyThrows(IOException.class)

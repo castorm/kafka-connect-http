@@ -40,19 +40,19 @@ class DateTimeFormatterTimestampParserConfigTest {
 
     @Test
     void whenItemTimestampParserPatternConfigured_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.response.item.timestamp.parser.pattern", "yyyy-MM-dd")).getItemTimestampFormatter().parse(date).toString())
+        assertThat(config(ImmutableMap.of("http.response.record.timestamp.parser.pattern", "yyyy-MM-dd")).getRecordTimestampFormatter().parse(date).toString())
                 .isEqualTo(ofPattern("yyyy-MM-dd").withZone(ZoneId.of("UTC")).parse(date).toString());
     }
 
     @Test
     void whenItemTimestampParserZoneConfigured_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.response.item.timestamp.parser.zone", "America/New_York")).getItemTimestampFormatter().parse(isoDate).toString())
+        assertThat(config(ImmutableMap.of("http.response.record.timestamp.parser.zone", "America/New_York")).getRecordTimestampFormatter().parse(isoDate).toString())
                 .isEqualTo(ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX").withZone(ZoneId.of("America/New_York")).parse(isoDate).toString());
     }
 
     @Test
     void whenMissingItemTimestampParserClassConfigured_thenInitialized() {
-        assertThat(config(emptyMap()).getItemTimestampFormatter()).isInstanceOf(DateTimeFormatter.class);
+        assertThat(config(emptyMap()).getRecordTimestampFormatter()).isInstanceOf(DateTimeFormatter.class);
     }
 
     interface Fixture {

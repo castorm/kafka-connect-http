@@ -23,7 +23,7 @@ package com.github.castorm.kafka.connect.http.response.spi;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import org.apache.kafka.common.Configurable;
 
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.Map;
 
 public interface HttpResponseParser extends Configurable {
 
-    List<HttpResponseItem> parse(HttpResponse response);
+    List<HttpRecord> parse(HttpResponse response);
 
     default void configure(Map<String, ?> map) {
         // Do nothing

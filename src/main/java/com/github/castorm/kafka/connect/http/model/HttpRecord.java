@@ -29,7 +29,7 @@ import lombok.With;
 @With
 @Value
 @Builder
-public class HttpResponseItem {
+public class HttpRecord {
 
     String key;
 

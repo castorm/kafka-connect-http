@@ -22,16 +22,16 @@ package com.github.castorm.kafka.connect.http.response.spi;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import org.apache.kafka.common.Configurable;
 
 import java.util.Map;
 import java.util.function.Predicate;
 
-public interface HttpResponseFilterFactory extends Configurable {
+public interface HttpRecordFilterFactory extends Configurable {
 
-    Predicate<HttpResponseItem> create(Offset offset);
+    Predicate<HttpRecord> create(Offset offset);
 
     default void configure(Map<String, ?> map) {
         // Do nothing

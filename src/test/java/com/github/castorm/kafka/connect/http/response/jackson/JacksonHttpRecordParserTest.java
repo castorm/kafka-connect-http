@@ -35,67 +35,67 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserTest.Fixture.deserialize;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserTest.Fixture.item1;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserTest.Fixture.item2;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserTest.Fixture.itemArray;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserTest.Fixture.itemNested;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserTest.Fixture.mapper;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserTest.Fixture.deserialize;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserTest.Fixture.item1;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserTest.Fixture.item2;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserTest.Fixture.itemArray;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserTest.Fixture.itemNested;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserTest.Fixture.mapper;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class JacksonItemParserTest {
+class JacksonHttpRecordParserTest {
 
-    JacksonItemParser parser = new JacksonItemParser();
+    JacksonHttpRecordParser parser = new JacksonHttpRecordParser();
 
     @Mock
-    JacksonItemParserConfig config;
+    JacksonHttpRecordParserConfig config;
 
     @BeforeEach
     void setUp() {
-        parser = new JacksonItemParser(__ -> config, () -> mapper);
+        parser = new JacksonHttpRecordParser(__ -> config, () -> mapper);
     }
 
     @Test
     void givenPointer_whenGetItemsRoot_thenRoot() {
 
-        given(config.getItemsPointer()).willReturn(compile("/"));
+        given(config.getRecordsPointer()).willReturn(compile("/"));
         parser.configure(emptyMap());
 
-        assertThat(parser.getItems("{}".getBytes()))
+        assertThat(parser.getRecords("{}".getBytes()))
                 .containsExactly(deserialize("{}"));
     }
 
     @Test
     void givenPointer_whenGetItemsArray_thenAllReturned() {
 
-        given(config.getItemsPointer()).willReturn(compile("/items"));
+        given(config.getRecordsPointer()).willReturn(compile("/items"));
         parser.configure(emptyMap());
 
-        assertThat(parser.getItems(itemArray.getBytes()))
+        assertThat(parser.getRecords(itemArray.getBytes()))
                 .containsExactly(deserialize(item1), deserialize(item2));
     }
 
     @Test
     void givenPointer_whenGetItemsNested_thenSingleReturned() {
 
-        given(config.getItemsPointer()).willReturn(compile("/items"));
+        given(config.getRecordsPointer()).willReturn(compile("/items"));
         parser.configure(emptyMap());
 
-        assertThat(parser.getItems(itemNested.getBytes()))
+        assertThat(parser.getRecords(itemNested.getBytes()))
                 .containsExactly(deserialize(item1));
     }
 
     @Test
     void givenPointer_whenGetMissingItemsProperty_thenException() {
 
-        given(config.getItemsPointer()).willReturn(compile("/missing"));
+        given(config.getRecordsPointer()).willReturn(compile("/missing"));
         parser.configure(emptyMap());
 
-        assertThat(catchThrowable(() -> parser.getItems(itemArray.getBytes())))
+        assertThat(catchThrowable(() -> parser.getRecords(itemArray.getBytes())))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

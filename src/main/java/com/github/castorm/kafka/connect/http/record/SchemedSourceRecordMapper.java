@@ -22,7 +22,7 @@ package com.github.castorm.kafka.connect.http.record;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import org.apache.kafka.connect.data.Schema;
@@ -62,11 +62,11 @@ public class SchemedSourceRecordMapper implements SourceRecordMapper {
     }
 
     @Override
-    public SourceRecord map(HttpResponseItem item) {
+    public SourceRecord map(HttpRecord record) {
 
-        Struct key = keyStruct(item.getKey());
-        Struct value = valueStruct(item.getValue());
-        Offset offset = item.getOffset();
+        Struct key = keyStruct(record.getKey());
+        Struct value = valueStruct(record.getValue());
+        Offset offset = record.getOffset();
 
         return new SourceRecord(
                 sourcePartition,

@@ -22,7 +22,7 @@ package com.github.castorm.kafka.connect.http.record.spi;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import org.apache.kafka.common.Configurable;
 import org.apache.kafka.connect.source.SourceRecord;
 
@@ -30,7 +30,7 @@ import java.util.Map;
 
 public interface SourceRecordMapper extends Configurable {
 
-    SourceRecord map(HttpResponseItem item);
+    SourceRecord map(HttpRecord HttpRecordFilterFactory);
 
     default void configure(Map<String, ?> map) {
         // Do nothing

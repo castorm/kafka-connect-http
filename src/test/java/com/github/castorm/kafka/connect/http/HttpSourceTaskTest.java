@@ -23,13 +23,13 @@ package com.github.castorm.kafka.connect.http;
  */
 
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
-import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
+import com.github.castorm.kafka.connect.http.response.spi.HttpRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.spi.Throttler;
 import com.google.common.collect.ImmutableMap;
@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.item;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.now;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offsetInitialMap;
@@ -88,7 +87,7 @@ class HttpSourceTaskTest {
     HttpResponseParser responseParser;
 
     @Mock
-    HttpResponseFilterFactory recordFilterFactory;
+    HttpRecordFilterFactory recordFilterFactory;
 
     @Mock
     SourceRecordMapper recordMapper;
@@ -104,7 +103,7 @@ class HttpSourceTaskTest {
         given(config.getClient()).willReturn(client);
         given(config.getResponseParser()).willReturn(responseParser);
         given(config.getRecordMapper()).willReturn(recordMapper);
-        given(config.getResponseFilterFactory()).willReturn(recordFilterFactory);
+        given(config.getRecordFilterFactory()).willReturn(recordFilterFactory);
     }
 
     private static SourceTaskContext getContext(Map<String, Object> offset) {
@@ -214,9 +213,9 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(item));
+        given(responseParser.parse(response)).willReturn(asList(record));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
-        given(recordMapper.map(item)).willReturn(record(offsetMap, now));
+        given(recordMapper.map(record)).willReturn(record(offsetMap, now));
 
         task.poll();
 
@@ -231,9 +230,9 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(item));
+        given(responseParser.parse(response)).willReturn(asList(record));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
-        given(recordMapper.map(item)).willReturn(record(offsetMap, now));
+        given(recordMapper.map(record)).willReturn(record(offsetMap, now));
 
         assertThat(task.poll()).containsExactly(record(offsetMap, now));
     }
@@ -246,7 +245,7 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(item));
+        given(responseParser.parse(response)).willReturn(asList(record));
         given(recordFilterFactory.create(offset)).willReturn(__ -> false);
 
         assertThat(task.poll()).isEmpty();
@@ -284,7 +283,7 @@ class HttpSourceTaskTest {
         Offset offset = Offset.of(offsetMap);
         HttpRequest request = HttpRequest.builder().build();
         HttpResponse response = HttpResponse.builder().build();
-        HttpResponseItem item = HttpResponseItem.builder().build();
+        HttpRecord record = HttpRecord.builder().build();
         Instant now = now();
 
         static SourceRecord record(Map<String, Object> offset, Instant timestamp) {

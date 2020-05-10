@@ -22,7 +22,7 @@ package com.github.castorm.kafka.connect.http.response;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
-import static com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactoryTest.Fixture.item;
+import static com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactoryTest.Fixture.record;
 import static com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactoryTest.Fixture.now;
 import static edu.emory.mathcs.backport.java.util.Collections.emptyMap;
 import static java.time.Instant.now;
@@ -44,18 +44,18 @@ class OffsetTimestampFilterFactoryTest {
 
     @Test
     void givenOffset_whenTestEarlier_thenFalse() {
-        assertThat(factory.create(Offset.of(emptyMap(), now)).test(item(now.minus(1, MINUTES)))).isFalse();
+        assertThat(factory.create(Offset.of(emptyMap(), now)).test(record(now.minus(1, MINUTES)))).isFalse();
     }
 
     @Test
     void givenOffset_whenTestLater_thenTrue() {
-        assertThat(factory.create(Offset.of(emptyMap(), now)).test(item(now.plus(1, MINUTES)))).isTrue();
+        assertThat(factory.create(Offset.of(emptyMap(), now)).test(record(now.plus(1, MINUTES)))).isTrue();
     }
 
     interface Fixture {
         Instant now = now();
-        static HttpResponseItem item(Instant timestamp) {
-            return HttpResponseItem.builder().offset(Offset.of(emptyMap(), timestamp)).build();
+        static HttpRecord record(Instant timestamp) {
+            return HttpRecord.builder().offset(Offset.of(emptyMap(), timestamp)).build();
         }
     }
 }

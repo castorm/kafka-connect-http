@@ -30,7 +30,7 @@ import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
-import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
+import com.github.castorm.kafka.connect.http.response.spi.HttpRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler;
 import com.github.castorm.kafka.connect.throttle.spi.Throttler;
@@ -53,7 +53,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private static final String CLIENT = "http.client";
     private static final String REQUEST_FACTORY = "http.request.factory";
     private static final String RESPONSE_PARSER = "http.response.parser";
-    private static final String RESPONSE_FILTER_FACTORY = "http.response.filter.factory";
+    private static final String RECORD_FILTER_FACTORY = "http.record.filter.factory";
     private static final String RECORD_MAPPER = "http.record.mapper";
     private static final String OFFSET_INITIAL = "http.offset.initial";
 
@@ -61,7 +61,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private final HttpRequestFactory requestFactory;
     private final HttpClient client;
     private final HttpResponseParser responseParser;
-    private final HttpResponseFilterFactory responseFilterFactory;
+    private final HttpRecordFilterFactory recordFilterFactory;
     private final SourceRecordMapper recordMapper;
     private final Map<String, String> initialOffset;
 
@@ -71,7 +71,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
         requestFactory = getConfiguredInstance(REQUEST_FACTORY, HttpRequestFactory.class);
         client = getConfiguredInstance(CLIENT, HttpClient.class);
         responseParser = getConfiguredInstance(RESPONSE_PARSER, HttpResponseParser.class);
-        responseFilterFactory = getConfiguredInstance(RESPONSE_FILTER_FACTORY, HttpResponseFilterFactory.class);
+        recordFilterFactory = getConfiguredInstance(RECORD_FILTER_FACTORY, HttpRecordFilterFactory.class);
         recordMapper = getConfiguredInstance(RECORD_MAPPER, SourceRecordMapper.class);
         initialOffset = breakDownMap(getString(OFFSET_INITIAL));
     }
@@ -82,7 +82,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
                 .define(CLIENT, CLASS, OkHttpClient.class, HIGH, "Request Client Class")
                 .define(REQUEST_FACTORY, CLASS, TemplateHttpRequestFactory.class, HIGH, "Request Factory Class")
                 .define(RESPONSE_PARSER, CLASS, JacksonHttpResponseParser.class, HIGH, "Response Parser Class")
-                .define(RESPONSE_FILTER_FACTORY, CLASS, PassthroughFilterFactory.class, LOW, "Record Filter Factory Class")
+                .define(RECORD_FILTER_FACTORY, CLASS, PassthroughFilterFactory.class, LOW, "Record Filter Factory Class")
                 .define(RECORD_MAPPER, CLASS, SchemedSourceRecordMapper.class, HIGH, "Record Mapper Class")
                 .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset");
     }

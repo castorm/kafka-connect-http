@@ -35,7 +35,7 @@
     <logger name="com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParserConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParserConfig" level="WARN"/>

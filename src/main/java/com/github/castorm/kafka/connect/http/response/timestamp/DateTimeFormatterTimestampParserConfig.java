@@ -36,14 +36,14 @@ import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 @Getter
 public class DateTimeFormatterTimestampParserConfig extends AbstractConfig {
 
-    private static final String ITEM_TIMESTAMP_PATTERN = "http.response.item.timestamp.parser.pattern";
-    private static final String ITEM_TIMESTAMP_ZONE = "http.response.item.timestamp.parser.zone";
+    private static final String ITEM_TIMESTAMP_PATTERN = "http.response.record.timestamp.parser.pattern";
+    private static final String ITEM_TIMESTAMP_ZONE = "http.response.record.timestamp.parser.zone";
 
-    private final DateTimeFormatter itemTimestampFormatter;
+    private final DateTimeFormatter recordTimestampFormatter;
 
     DateTimeFormatterTimestampParserConfig(Map<String, ?> originals) {
         super(config(), originals);
-        itemTimestampFormatter = DateTimeFormatter.ofPattern(getString(ITEM_TIMESTAMP_PATTERN))
+        recordTimestampFormatter = DateTimeFormatter.ofPattern(getString(ITEM_TIMESTAMP_PATTERN))
                 .withZone(ZoneId.of(getString(ITEM_TIMESTAMP_ZONE)));
     }
 

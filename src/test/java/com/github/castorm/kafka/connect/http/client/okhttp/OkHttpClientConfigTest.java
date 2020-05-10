@@ -64,7 +64,7 @@ class OkHttpClientConfigTest {
 
     @Test
     void whenMaxIdleConnections_thenDefault() {
-        assertThat(config(emptyMap()).getMaxIdleConnections()).isEqualTo(5);
+        assertThat(config(emptyMap()).getMaxIdleConnections()).isEqualTo(1);
     }
 
     @Test

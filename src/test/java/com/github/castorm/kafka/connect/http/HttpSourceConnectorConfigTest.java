@@ -26,7 +26,7 @@ import com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
-import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
@@ -95,12 +95,12 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenNoResponseFilterFactory_thenDefault() {
-        assertThat(configWithout("http.response.filter.factory").getResponseFilterFactory()).isInstanceOf(PassthroughFilterFactory.class);
+        assertThat(configWithout("http.record.filter.factory").getRecordFilterFactory()).isInstanceOf(PassthroughFilterFactory.class);
     }
 
     @Test
     void whenResponseFilterFactory_thenInitialized() {
-        assertThat(config("http.response.filter.factory", OffsetTimestampFilterFactory.class.getName()).getResponseFilterFactory()).isInstanceOf(OffsetTimestampFilterFactory.class);
+        assertThat(config("http.record.filter.factory", OffsetTimestampFilterFactory.class.getName()).getRecordFilterFactory()).isInstanceOf(OffsetTimestampFilterFactory.class);
     }
 
     @Test
@@ -132,11 +132,11 @@ class HttpSourceConnectorConfigTest {
     }
 
     public static class TestResponseParser implements HttpResponseParser {
-        public List<HttpResponseItem> parse(HttpResponse response) { return null; }
+        public List<HttpRecord> parse(HttpResponse response) { return null; }
     }
 
     public static class TestRecordMapper implements SourceRecordMapper {
-        public SourceRecord map(HttpResponseItem item) { return null; }
+        public SourceRecord map(HttpRecord record) { return null; }
     }
 
     interface Fixture {
@@ -144,7 +144,7 @@ class HttpSourceConnectorConfigTest {
             return new HashMap<String, String>() {{
                 put("kafka.topic", "topic");
                 put("http.request.url", "foo");
-                put("http.response.json.item.offset.value.pointer", "/baz");
+                put("http.response.json.record.offset.value.pointer", "/baz");
             }};
         }
 
