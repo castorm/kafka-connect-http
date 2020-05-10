@@ -21,3 +21,4 @@ buildNumber.properties
 *.iws
 HttpSourceTaskHarnessTest.java
 .DS_Store
+.java-version
