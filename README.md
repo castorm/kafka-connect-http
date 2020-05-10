@@ -107,12 +107,12 @@ Responsible for executing the `HttpRequest`, obtaining a `HttpResponse` as a res
 
 Uses a pooled [OkHttp](https://square.github.io/okhttp/) client. 
 
-| Property                                | Req | Default | Description                       |
-|:----------------------------------------|:---:|:-------:|:----------------------------------|
-| `http.client.connection.timeout.millis` | -   | 2000    | Connection timeout                |
-| `http.client.read.timeout.millis`       | -   | 2000    | Read timeout                      |
-| `http.client.connection.ttl.millis`     | -   | 300000  | Connection time to live           |
-| `http.client.max-idle`                  | -   | 5       | Max. idle connections in the pool |
+| Property                                | Default | Description                       |
+|:----------------------------------------|:-------:|:----------------------------------|
+| `http.client.connection.timeout.millis` | 2000    | Connection timeout                |
+| `http.client.read.timeout.millis`       | 2000    | Read timeout                      |
+| `http.client.connection.ttl.millis`     | 300000  | Connection time to live           |
+| `http.client.max-idle`                  | 5       | Max. idle connections in the pool |
 
 <a name="response"/>
 
@@ -124,33 +124,33 @@ Responsible for parsing the resulting `HttpResponse` into a list of individual i
 
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the relevant aspects of the response. 
 
-| Property                               | Req | Default                            | Description                                                                                                                                                                                                                                  |
-|:---------------------------------------|:---:|:----------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `http.response.items.pointer`          | -   | /                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items                                                                                                                                              |
-| `http.response.item.key.pointer`       | -   | -                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key                                                                                                                   |
-| `http.response.item.value.pointer`     | -   | /                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body                                                                                                                                    |
-| `http.response.item.timestamp.pointer` | -   | -                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual item to be used as kafka record timestamp                                                                                                              |
-| `http.response.item.timestamp.parser`  | -   | `DateTimeFormatterTimestampParser` | Converts the timestamp property into a `java.time.Instant`                                                                                                                                                                                   |
-| `http.response.item.offset.pointer`    | -   | -                                  | Comma separated list of key=value pairs where the key is the name of the item in the offset and the value is [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value of the individual item being used as offset for future requests |
+| Property                               | Default                            | Description                                                                                                                                                                                                                                  |
+|:---------------------------------------|:----------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `http.response.items.pointer`          | /                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property containing an array of items                                                                                                                                              |
+| `http.response.item.key.pointer`       | -                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual item to be used as kafka record key                                                                                                                   |
+| `http.response.item.value.pointer`     | /                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual item to be used as kafka record body                                                                                                                                    |
+| `http.response.item.timestamp.pointer` | -                                  | [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual item to be used as kafka record timestamp                                                                                                              |
+| `http.response.item.timestamp.parser`  | `DateTimeFormatterTimestampParser` | Converts the timestamp property into a `java.time.Instant`                                                                                                                                                                                   |
+| `http.response.item.offset.pointer`    | -                                  | Comma separated list of key=value pairs where the key is the name of the item in the offset and the value is [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value of the individual item being used as offset for future requests |
 
 #### DateTimeFormatterTimestampParser
 `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
 
 TimestampParser based on a `DateTimeFormatter`
 
-| Property                                      | Req | Default                      | Description                                                                                                                    |
-|:----------------------------------------------|:---:|:----------------------------:|:-------------------------------------------------------------------------------------------------------------------------------|
-| `http.response.item.timestamp.parser.pattern` | -   | `yyyy-MM-dd'T'HH:mm:ss.SSSX` | `DateTimeFormatter` pattern                                                                                                    |
-| `http.response.item.timestamp.parser.zone`    | -   | `UTC`                        | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
+| Property                                      | Default                      | Description                                                                                                                    |
+|:----------------------------------------------|:----------------------------:|:-------------------------------------------------------------------------------------------------------------------------------|
+| `http.response.item.timestamp.parser.pattern` | `yyyy-MM-dd'T'HH:mm:ss.SSSX` | `DateTimeFormatter` pattern                                                                                                    |
+| `http.response.item.timestamp.parser.zone`    | `UTC`                        | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
 
 #### NattyTimestampParser
 `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser`
 
 TimestampParser based on [Natty](http://natty.joestelmach.com/) parser
 
-| Property                                   | Req | Default | Description                                                                                                                    |
-|:-------------------------------------------|:---:|:-------:|:-------------------------------------------------------------------------------------------------------------------------------|
-| `http.response.item.timestamp.parser.zone` | -   | `UTC`   | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
+| Property                                   | Default | Description                                                                                                                    |
+|:-------------------------------------------|:-------:|:-------------------------------------------------------------------------------------------------------------------------------|
+| `http.response.item.timestamp.parser.zone` | `UTC`   | TimeZone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers |
 
 <a name="filter"/>
 
@@ -188,9 +188,9 @@ Controls the rate at which HTTP requests are executed.
 
 Throttles rate of requests based on a given interval. 
 
-| Property                        | Req | Default | Description                  |
-|:--------------------------------|:---:|:-------:|:-----------------------------|
-| `http.throttle.interval.millis` | -   | 10000   | Interval in between requests |
+| Property                        | Default | Description                  |
+|:--------------------------------|:-------:|:-----------------------------|
+| `http.throttle.interval.millis` | 10000   | Interval in between requests |
 
 ### Prerequisites
 
