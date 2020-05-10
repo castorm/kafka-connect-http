@@ -60,74 +60,60 @@ See [Examples](examples), e.g.
 
 ---
 **`http.request.factory`**
-
-[Preparing a HttpRequest](#request)
-
-*   Type: Class
-*   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
-*   Available classes:
-    * `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
+> [Preparing a HttpRequest](#request)
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
+> *   Available classes:
+>     * `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
 
 ---
 **`http.client`**
-
-[Executing a HttpRequest](#client)
-
-*   Type: Class
-*   Default: `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
-*   Available classes:
-    * `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
+> [Executing a HttpRequest](#client)
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
+> *   Available classes:
+>     * `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
 
 ---
 **`http.response.parser`**
-
-[Parsing a HttpResponse](#response)
-
-*   Type: Class
-*   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
-*   Available classes:
-    * `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
+> [Parsing a HttpResponse](#response)
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
+> *   Available classes:
+>     * `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
 
 ---
 **`http.record.filter.factory`**
-
-[Filtering out HttpRecord](#filter)
-
-*   Type: Class
-*   Default: `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
-*   Available classes:
-    * `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
-    * `com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory`
+> [Filtering out HttpRecord](#filter)
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
+> *   Available classes:
+>     * `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
+>     * `com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory`
 
 ---
 **`http.record.mapper`**
-
-[Mapping HttpRecord to SourceRecord](#mapper)
-
-*   Type: Class
-*   Default: `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
-*   Available classes:
-    * `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
+> [Mapping HttpRecord to SourceRecord](#mapper)
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
+> *   Available classes:
+>     * `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
 
 ---
 **`http.throttler`**
-
-[See Throttling `HttpRequest`s: `Throttler`](#throttler)
-
-*   Type: Class
-*   Default: `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
-*   Available classes:
-    * `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
-    * `com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler`
+> [See Throttling `HttpRequest`s: `Throttler`](#throttler)
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
+> *   Available classes:
+>     * `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
+>     * `com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler`
 
 ---
 **`http.offset.initial`**
-
-Initial offset, comma separated list of pairs
- 
-*   Example: `property1=value1, property2=value2`
-*   Type: String
-*   Default: ""
+> Initial offset, comma separated list of pairs
+> *   Example: `property1=value1, property2=value2`
+> *   Type: String
+> *   Default: ""
 
 ---
 <a name="request"/>
@@ -141,56 +127,44 @@ Templates can be provided for url, headers, query params and body.
 
 ---
 **`http.request.url`**
-
-Http method to use in the request.
-
-*   Type: String
-*   Default: "GET"
+> Http method to use in the request.
+> *   Type: String
+> *   Default: "GET"
 
 ---
 **`http.request.method`**
-
-Http url to use in the request, it can contain a `Template`
-
-*   Required
-*   Type: String
+> Http url to use in the request, it can contain a `Template`
+> *   Required
+> *   Type: String
 
 ---
 **`http.request.headers`**
-
-Http headers to use in the request, comma separated list of pairs.
-
-*   Example: `Name: Value, Name2 = Value2`
-*   Type: String
-*   Default: ""
+> Http headers to use in the request, comma separated list of pairs.
+> *   Example: `Name: Value, Name2 = Value2`
+> *   Type: String
+> *   Default: ""
 
 ---
 **`http.request.params`**
-
-Http query parameters to use in the request, ampersand separated list of pairs.
-
-*   Example: `name=value&name2=value2`
-*   Type: String
-*   Default: ""
+> Http query parameters to use in the request, ampersand separated list of pairs.
+> *   Example: `name=value&name2=value2`
+> *   Type: String
+> *   Default: ""
 
 ---
 **`http.request.body`**
-
-Http body to use in the request.
- 
-*   Type: String
-*   Default: ""
+> Http body to use in the request.
+> *   Type: String
+> *   Default: ""
 
 ---
 **`http.request.template.factory`**
-
-Class responsible for creating the templates that will be used on every request.
-
-*   Type: Class
-*   Default: `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
-*   Available classes:
-    *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
-    *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory` Implementation based on [FreeMarker](https://freemarker.apache.org/)
+> Class responsible for creating the templates that will be used on every request.
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
+> *   Available classes:
+>     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
+>     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory` Implementation based on [FreeMarker](https://freemarker.apache.org/)
 
 ---
 <a name="client"/>
@@ -203,35 +177,27 @@ Uses a [OkHttp](https://square.github.io/okhttp/) client.
 
 ---
 **`http.client.connection.timeout.millis`**
-
-Timeout for opening a connection
-
-*   Type: Long
-*   Default: 2000
+> Timeout for opening a connection
+> *   Type: Long
+> *   Default: 2000
 
 ---
 **`http.client.read.timeout.millis`**
-
-Timeout for reading a response
-
-*   Type: Long
-*   Default: 2000
+> Timeout for reading a response
+> *   Type: Long
+> *   Default: 2000
 
 ---
 **`http.client.connection.ttl.millis`**
-
-Time to live for the connection
-
-*   Type: Long
-*   Default: 300000
+> Time to live for the connection
+> *   Type: Long
+> *   Default: 300000
 
 ---
 **`http.client.max-idle`**
-
-Maximum number of idle connections in the connection pool
-
-*   Type: Integer
-*   Default: 1
+> Maximum number of idle connections in the connection pool
+> *   Type: Integer
+> *   Default: 1
 
 ---
 <a name="response"/>
@@ -245,76 +211,58 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 
 ---
 **`http.response.records.pointer`**
-
-[JsonPointer](https://tools.ietf.org/html/rfc6901) to the property in the response body containing an array of records 
-
-*   Type: String
-*   Default: "/"
+> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property in the response body containing an array of records 
+> *   Type: String
+> *   Default: "/"
 
 ---
 **`http.response.record.key.pointer`**
 
 [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual record to be used as kafka record key
-
-This is especially important on partitioned topics  
-
-*   Type: String
-*   Default: ""
+> This is especially important on partitioned topics  
+> *   Type: String
+> *   Default: ""
 
 ---
 **`http.response.record.value.pointer`**
-
-[JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual record to be used as kafka record body
-
-*   Type: String
-*   Default: "/"
+> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual record to be used as kafka record body
+> *   Type: String
+> *   Default: "/"
 
 ---
 **`http.response.record.timestamp.pointer`**
-
-[JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual record to be used as kafka record timestamp
-
-This is especially important to track progress, enable latency calculations, improved throttling and feedback to `TemplateHttpRequestFactory` 
-
-*   Type: String
-*   Default: ""
+> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual record to be used as kafka record timestamp
+> This is especially important to track progress, enable latency calculations, improved throttling and feedback to `TemplateHttpRequestFactory` 
+> *   Type: String
+> *   Default: ""
 
 ---
 **`http.response.record.timestamp.parser`**
-
-Class responsible for converting the timestamp property captured above into a `java.time.Instant`.  
-
-*   Type: String
-*   Default: `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
-*   Available classes:
-    *   `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser` Implementation based on based on a `DateTimeFormatter`
-    *   `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser` Implementation based on [Natty](http://natty.joestelmach.com/) parser
+> Class responsible for converting the timestamp property captured above into a `java.time.Instant`.  
+> *   Type: String
+> *   Default: `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
+> *   Available classes:
+>     *   `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser` Implementation based on based on a `DateTimeFormatter`
+>     *   `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser` Implementation based on [Natty](http://natty.joestelmach.com/) parser
 
 ---
 **`http.response.record.timestamp.parser.pattern`**
-
-When using `DateTimeFormatterTimestampParser`, a custom pattern can be specified 
-
-*   Type: String
-*   Default: `yyyy-MM-dd'T'HH:mm:ss.SSSX`
+> When using `DateTimeFormatterTimestampParser`, a custom pattern can be specified 
+> *   Type: String
+> *   Default: `yyyy-MM-dd'T'HH:mm:ss.SSSX`
 
 ---
 **`http.response.record.timestamp.parser.zone`**
-
-Timezone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers
-
-*   Type: String
-*   Default: "UTC"
+> Timezone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers
+> *   Type: String
+> *   Default: "UTC"
 
 ---
 **`http.response.record.offset.pointer`**
-
-Comma separated list of `key=value` pairs where the key is the name of the property in the offset and the value is the [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value being used as offset for future requests
-
-This is the mechanism that enables sharing state in between `HttpRequests`. `HttpRequestFactory` implementations receive this `Offset`.
-
-*   Type: String
-*   Default: ""
+> Comma separated list of `key=value` pairs where the key is the name of the property in the offset and the value is the [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value being used as offset for future requests
+> This is the mechanism that enables sharing state in between `HttpRequests`. `HttpRequestFactory` implementations receive this `Offset`.
+> *   Type: String
+> *   Default: ""
 
 ---
 <a name="filter"/>
@@ -340,12 +288,10 @@ Embeds the record properties into a common simple envelope to enable schema evol
 
 ---
 **`kafka.topic`**
-
-Name of the topic where the record will be sent to
-
-*   Required
-*   Type: String
-*   Default: ""
+> Name of the topic where the record will be sent to
+> *   Required
+> *   Type: String
+> *   Default: ""
 
 ---
 <a name="throttler"/>
@@ -360,11 +306,9 @@ Throttles rate of requests based on a fixed interval.
 
 ---
 **`http.throttler.interval.millis`**
-
-Interval in between requests
-
-*   Type: Long
-*   Default: 10000
+> Interval in between requests
+> *   Type: Long
+> *   Default: 10000
 
 ---
 #### Throttling HttpRequests with AdaptableIntervalThrottler
@@ -375,19 +319,16 @@ Throttles rate of requests based on a fixed interval. However, it has two modes 
 
 ---
 **`http.throttler.interval.millis`**
-
-Interval in between requests when up-to-date
-
-*   Type: Long
-*   Default: 10000
+> Interval in between requests when up-to-date
+> 
+> *   Type: Long
+> *   Default: 10000
 
 ---
 **`http.throttler.catchup.interval.millis`**
-
-Interval in between requests when catching up
-
-*   Type: Long
-*   Default: 1000
+> Interval in between requests when catching up
+> *   Type: Long
+> *   Default: 1000
 
 ---
 ## Development
