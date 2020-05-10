@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.throttle.spi;
+package com.github.castorm.kafka.connect.http.request.template.spi;
 
 /*-
  * #%L
@@ -22,10 +22,8 @@ package com.github.castorm.kafka.connect.http.throttle.spi;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.Offset;
-import org.apache.kafka.common.Configurable;
+@FunctionalInterface
+public interface TemplateFactory {
 
-public interface Throttler extends Configurable {
-
-    void throttle(Offset lastConfirmedOffset) throws InterruptedException;
+    Template create(String template);
 }

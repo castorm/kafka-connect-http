@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.offset;
+package com.github.castorm.kafka.connect.http.request.template;
 
 /*-
  * #%L
@@ -22,22 +22,22 @@ package com.github.castorm.kafka.connect.http.request.offset;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplate;
-import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
+import com.github.castorm.kafka.connect.http.request.template.spi.Template;
+import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
 import org.apache.kafka.common.config.ConfigException;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryConfigTest.Fixture.config;
-import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryConfigTest.Fixture.configWithout;
-import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryConfigTest.Fixture.defaultMap;
-import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryConfigTest.Fixture.value;
+import static com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfigTest.Fixture.config;
+import static com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfigTest.Fixture.configWithout;
+import static com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfigTest.Fixture.defaultMap;
+import static com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfigTest.Fixture.value;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-class OffsetTemplateHttpRequestFactoryConfigTest {
+class TemplateHttpRequestFactoryConfigTest {
 
     @Test
     void whenMissingUrl_thenException() {
@@ -91,18 +91,18 @@ class OffsetTemplateHttpRequestFactoryConfigTest {
 
     @Test
     void whenMissingTemplateFactory_thenDefault() {
-        assertThat(configWithout("http.request.template.factory").getOffsetTemplateFactory()).isInstanceOf(NoOffsetTemplateFactory.class);
+        assertThat(configWithout("http.request.template.factory").getTemplateFactory()).isInstanceOf(NoTemplateFactory.class);
     }
 
     @Test
     void whenTemplateFactory_thenInitialized() {
-        assertThat(config("http.request.template.factory", TestOffsetTemplateFactory.class.getName()).getOffsetTemplateFactory()).isInstanceOf(TestOffsetTemplateFactory.class);
+        assertThat(config("http.request.template.factory", TestTemplateFactory.class.getName()).getTemplateFactory()).isInstanceOf(TestTemplateFactory.class);
     }
 
-    public static class TestOffsetTemplateFactory implements OffsetTemplateFactory {
+    public static class TestTemplateFactory implements TemplateFactory {
 
         @Override
-        public OffsetTemplate create(String template) {
+        public Template create(String template) {
             return null;
         }
     }
@@ -116,16 +116,16 @@ class OffsetTemplateHttpRequestFactoryConfigTest {
             }};
         }
 
-        static OffsetTemplateHttpRequestFactoryConfig config(String key, String value) {
+        static TemplateHttpRequestFactoryConfig config(String key, String value) {
             Map<String, String> customMap = defaultMap();
             customMap.put(key, value);
-            return new OffsetTemplateHttpRequestFactoryConfig(customMap);
+            return new TemplateHttpRequestFactoryConfig(customMap);
         }
 
-        static OffsetTemplateHttpRequestFactoryConfig configWithout(String key) {
+        static TemplateHttpRequestFactoryConfig configWithout(String key) {
             Map<String, String> customMap = defaultMap();
             customMap.remove(key);
-            return new OffsetTemplateHttpRequestFactoryConfig(customMap);
+            return new TemplateHttpRequestFactoryConfig(customMap);
         }
     }
 }

@@ -22,6 +22,7 @@ package com.github.castorm.kafka.connect.common;
  * #L%
  */
 
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.util.Properties;
 import static java.nio.file.Files.newInputStream;
 
 @Slf4j
+@UtilityClass
 public class VersionUtils {
 
     private static final String DEFAULT_VERSION = "0.0.0.0";

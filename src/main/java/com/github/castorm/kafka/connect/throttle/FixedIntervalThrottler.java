@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.throttle;
+package com.github.castorm.kafka.connect.throttle;
 
 /*-
  * #%L
@@ -23,7 +23,7 @@ package com.github.castorm.kafka.connect.http.throttle;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.throttle.spi.Throttler;
+import com.github.castorm.kafka.connect.throttle.spi.Throttler;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -45,7 +45,7 @@ public class FixedIntervalThrottler implements Throttler {
         this(FixedIntervalThrottlerConfig::new, Thread::sleep, System::currentTimeMillis);
     }
 
-    FixedIntervalThrottler(Function<Map<String, ?>, FixedIntervalThrottlerConfig> configFactory, Sleeper sleeper, Supplier<Long> lastPollMillisInitializer) {
+    public FixedIntervalThrottler(Function<Map<String, ?>, FixedIntervalThrottlerConfig> configFactory, Sleeper sleeper, Supplier<Long> lastPollMillisInitializer) {
         this.configFactory = configFactory;
         this.sleeper = sleeper;
         this.lastPollMillis = lastPollMillisInitializer.get();

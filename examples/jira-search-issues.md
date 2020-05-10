@@ -50,7 +50,7 @@ And based on the results we would be updating the `updated` filter for subsequen
         "http.request.url": "https://your-host-here/rest/api/2/search",
         "http.request.headers": "Authorization: Basic TBD, Accept: application/json",
         "http.request.params": "jql=updated>=\"${timestamp_iso?datetime.iso?string['yyyy/MM/dd HH:mm']}\" ORDER BY updated ASC&maxResults=100",
-        "http.request.template.factory": "com.github.castorm.kafka.connect.http.request.offset.freemarker.FreeMarkerOffsetTemplateFactory",
+        "http.request.template.factory": "com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory",    
         "http.response.filter.factory": "com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory",
         "http.response.items.pointer": "/issues",
         "http.response.item.key.pointer": "/id",

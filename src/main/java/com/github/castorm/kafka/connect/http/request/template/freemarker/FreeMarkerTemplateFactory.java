@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.offset.freemarker;
+package com.github.castorm.kafka.connect.http.request.template.freemarker;
 
 /*-
  * #%L
@@ -22,8 +22,9 @@ package com.github.castorm.kafka.connect.http.request.offset.freemarker;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplate;
-import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
+import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.request.template.spi.Template;
+import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
@@ -33,16 +34,15 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Map;
 
 import static java.util.UUID.randomUUID;
 
-public class FreeMarkerOffsetTemplateFactory implements OffsetTemplateFactory {
+public class FreeMarkerTemplateFactory implements TemplateFactory {
 
     private final Configuration configuration = new Configuration(new Version(2, 3, 30));
 
     @Override
-    public OffsetTemplate create(String template) {
+    public Template create(String template) {
         return offset -> apply(createTemplate(template), offset);
     }
 
@@ -52,9 +52,9 @@ public class FreeMarkerOffsetTemplateFactory implements OffsetTemplateFactory {
     }
 
     @SneakyThrows({TemplateException.class, IOException.class})
-    private String apply(freemarker.template.Template template, Map<String, ?> model) {
+    private String apply(freemarker.template.Template template, Offset offset) {
         Writer writer = new StringWriter();
-        template.process(model, writer);
+        template.process(offset.toMap(), writer);
         return writer.toString();
     }
 }

@@ -31,8 +31,8 @@
     <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient" level="DEBUG"/>
     <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClientConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.HttpSourceConnectorConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottlerConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonItemParserConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperConfig" level="WARN"/>

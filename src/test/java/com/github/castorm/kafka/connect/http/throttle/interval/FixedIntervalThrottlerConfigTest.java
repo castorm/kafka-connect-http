@@ -22,7 +22,7 @@ package com.github.castorm.kafka.connect.http.throttle.interval;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottlerConfig;
+import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 

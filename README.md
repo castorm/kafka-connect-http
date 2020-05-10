@@ -55,15 +55,15 @@ Kafka Connect will store internally these offsets so the connector can continue 
 
 The connector breaks down the different responsibilities into the following components.
 
-| Property                       | Description                                                         |
-|--------------------------------|---------------------------------------------------------------------|
-| `http.request.factory`         | [`com...request.offset.OffsetTemplateHttpRequestFactory`](#request) | 
-| `http.client`                  | [`com....client.okhttp.OkHttpClient`](#client)                      | 
-| `http.response.parser`         | [`com...response.jackson.JacksonHttpResponseParser`](#response)     | 
-| `http.response.filter.factory` | [`com...response.spi.HttpResponseFilterFactory`](#filter)           | 
-| `http.record.mapper`           | [`com...record.SchemedSourceRecordMapper`](#record)                 |
-| `http.throttler`               | [`com....throttle.FixedIntervalThrottler`](#throttler)              |  
-| `http.offset.initial`          | Initial offset, comma separated list of pairs `offset=value`        |  
+| Property                       | Description                                                        |
+|--------------------------------|--------------------------------------------------------------------|
+| `http.request.factory`         | [`com..request.spi.HttpRequestFactory`](#request)                  | 
+| `http.client`                  | [`com..client.spi.HttpClient`](#client)                            | 
+| `http.response.parser`         | [`com..response.spi.HttpResponseParser`](#response)                | 
+| `http.response.filter.factory` | [`com..response.spi.HttpResponseFilterFactory`](#filter)           | 
+| `http.record.mapper`           | [`com..record.spi.SourceRecordMapper`](#record)                    |
+| `http.throttler`               | [`com..throttle.spi.Throttler`](#throttler)                        |  
+| `http.offset.initial`          | Initial offset, comma separated list of pairs `offset=value`       |  
 
 Below further details on these components 
 
@@ -77,10 +77,10 @@ See [Examples](examples), e.g.
 ### HttpRequestFactory
 Responsible for creating the `HttpRequest`.
 
-#### OffsetTemplateHttpRequestFactory
-`com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactory`
+#### TemplateHttpRequestFactory
+`com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
 
-Enables offset injection on url, headers, query params and body via templates
+Enables template resolution based on offset and timestamp for url, headers, query params and body
 
 | Property                        | Req | Default             | Description                                                  |
 |:--------------------------------|:---:|:-------------------:|:-------------------------------------------------------------|
@@ -93,7 +93,7 @@ Enables offset injection on url, headers, query params and body via templates
 
 ### TemplateFactory
 #### FreeMarkerTemplateFactory
-`com.github.castorm.kafka.connect.http.request.offset.freemarker.FreeMarkerTemplateFactory`
+`com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
 
 [FreeMarker](https://freemarker.apache.org/) based implementation of `TemplateFactory`
 
@@ -242,12 +242,12 @@ public interface HttpRequestFactory extends Configurable {
 
 #### OffsetTemplateFactory
 ```java
-public interface OffsetTemplateFactory {
+public interface TemplateFactory {
 
     OffsetTemplate create(String template);
 }
 
-public interface OffsetTemplate {
+public interface Template {
 
     String apply(Offset offset);
 }

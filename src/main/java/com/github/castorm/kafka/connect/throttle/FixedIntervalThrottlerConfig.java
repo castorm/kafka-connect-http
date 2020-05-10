@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.throttle;
+package com.github.castorm.kafka.connect.throttle;
 
 /*-
  * #%L

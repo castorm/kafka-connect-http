@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.offset;
+package com.github.castorm.kafka.connect.http.request.template;
 
 /*-
  * #%L
@@ -22,7 +22,7 @@ package com.github.castorm.kafka.connect.http.request.offset;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
+import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
 import lombok.Getter;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
@@ -36,7 +36,7 @@ import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
 import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 
 @Getter
-public class OffsetTemplateHttpRequestFactoryConfig extends AbstractConfig {
+public class TemplateHttpRequestFactoryConfig extends AbstractConfig {
 
     private static final String URL = "http.request.url";
     private static final String METHOD = "http.request.method";
@@ -55,25 +55,25 @@ public class OffsetTemplateHttpRequestFactoryConfig extends AbstractConfig {
 
     private final String body;
 
-    private final OffsetTemplateFactory offsetTemplateFactory;
+    private final TemplateFactory templateFactory;
 
-    OffsetTemplateHttpRequestFactoryConfig(Map<String, ?> originals) {
+    TemplateHttpRequestFactoryConfig(Map<String, ?> originals) {
         super(config(), originals);
         url = getString(URL);
         method = getString(METHOD);
         headers = getString(HEADERS);
         queryParams = getString(QUERY_PARAMS);
         body = getString(BODY);
-        offsetTemplateFactory = getConfiguredInstance(TEMPLATE_FACTORY, OffsetTemplateFactory.class);
+        templateFactory = getConfiguredInstance(TEMPLATE_FACTORY, TemplateFactory.class);
     }
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(URL, STRING, HIGH, "HTTP URL OffsetTemplate")
-                .define(METHOD, STRING, "GET", HIGH, "HTTP Method OffsetTemplate")
-                .define(HEADERS, STRING, "", MEDIUM, "HTTP Headers OffsetTemplate")
-                .define(QUERY_PARAMS, STRING, "", MEDIUM, "HTTP Query Params OffsetTemplate")
-                .define(BODY, STRING, "", LOW, "HTTP Body OffsetTemplate")
-                .define(TEMPLATE_FACTORY, CLASS, NoOffsetTemplateFactory.class, LOW, "OffsetTemplate Factory Class");
+                .define(URL, STRING, HIGH, "HTTP URL Template")
+                .define(METHOD, STRING, "GET", HIGH, "HTTP Method Template")
+                .define(HEADERS, STRING, "", MEDIUM, "HTTP Headers Template")
+                .define(QUERY_PARAMS, STRING, "", MEDIUM, "HTTP Query Params Template")
+                .define(BODY, STRING, "", LOW, "HTTP Body Template")
+                .define(TEMPLATE_FACTORY, CLASS, NoTemplateFactory.class, LOW, "Template Factory Class");
     }
 }

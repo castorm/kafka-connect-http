@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.offset;
+package com.github.castorm.kafka.connect.http.request.template;
 
 /*-
  * #%L
@@ -24,8 +24,8 @@ package com.github.castorm.kafka.connect.http.request.offset;
 
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplate;
-import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
+import com.github.castorm.kafka.connect.http.request.template.spi.Template;
+import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 
 import java.util.Map;
@@ -33,39 +33,38 @@ import java.util.Map;
 import static com.github.castorm.kafka.connect.common.MapUtils.breakDownHeaders;
 import static com.github.castorm.kafka.connect.common.MapUtils.breakDownQueryParams;
 
-public class OffsetTemplateHttpRequestFactory implements HttpRequestFactory {
+public class TemplateHttpRequestFactory implements HttpRequestFactory {
 
     private String method;
 
-    private OffsetTemplate urlTpl;
+    private Template urlTpl;
 
-    private OffsetTemplate headersTpl;
+    private Template headersTpl;
 
-    private OffsetTemplate queryParamsTpl;
+    private Template queryParamsTpl;
 
-    private OffsetTemplate bodyTpl;
+    private Template bodyTpl;
 
     @Override
     public void configure(Map<String, ?> configs) {
-        OffsetTemplateHttpRequestFactoryConfig config = new OffsetTemplateHttpRequestFactoryConfig(configs);
-        OffsetTemplateFactory offsetTemplateFactory = config.getOffsetTemplateFactory();
+        TemplateHttpRequestFactoryConfig config = new TemplateHttpRequestFactoryConfig(configs);
+        TemplateFactory templateFactory = config.getTemplateFactory();
 
         method = config.getMethod();
-        urlTpl = offsetTemplateFactory.create(config.getUrl());
-        headersTpl = offsetTemplateFactory.create(config.getHeaders());
-        queryParamsTpl = offsetTemplateFactory.create(config.getQueryParams());
-        bodyTpl = offsetTemplateFactory.create(config.getBody());
+        urlTpl = templateFactory.create(config.getUrl());
+        headersTpl = templateFactory.create(config.getHeaders());
+        queryParamsTpl = templateFactory.create(config.getQueryParams());
+        bodyTpl = templateFactory.create(config.getBody());
     }
 
     @Override
     public HttpRequest createRequest(Offset offset) {
-        Map<String, ?> offsetMap = offset.toMap();
         return HttpRequest.builder()
                 .method(HttpRequest.HttpMethod.valueOf(method))
-                .url(urlTpl.apply(offsetMap))
-                .headers(breakDownHeaders(headersTpl.apply(offsetMap)))
-                .queryParams(breakDownQueryParams(queryParamsTpl.apply(offsetMap)))
-                .body(bodyTpl.apply(offsetMap).getBytes())
+                .url(urlTpl.apply(offset))
+                .headers(breakDownHeaders(headersTpl.apply(offset)))
+                .queryParams(breakDownQueryParams(queryParamsTpl.apply(offset)))
+                .body(bodyTpl.apply(offset).getBytes())
                 .build();
     }
 }

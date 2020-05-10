@@ -23,7 +23,9 @@ package com.github.castorm.kafka.connect.http.throttle;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottler.Sleeper;
+import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler;
+import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler.Sleeper;
+import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.request.offset;
+package com.github.castorm.kafka.connect.throttle.spi;
 
 /*-
  * #%L
@@ -22,13 +22,10 @@ package com.github.castorm.kafka.connect.http.request.offset;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplate;
-import com.github.castorm.kafka.connect.http.request.offset.spi.OffsetTemplateFactory;
+import com.github.castorm.kafka.connect.http.model.Offset;
+import org.apache.kafka.common.Configurable;
 
-public class NoOffsetTemplateFactory implements OffsetTemplateFactory {
+public interface Throttler extends Configurable {
 
-    @Override
-    public OffsetTemplate create(String template) {
-        return offset -> template;
-    }
+    void throttle(Offset lastConfirmedOffset) throws InterruptedException;
 }

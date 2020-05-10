@@ -26,14 +26,14 @@ import com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
-import com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactory;
+import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
-import com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottler;
-import com.github.castorm.kafka.connect.http.throttle.spi.Throttler;
+import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler;
+import com.github.castorm.kafka.connect.throttle.spi.Throttler;
 import lombok.Getter;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
@@ -80,7 +80,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
         return new ConfigDef()
                 .define(THROTTLER, CLASS, FixedIntervalThrottler.class, HIGH, "Poll Throttler Class")
                 .define(CLIENT, CLASS, OkHttpClient.class, HIGH, "Request Client Class")
-                .define(REQUEST_FACTORY, CLASS, OffsetTemplateHttpRequestFactory.class, HIGH, "Request Factory Class")
+                .define(REQUEST_FACTORY, CLASS, TemplateHttpRequestFactory.class, HIGH, "Request Factory Class")
                 .define(RESPONSE_PARSER, CLASS, JacksonHttpResponseParser.class, HIGH, "Response Parser Class")
                 .define(RESPONSE_FILTER_FACTORY, CLASS, PassthroughFilterFactory.class, LOW, "Record Filter Factory Class")
                 .define(RECORD_MAPPER, CLASS, SchemedSourceRecordMapper.class, HIGH, "Record Mapper Class")

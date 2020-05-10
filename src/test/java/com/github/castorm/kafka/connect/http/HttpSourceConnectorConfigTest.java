@@ -30,13 +30,13 @@ import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
-import com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactory;
+import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory;
 import com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
-import com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottler;
+import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.Test;
@@ -74,7 +74,7 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenNoRequestFactory_thenDefault() {
-        assertThat(configWithout("http.request.factory").getRequestFactory()).isInstanceOf(OffsetTemplateHttpRequestFactory.class);
+        assertThat(configWithout("http.request.factory").getRequestFactory()).isInstanceOf(TemplateHttpRequestFactory.class);
     }
 
     @Test

@@ -31,7 +31,7 @@ import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
-import com.github.castorm.kafka.connect.http.throttle.spi.Throttler;
+import com.github.castorm.kafka.connect.throttle.spi.Throttler;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
