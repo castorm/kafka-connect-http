@@ -26,11 +26,11 @@ import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.poll.spi.PollInterceptor;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.github.castorm.kafka.connect.http.throttle.spi.Throttler;
 import edu.emory.mathcs.backport.java.util.Collections;
 import lombok.Getter;
 import org.apache.kafka.connect.errors.RetriableException;
@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
+import static java.time.Instant.EPOCH;
+import static java.time.Instant.ofEpochMilli;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -51,7 +53,7 @@ public class HttpSourceTask extends SourceTask {
 
     private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
 
-    private PollInterceptor pollInterceptor;
+    private Throttler throttler;
 
     private HttpRequestFactory requestFactory;
 
@@ -64,7 +66,7 @@ public class HttpSourceTask extends SourceTask {
     private HttpResponseFilterFactory responseFilterFactory;
 
     @Getter
-    private Offset lastConfirmedOffset;
+    private Offset offset;
 
     HttpSourceTask(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
         this.configFactory = configFactory;
@@ -79,10 +81,10 @@ public class HttpSourceTask extends SourceTask {
 
         HttpSourceConnectorConfig config = configFactory.apply(settings);
 
-        pollInterceptor = config.getPollInterceptor();
+        throttler = config.getThrottler();
         requestFactory = config.getRequestFactory();
         Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
-        lastConfirmedOffset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset());
+        offset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset(), EPOCH);
         requestExecutor = config.getClient();
         responseParser = config.getResponseParser();
         recordMapper = config.getRecordMapper();
@@ -92,18 +94,16 @@ public class HttpSourceTask extends SourceTask {
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
 
-        pollInterceptor.beforePoll();
+        throttler.throttle(offset);
 
-        HttpRequest request = requestFactory.createRequest(lastConfirmedOffset);
+        HttpRequest request = requestFactory.createRequest(offset);
 
         HttpResponse response = execute(request);
 
-        List<SourceRecord> records = responseParser.parse(response).stream()
-                .filter(responseFilterFactory.create(lastConfirmedOffset))
+        return responseParser.parse(response).stream()
+                .filter(responseFilterFactory.create(offset))
                 .map(recordMapper::map)
                 .collect(toList());
-
-        return pollInterceptor.afterPoll(records);
     }
 
     private HttpResponse execute(HttpRequest request) {
@@ -116,7 +116,7 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void commitRecord(SourceRecord record) {
-        lastConfirmedOffset = Offset.of(record.sourceOffset());
+        offset = Offset.of(record.sourceOffset(), ofEpochMilli(record.timestamp()));
     }
 
     @Override

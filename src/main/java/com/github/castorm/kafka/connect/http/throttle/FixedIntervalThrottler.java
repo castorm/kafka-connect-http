@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.poll;
+package com.github.castorm.kafka.connect.http.throttle;
 
 /*-
  * #%L
@@ -22,61 +22,49 @@ package com.github.castorm.kafka.connect.http.poll;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.poll.spi.PollInterceptor;
-import org.apache.kafka.connect.source.SourceRecord;
+import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.throttle.spi.Throttler;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.lang.System.currentTimeMillis;
 
-public class IntervalDelayPollInterceptor implements PollInterceptor {
+public class FixedIntervalThrottler implements Throttler {
 
-    private final Function<Map<String, ?>, IntervalDelayPollInterceptorConfig> configFactory;
+    private final Function<Map<String, ?>, FixedIntervalThrottlerConfig> configFactory;
 
     private final Sleeper sleeper;
 
-    private Long pollIntervalMillis = 60000L;
+    private Long intervalMillis;
 
-    private Long lastPollMillis = currentTimeMillis();
+    private Long lastPollMillis;
 
-    boolean upToDate = false;
-
-    public IntervalDelayPollInterceptor() {
-        this(IntervalDelayPollInterceptorConfig::new, Thread::sleep);
+    public FixedIntervalThrottler() {
+        this(FixedIntervalThrottlerConfig::new, Thread::sleep, System::currentTimeMillis);
     }
 
-    IntervalDelayPollInterceptor(Function<Map<String, ?>, IntervalDelayPollInterceptorConfig> configFactory, Sleeper sleeper) {
+    FixedIntervalThrottler(Function<Map<String, ?>, FixedIntervalThrottlerConfig> configFactory, Sleeper sleeper, Supplier<Long> lastPollMillisInitializer) {
         this.configFactory = configFactory;
         this.sleeper = sleeper;
+        this.lastPollMillis = lastPollMillisInitializer.get();
     }
 
     @Override
     public void configure(Map<String, ?> settings) {
-        pollIntervalMillis = configFactory.apply(settings).getPollIntervalMillis();
+        FixedIntervalThrottlerConfig config = configFactory.apply(settings);
+        intervalMillis = config.getPollIntervalMillis();
     }
 
     @Override
-    public void beforePoll() throws InterruptedException {
-        if (upToDate) {
-            awaitNextTick();
-        }
-    }
-
-    private void awaitNextTick() throws InterruptedException {
+    public void throttle(Offset offset) throws InterruptedException {
         long now = currentTimeMillis();
         long sinceLastPollMillis = now - lastPollMillis;
-        if (pollIntervalMillis > sinceLastPollMillis) {
-            sleeper.sleep(pollIntervalMillis - sinceLastPollMillis);
+        if (intervalMillis > sinceLastPollMillis) {
+            sleeper.sleep(intervalMillis - sinceLastPollMillis);
         }
         lastPollMillis = now;
-    }
-
-    @Override
-    public List<SourceRecord> afterPoll(List<SourceRecord> records) {
-        upToDate = records.isEmpty();
-        return records;
     }
 
     @FunctionalInterface

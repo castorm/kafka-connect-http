@@ -31,6 +31,7 @@ import static com.github.castorm.kafka.connect.http.model.HttpRequest.HttpMethod
 import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryTest.Fixture.url;
 import static com.github.castorm.kafka.connect.http.request.offset.OffsetTemplateHttpRequestFactoryTest.Fixture.value;
+import static java.time.Instant.EPOCH;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,6 +92,6 @@ class OffsetTemplateHttpRequestFactoryTest {
     interface Fixture {
         String value = "value";
         String url = "url";
-        Offset offset = Offset.of(emptyMap());
+        Offset offset = Offset.of(emptyMap(), EPOCH);
     }
 }

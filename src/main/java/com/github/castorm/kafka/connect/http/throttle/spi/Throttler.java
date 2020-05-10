@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.poll.spi;
+package com.github.castorm.kafka.connect.http.throttle.spi;
 
 /*-
  * #%L
@@ -22,14 +22,10 @@ package com.github.castorm.kafka.connect.http.poll.spi;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.model.Offset;
 import org.apache.kafka.common.Configurable;
-import org.apache.kafka.connect.source.SourceRecord;
 
-import java.util.List;
+public interface Throttler extends Configurable {
 
-public interface PollInterceptor extends Configurable {
-
-    void beforePoll() throws InterruptedException;
-
-    List<SourceRecord> afterPoll(List<SourceRecord> records);
+    void throttle(Offset lastConfirmedOffset) throws InterruptedException;
 }

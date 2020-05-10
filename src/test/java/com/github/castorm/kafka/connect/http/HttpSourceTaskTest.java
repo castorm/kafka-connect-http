@@ -27,11 +27,11 @@ import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.HttpResponseItem;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.poll.spi.PollInterceptor;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.github.castorm.kafka.connect.http.throttle.spi.Throttler;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
@@ -44,15 +44,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Map;
 
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.item;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.now;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offsetInitialMap;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offsetMap;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.record;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.request;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.response;
+import static java.time.Instant.EPOCH;
+import static java.time.Instant.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,7 +76,7 @@ class HttpSourceTaskTest {
     HttpSourceConnectorConfig config;
 
     @Mock
-    PollInterceptor pollInterceptor;
+    Throttler throttler;
 
     @Mock
     HttpRequestFactory requestFactory;
@@ -91,7 +95,7 @@ class HttpSourceTaskTest {
 
     @BeforeEach
     void setUp() {
-        given(config.getPollInterceptor()).willReturn(pollInterceptor);
+        given(config.getThrottler()).willReturn(throttler);
         given(config.getRequestFactory()).willReturn(requestFactory);
         given(config.getClient()).willReturn(client);
         given(config.getResponseParser()).willReturn(responseParser);
@@ -115,7 +119,7 @@ class HttpSourceTaskTest {
 
         task.start(emptyMap());
 
-        assertThat(task.getLastConfirmedOffset()).isEqualTo(Offset.of(offsetMap));
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap, EPOCH));
     }
 
     @Test
@@ -126,7 +130,7 @@ class HttpSourceTaskTest {
 
         task.start(emptyMap());
 
-        assertThat(task.getLastConfirmedOffset()).isEqualTo(Offset.of(offsetInitialMap));
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetInitialMap, EPOCH));
     }
 
     @Test
@@ -136,7 +140,7 @@ class HttpSourceTaskTest {
 
         task.start(emptyMap());
 
-        then(config).should().getPollInterceptor();
+        then(config).should().getThrottler();
     }
 
     @Test
@@ -186,9 +190,25 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         reset(requestFactory);
 
-        task.commitRecord(record(offsetMap));
+        task.commitRecord(record(offsetMap, now));
 
-        assertThat(task.getLastConfirmedOffset()).isEqualTo(Offset.of(offsetMap));
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap, now));
+    }
+
+    @Test
+    void givenTaskStarted_whenPoll_thenThrottled() throws InterruptedException, IOException {
+
+        task.initialize(getContext(offsetMap));
+        task.start(emptyMap());
+        given(requestFactory.createRequest(offset)).willReturn(request);
+        given(client.execute(request)).willReturn(response);
+        given(responseParser.parse(response)).willReturn(asList(item));
+        given(recordFilterFactory.create(offset)).willReturn(__ -> true);
+        given(recordMapper.map(item)).willReturn(record(offsetMap, now));
+
+        task.poll();
+
+        then(throttler).should().throttle(offset);
     }
 
     @Test
@@ -200,10 +220,9 @@ class HttpSourceTaskTest {
         given(client.execute(request)).willReturn(response);
         given(responseParser.parse(response)).willReturn(asList(item));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
-        given(recordMapper.map(item)).willReturn(record(offsetMap));
-        given(pollInterceptor.afterPoll(asList(record(offsetMap)))).willAnswer(invocation -> invocation.getArgument(0));
+        given(recordMapper.map(item)).willReturn(record(offsetMap, now));
 
-        assertThat(task.poll()).containsExactly(record(offsetMap));
+        assertThat(task.poll()).containsExactly(record(offsetMap, now));
     }
 
     @Test
@@ -220,38 +239,6 @@ class HttpSourceTaskTest {
     }
 
     @Test
-    void givenTaskStarted_whenPoll_thenPollInterceptorBefore() throws InterruptedException, IOException {
-
-        task.initialize(getContext(offsetMap));
-        task.start(emptyMap());
-        given(requestFactory.createRequest(offset)).willReturn(request);
-        given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(item));
-        given(recordFilterFactory.create(offset)).willReturn(__ -> true);
-        given(recordMapper.map(item)).willReturn(record(offsetMap));
-
-        task.poll();
-
-        then(pollInterceptor).should().beforePoll();
-    }
-
-    @Test
-    void givenTaskStarted_whenPoll_thenPollInterceptorAfterWithRecords() throws InterruptedException, IOException {
-
-        task.initialize(getContext(offsetMap));
-        task.start(emptyMap());
-        given(requestFactory.createRequest(offset)).willReturn(request);
-        given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(item));
-        given(recordFilterFactory.create(offset)).willReturn(__ -> true);
-        given(recordMapper.map(item)).willReturn(record(offsetMap));
-
-        task.poll();
-
-        then(pollInterceptor).should().afterPoll(asList(record(offsetMap)));
-    }
-
-    @Test
     void givenTaskStartedAndExecuteFails_whenPoll_thenRetriableException() throws IOException {
 
         task.initialize(getContext(offsetMap));
@@ -265,13 +252,14 @@ class HttpSourceTaskTest {
     interface Fixture {
         Map<String, Object> offsetMap = ImmutableMap.of("k", "v");
         Map<String, String> offsetInitialMap = ImmutableMap.of("k2", "v2");
-        Offset offset = Offset.of(offsetMap);
+        Offset offset = Offset.of(offsetMap, EPOCH);
         HttpRequest request = HttpRequest.builder().build();
         HttpResponse response = HttpResponse.builder().build();
         HttpResponseItem item = HttpResponseItem.builder().build();
+        Instant now = now();
 
-        static SourceRecord record(Map<String, Object> offset) {
-            return new SourceRecord(emptyMap(), offset, null, null, null);
+        static SourceRecord record(Map<String, Object> offset, Instant timestamp) {
+            return new SourceRecord(emptyMap(), offset, null, null, null, null, null, null, timestamp.toEpochMilli());
         }
     }
 }

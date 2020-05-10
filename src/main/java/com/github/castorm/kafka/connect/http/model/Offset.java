@@ -23,13 +23,13 @@ package com.github.castorm.kafka.connect.http.model;
  */
 
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.time.Instant.EPOCH;
-
+@ToString
 @EqualsAndHashCode
 public class Offset {
 
@@ -44,16 +44,6 @@ public class Offset {
     public static Offset of(Map<String, ?> properties, Instant timestamp) {
         Map<String, Object> props = new HashMap<>(properties);
         props.put(TIMESTAMP_ISO_KEY, timestamp.toString());
-        return new Offset(props);
-    }
-
-    public static Offset of(Map<String, ?> properties) {
-        Map<String, Object> props = new HashMap<>(properties);
-        if (props.containsKey(TIMESTAMP_ISO_KEY)) {
-            Instant.parse((CharSequence) props.get(TIMESTAMP_ISO_KEY));
-        } else {
-            props.put(TIMESTAMP_ISO_KEY, EPOCH.toString());
-        }
         return new Offset(props);
     }
 

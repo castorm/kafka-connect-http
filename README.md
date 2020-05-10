@@ -62,7 +62,7 @@ The connector breaks down the different responsibilities into the following comp
 | `http.response.parser`         | [`com...response.jackson.JacksonHttpResponseParser`](#response)     | 
 | `http.response.filter.factory` | [`com...response.spi.HttpResponseFilterFactory`](#filter)           | 
 | `http.record.mapper`           | [`com...record.SchemedSourceRecordMapper`](#record)                 |
-| `http.poll.interceptor`        | [`com...poll.IntervalDelayPollInterceptor`](#interceptor)           |  
+| `http.throttler`               | [`com....throttle.FixedIntervalThrottler`](#throttler)              |  
 | `http.offset.initial`          | Initial offset, comma separated list of pairs `offset=value`        |  
 
 Below further details on these components 
@@ -178,19 +178,19 @@ Embeds the item properties into a common simple envelope to enable schema evolut
 |:--------------|:---:|:-------:|:---------------------------------------------------|
 | `kafka.topic` | *   | -       | Name of the topic where the record will be sent to |
 
-<a name="interceptor"/>
+<a name="throttler"/>
 
-### PollInterceptor
-Hooks that enable influencing the poll control flow.
+### Throttler
+Controls the rate at which HTTP requests are executed.
 
-#### IntervalDelayPollInterceptor
-`com.github.castorm.kafka.connect.http.poll.IntervalDelayPollInterceptor`
+#### FixedIntervalThrottler
+`com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottler`
 
-Throttles rate of requests based on a given interval, except when connector is not up-to-date. 
+Throttles rate of requests based on a given interval. 
 
-| Property                    | Req | Default | Description                                  |
-|:----------------------------|:---:|:-------:|:---------------------------------------------|
-| `http.poll.interval.millis` | -   | 60000   | Interval in between requests once up-to-date |
+| Property                        | Req | Default | Description                  |
+|:--------------------------------|:---:|:-------:|:-----------------------------|
+| `http.throttle.interval.millis` | -   | 10000   | Interval in between requests |
 
 ### Prerequisites
 
@@ -207,22 +207,28 @@ These are better understood by looking at the source task implementation:
 ```java
 public List<SourceRecord> poll() throws InterruptedException {
 
-    pollInterceptor.beforePoll();
+    throttler.throttle(offset);
 
-    HttpRequest request = requestFactory.createRequest(lastConfirmedOffset);
+    HttpRequest request = requestFactory.createRequest(offset);
 
     HttpResponse response = requestExecutor.execute(request);
 
-    List<SourceRecord> records = responseParser.parse(response).stream()
-            .filter(responseFilterFactory.create(lastConfirmedOffset))
+    return responseParser.parse(response).stream()
+            .filter(responseFilterFactory.create(offset))
             .map(recordMapper::map)
             .collect(toList());
-
-    return pollInterceptor.afterPoll(records);
 }
 
 public void commitRecord(SourceRecord record) {
-    lastConfirmedOffset = Offset.of(record.sourceOffset());
+    offset = Offset.of(record.sourceOffset(), record.timestamp());
+}
+```
+
+#### Throttler
+```java
+public interface Throttler extends Configurable {
+
+    void throttle(Offset offset) throws InterruptedException;
 }
 ```
 
@@ -276,16 +282,6 @@ public interface HttpResponseFilterFactory extends Configurable {
 public interface SourceRecordMapper extends Configurable {
 
     SourceRecord map(HttpResponseItem item);
-}
-```
-
-#### PollInterceptor
-```java
-public interface PollInterceptor extends Configurable {
-
-    void beforePoll() throws InterruptedException;
-
-    List<SourceRecord> afterPoll(List<SourceRecord> records);
 }
 ```
 

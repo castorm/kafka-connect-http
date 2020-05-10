@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.poll;
+package com.github.castorm.kafka.connect.http.throttle;
 
 /*-
  * #%L
@@ -32,19 +32,19 @@ import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Type.LONG;
 
 @Getter
-public class IntervalDelayPollInterceptorConfig extends AbstractConfig {
+public class FixedIntervalThrottlerConfig extends AbstractConfig {
 
-    private static final String POLL_INTERVAL_MILLIS = "http.poll.interval.millis";
+    private static final String THROTTLE_INTERVAL_MILLIS = "http.throttle.interval.millis";
 
     private final Long pollIntervalMillis;
 
-    public IntervalDelayPollInterceptorConfig(Map<String, ?> originals) {
+    public FixedIntervalThrottlerConfig(Map<String, ?> originals) {
         super(config(), originals);
-        pollIntervalMillis = getLong(POLL_INTERVAL_MILLIS);
+        pollIntervalMillis = getLong(THROTTLE_INTERVAL_MILLIS);
     }
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(POLL_INTERVAL_MILLIS, LONG, 60000L, HIGH, "Poll Interval Millis");
+                .define(THROTTLE_INTERVAL_MILLIS, LONG, 10000L, HIGH, "Throttle Poll Interval Millis");
     }
 }

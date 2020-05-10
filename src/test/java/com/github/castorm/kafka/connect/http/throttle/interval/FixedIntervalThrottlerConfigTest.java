@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.poll.interval;
+package com.github.castorm.kafka.connect.http.throttle.interval;
 
 /*-
  * #%L
@@ -22,22 +22,22 @@ package com.github.castorm.kafka.connect.http.poll.interval;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.poll.IntervalDelayPollInterceptorConfig;
+import com.github.castorm.kafka.connect.http.throttle.FixedIntervalThrottlerConfig;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class IntervalDelayPollInterceptorConfigTest {
+class FixedIntervalThrottlerConfigTest {
 
     @Test
     void whenPollIntervalMillis_thenDefault() {
-        assertThat(new IntervalDelayPollInterceptorConfig(emptyMap()).getPollIntervalMillis()).isEqualTo(60000L);
+        assertThat(new FixedIntervalThrottlerConfig(emptyMap()).getPollIntervalMillis()).isEqualTo(10000L);
     }
 
     @Test
     void whenPollIntervalMillis_thenInitialized() {
-        assertThat(new IntervalDelayPollInterceptorConfig(ImmutableMap.of("http.poll.interval.millis", "42")).getPollIntervalMillis()).isEqualTo(42L);
+        assertThat(new FixedIntervalThrottlerConfig(ImmutableMap.of("http.throttle.interval.millis", "42")).getPollIntervalMillis()).isEqualTo(42L);
     }
 }
