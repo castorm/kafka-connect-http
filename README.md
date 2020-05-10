@@ -126,8 +126,7 @@ Initial offset, comma separated list of pairs
 <a name="request"/>
 
 ### `HttpRequestFactory`: Preparing a `HttpRequest`
-Request is prepared by the `http.request.factory`. The implementations available are:
-*   `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
+The first thing our connector will need to do is prepare a `HttpRequest`
 
 #### Preparing a `HttpRequest` with `TemplateHttpRequestFactory`
 This `HttpRequestFactory` is based on template resolution using the `Offset` of the last seen record.
