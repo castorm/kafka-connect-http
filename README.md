@@ -95,7 +95,7 @@ See [Examples](examples), e.g.
 >     *   `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
 > 
 > #### `http.throttler`
-> [See Throttling `HttpRequest`s: `Throttler`](#throttler)
+> [Throttling HttpRequests](#throttler)
 > *   Type: Class
 > *   Default: `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
 > *   Available classes:
