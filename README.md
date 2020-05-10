@@ -67,6 +67,7 @@ See [Examples](examples), e.g.
 *   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
 *   Available classes:
     * `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
+
 ---
 **`http.client`**
 
@@ -76,6 +77,7 @@ See [Examples](examples), e.g.
 *   Default: `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
 *   Available classes:
     * `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
+
 ---
 **`http.response.parser`**
 
@@ -85,6 +87,7 @@ See [Examples](examples), e.g.
 *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
 *   Available classes:
     * `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
+
 ---
 **`http.record.filter.factory`**
 
@@ -95,6 +98,7 @@ See [Examples](examples), e.g.
 *   Available classes:
     * `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
     * `com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory`
+
 ---
 **`http.record.mapper`**
 
@@ -104,6 +108,7 @@ See [Examples](examples), e.g.
 *   Default: `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
 *   Available classes:
     * `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
+
 ---
 **`http.throttler`**
 
@@ -114,6 +119,7 @@ See [Examples](examples), e.g.
 *   Available classes:
     * `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
     * `com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler`
+
 ---
 **`http.offset.initial`**
 
@@ -123,6 +129,7 @@ Initial offset, comma separated list of pairs
 *   Type: String
 *   Default: ""
 
+---
 <a name="request"/>
 
 ### HttpRequestFactory: Preparing a HttpRequest
@@ -131,6 +138,7 @@ The first thing our connector will need to do is prepare a `HttpRequest`
 #### Preparing a HttpRequest with TemplateHttpRequestFactory
 This `HttpRequestFactory` is based on template resolution using the `Offset` of the last seen record.
 Templates can be provided for url, headers, query params and body.
+
 ---
 **`http.request.url`**
 
@@ -138,6 +146,7 @@ Http method to use in the request.
 
 *   Type: String
 *   Default: "GET"
+
 ---
 **`http.request.method`**
 
@@ -145,6 +154,7 @@ Http url to use in the request, it can contain a `Template`
 
 *   Required
 *   Type: String
+
 ---
 **`http.request.headers`**
 
@@ -153,6 +163,7 @@ Http headers to use in the request, comma separated list of pairs.
 *   Example: `Name: Value, Name2 = Value2`
 *   Type: String
 *   Default: ""
+
 ---
 **`http.request.params`**
 
@@ -161,6 +172,7 @@ Http query parameters to use in the request, ampersand separated list of pairs.
 *   Example: `name=value&name2=value2`
 *   Type: String
 *   Default: ""
+
 ---
 **`http.request.body`**
 
@@ -168,6 +180,7 @@ Http body to use in the request.
  
 *   Type: String
 *   Default: ""
+
 ---
 **`http.request.template.factory`**
 
@@ -179,6 +192,7 @@ Class responsible for creating the templates that will be used on every request.
     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory` Implementation based on [FreeMarker](https://freemarker.apache.org/)
 
+---
 <a name="client"/>
 
 ### HttpClient: Executing a HttpRequest
@@ -186,6 +200,7 @@ Once our HttpRequest is ready, we have to execute it to get some results out of 
 
 #### Executing a HttpRequest with OkHttpClient
 Uses a [OkHttp](https://square.github.io/okhttp/) client. 
+
 ---
 **`http.client.connection.timeout.millis`**
 
@@ -193,6 +208,7 @@ Timeout for opening a connection
 
 *   Type: Long
 *   Default: 2000
+
 ---
 **`http.client.read.timeout.millis`**
 
@@ -200,6 +216,7 @@ Timeout for reading a response
 
 *   Type: Long
 *   Default: 2000
+
 ---
 **`http.client.connection.ttl.millis`**
 
@@ -207,6 +224,7 @@ Time to live for the connection
 
 *   Type: Long
 *   Default: 300000
+
 ---
 **`http.client.max-idle`**
 
@@ -215,6 +233,7 @@ Maximum number of idle connections in the connection pool
 *   Type: Integer
 *   Default: 1
 
+---
 <a name="response"/>
 
 ### HttpResponseParser: Parsing a HttpResponse
@@ -223,6 +242,7 @@ a list of `HttpRecord`
 
 #### Parsing a HttpResponse with JacksonHttpResponseParser
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in the response.
+
 ---
 **`http.response.records.pointer`**
 
@@ -230,6 +250,7 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 
 *   Type: String
 *   Default: "/"
+
 ---
 **`http.response.record.key.pointer`**
 
@@ -239,6 +260,7 @@ This is especially important on partitioned topics
 
 *   Type: String
 *   Default: ""
+
 ---
 **`http.response.record.value.pointer`**
 
@@ -246,6 +268,7 @@ This is especially important on partitioned topics
 
 *   Type: String
 *   Default: "/"
+
 ---
 **`http.response.record.timestamp.pointer`**
 
@@ -255,6 +278,7 @@ This is especially important to track progress, enable latency calculations, imp
 
 *   Type: String
 *   Default: ""
+
 ---
 **`http.response.record.timestamp.parser`**
 
@@ -265,6 +289,7 @@ Class responsible for converting the timestamp property captured above into a `j
 *   Available classes:
     *   `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser` Implementation based on based on a `DateTimeFormatter`
     *   `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser` Implementation based on [Natty](http://natty.joestelmach.com/) parser
+
 ---
 **`http.response.record.timestamp.parser.pattern`**
 
@@ -272,6 +297,7 @@ When using `DateTimeFormatterTimestampParser`, a custom pattern can be specified
 
 *   Type: String
 *   Default: `yyyy-MM-dd'T'HH:mm:ss.SSSX`
+
 ---
 **`http.response.record.timestamp.parser.zone`**
 
@@ -279,6 +305,7 @@ Timezone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/doc
 
 *   Type: String
 *   Default: "UTC"
+
 ---
 **`http.response.record.offset.pointer`**
 
@@ -289,6 +316,7 @@ This is the mechanism that enables sharing state in between `HttpRequests`. `Htt
 *   Type: String
 *   Default: ""
 
+---
 <a name="filter"/>
 
 ### HttpRecordFilterFactory: Filtering out HttpRecord
@@ -309,6 +337,7 @@ Once we have our `HttpRecord`s we have to translate them into what Kafka Connect
 #### Mapping HttpRecord to Kafka Connect's SourceRecord with SchemedSourceRecordMapper
 
 Embeds the record properties into a common simple envelope to enable schema evolution. This envelope contains simple a key and a body properties. 
+
 ---
 **`kafka.topic`**
 
@@ -318,6 +347,7 @@ Name of the topic where the record will be sent to
 *   Type: String
 *   Default: ""
 
+---
 <a name="throttler"/>
 
 ### Throttler: Throttling HttpRequests
@@ -327,6 +357,7 @@ Controls the rate at which HTTP requests are executed.
 #### Throttling HttpRequests with FixedIntervalThrottler
 
 Throttles rate of requests based on a fixed interval. 
+
 ---
 **`http.throttler.interval.millis`**
 
@@ -335,11 +366,13 @@ Interval in between requests
 *   Type: Long
 *   Default: 10000
 
+---
 #### Throttling HttpRequests with AdaptableIntervalThrottler
 
 Throttles rate of requests based on a fixed interval. However, it has two modes of operation, with two different intervals:
 *   Up to date: No new records, or they have been created since last poll 
 *   Catching up: There were new record in last poll and they were created long ago
+
 ---
 **`http.throttler.interval.millis`**
 
@@ -347,6 +380,7 @@ Interval in between requests when up-to-date
 
 *   Type: Long
 *   Default: 10000
+
 ---
 **`http.throttler.catchup.interval.millis`**
 
@@ -355,6 +389,7 @@ Interval in between requests when catching up
 *   Type: Long
 *   Default: 1000
 
+---
 ## Development
 
 ### SPI
