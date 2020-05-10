@@ -174,7 +174,7 @@ Http body to use in the request.
 Class responsible for creating the templates that will be used on every request.
 
 *   Type: Class
-*   Default: "`com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`"
+*   Default: `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
 *   Available classes:
     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory` Implementation based on [FreeMarker](https://freemarker.apache.org/)
@@ -261,7 +261,7 @@ This is especially important to track progress, enable latency calculations, imp
 Class responsible for converting the timestamp property captured above into a `java.time.Instant`.  
 
 *   Type: String
-*   Default: "`com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`"
+*   Default: `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
 *   Available classes:
     *   `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser` Implementation based on based on a `DateTimeFormatter`
     *   `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser` Implementation based on [Natty](http://natty.joestelmach.com/) parser
@@ -271,7 +271,7 @@ Class responsible for converting the timestamp property captured above into a `j
 When using `DateTimeFormatterTimestampParser`, a custom pattern can be specified 
 
 *   Type: String
-*   Default: "`yyyy-MM-dd'T'HH:mm:ss.SSSX`"
+*   Default: `yyyy-MM-dd'T'HH:mm:ss.SSSX`
 
 `http.response.record.timestamp.parser.zone`
 
