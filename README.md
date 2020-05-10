@@ -39,11 +39,6 @@ Otherwise, you'll have to do it manually by downloading the package from the [Re
 
 More details on how to [Install Connectors](https://docs.confluent.io/current/connect/managing/install.html)
 
-### Examples
-
-See [Examples](examples), e.g. 
-*   [Jira Search Issues API](examples/jira-search-issues.md)
-
 ## Source Connector
 `com.github.castorm.kafka.connect.http.HttpSourceConnector`
 
@@ -56,12 +51,15 @@ The HTTP Source connector is meant for implementing [CDC (Change Data Capture)](
 
 Kafka Connect will store internally these offsets so the connector can continue from where it left after restarting.
 
-The connector breaks down the different responsibilities into the following components.
+### Examples
+
+See [Examples](examples), e.g. 
+*   [Jira Search Issues API](examples/jira-search-issues.md)
 
 ### Configuration
 `http.request.factory`
 
-[See Preparing a `HttpRequest`: `HttpRequestFactory`](#request)
+[Preparing a HttpRequest](#request)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
@@ -70,7 +68,7 @@ The connector breaks down the different responsibilities into the following comp
 
 `http.client`
 
-[See Executing a `HttpRequest`: `HttpClient`](#client)
+[Executing a HttpRequest](#client)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
@@ -79,7 +77,7 @@ The connector breaks down the different responsibilities into the following comp
 
 `http.response.parser`
 
-[See Parsing a `HttpResponse`: `HttpResponseParser`](#response)
+[Parsing a HttpResponse](#response)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
@@ -88,7 +86,7 @@ The connector breaks down the different responsibilities into the following comp
 
 `http.record.filter.factory`
 
-[See Filtering out `HttpRecord`: `HttpRecordFilterFactory`](#filter)
+[Filtering out HttpRecord](#filter)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
@@ -98,7 +96,7 @@ The connector breaks down the different responsibilities into the following comp
 
 `http.record.mapper`
 
-[See Mapping `HttpRecord` to Kafka Connect's `SourceRecord`: `SourceRecordMapper`](#mapper)
+[Mapping HttpRecord to SourceRecord](#mapper)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
@@ -125,10 +123,10 @@ Initial offset, comma separated list of pairs
 
 <a name="request"/>
 
-### Preparing a `HttpRequest`: `HttpRequestFactory`
+### HttpRequestFactory: Preparing a HttpRequest
 The first thing our connector will need to do is prepare a `HttpRequest`
 
-#### Preparing a `HttpRequest` with `TemplateHttpRequestFactory`
+#### Preparing a HttpRequest with TemplateHttpRequestFactory
 This `HttpRequestFactory` is based on template resolution using the `Offset` of the last seen record.
 Templates can be provided for url, headers, query params and body.
 
@@ -181,10 +179,10 @@ Class responsible for creating the templates that will be used on every request.
 
 <a name="client"/>
 
-### Executing a `HttpRequest`: `HttpClient`
+### HttpClient: Executing a HttpRequest
 Once our HttpRequest is ready, we have to execute it to get some results out of it. That's the purpose of the `HttpClient`
 
-#### Executing a `HttpRequest` with `OkHttpClient`
+#### Executing a HttpRequest with OkHttpClient
 Uses a [OkHttp](https://square.github.io/okhttp/) client. 
 
 `http.client.connection.timeout.millis`
@@ -217,11 +215,11 @@ Maximum number of idle connections in the connection pool
 
 <a name="response"/>
 
-### Parsing a `HttpResponse`: `HttpResponseParser`
+### HttpResponseParser: Parsing a HttpResponse
 Once our `HttpRequest` has been executed, as a result we'll have to deal with a `HttpResponse` and translate it into 
 a list of `HttpRecord`
 
-#### Parsing a `HttpResponse` with `JacksonHttpResponseParser`
+#### Parsing a HttpResponse with JacksonHttpResponseParser
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in the response.
 
 `http.response.records.pointer`
@@ -291,22 +289,22 @@ This is the mechanism that enables sharing state in between `HttpRequests`. `Htt
 
 <a name="filter"/>
 
-### Filtering out `HttpRecord`: `HttpRecordFilterFactory`
+### HttpRecordFilterFactory: Filtering out HttpRecord
 
 There are cases where we'll be interested in filtering out certain records. For instance for de-duplication.
 
-#### Filtering out `HttpRecord` with `OffsetTimestampFilterFactory`
+#### Filtering out HttpRecord with OffsetTimestampFilterFactory
 
 De-duplicates based on `Offset`'s timestamp, filtering out records already processed. Assumes records will be ordered by timestamp.
 Useful when timestamp is used to filter the HTTP resource, but the filter doesn't have full timestamp granularity.
 
 <a name="mapper"/>
 
-### Mapping `HttpRecord` to Kafka Connect's `SourceRecord`: `SourceRecordMapper`
+### SourceRecordMapper: Mapping HttpRecord to Kafka Connect's SourceRecord
 
 Once we have our `HttpRecord`s we have to translate them into what Kafka Connect is expecting: `SourceRecord`s 
 
-#### Mapping `HttpRecord` to Kafka Connect's `SourceRecord` with `SchemedSourceRecordMapper`
+#### Mapping HttpRecord to Kafka Connect's SourceRecord with SchemedSourceRecordMapper
 
 Embeds the record properties into a common simple envelope to enable schema evolution. This envelope contains simple a key and a body properties. 
 
@@ -320,11 +318,11 @@ Name of the topic where the record will be sent to
 
 <a name="throttler"/>
 
-### Throttling `HttpRequest`s: `Throttler`
+### Throttler: Throttling HttpRequests
 
 Controls the rate at which HTTP requests are executed.
 
-#### Throttling `HttpRequest`s with `FixedIntervalThrottler`
+#### Throttling HttpRequests with FixedIntervalThrottler
 
 Throttles rate of requests based on a fixed interval. 
 
@@ -335,7 +333,7 @@ Interval in between requests
 *   Type: Long
 *   Default: 10000
 
-#### Throttling `HttpRequest`s with `AdaptableIntervalThrottler`
+#### Throttling HttpRequests with AdaptableIntervalThrottler
 
 Throttles rate of requests based on a fixed interval. However, it has two modes of operation, with two different intervals:
 *   Up to date: No new records, or they have been created since last poll 
