@@ -2,7 +2,7 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## master
+## v0.5.0 (05/10/2020)
 -   `PollInterceptor` refactored into `Throttler`
 -   Implemented `FixedIntervalThrottler` with default interval of 10s
 -   Implemented `AdaptableIntervalThrottler` with up-to-date interval of 10s catch-up interval of 1s

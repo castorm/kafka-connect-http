@@ -26,7 +26,7 @@ If your Kafka Connect deployment is automated and packaged with Maven, you can u
                 <artifactItem>
                     <groupId>com.github.castorm</groupId>
                     <artifactId>kafka-connect-http-plugin</artifactId>
-                    <version>0.3.4</version>
+                    <version>0.5.0</version>
                     <type>tar.gz</type>
                     <classifier>plugin</classifier>
                 </artifactItem>
