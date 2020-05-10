@@ -61,7 +61,7 @@ The connector breaks down the different responsibilities into the following comp
 ### Configuration
 `http.request.factory`
 
-[See `HttpRequestFactory`: Preparing a `HttpRequest`](#request)
+[See Preparing a `HttpRequest`: `HttpRequestFactory`](#request)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
@@ -70,7 +70,7 @@ The connector breaks down the different responsibilities into the following comp
 
 `http.client`
 
-[See `HttpClient`: Executing a `HttpRequest`](#client)
+[See Executing a `HttpRequest`: `HttpClient`](#client)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
@@ -79,7 +79,7 @@ The connector breaks down the different responsibilities into the following comp
 
 `http.response.parser`
 
-[See `HttpResponseParser`: Parsing a `HttpResponse`](#response)
+[See Parsing a `HttpResponse`: `HttpResponseParser`](#response)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
@@ -88,7 +88,7 @@ The connector breaks down the different responsibilities into the following comp
 
 `http.record.filter.factory`
 
-[See `HttpRecordFilterFactory`: Filtering out `HttpRecord`](#filter)
+[See Filtering out `HttpRecord`: `HttpRecordFilterFactory`](#filter)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
@@ -98,7 +98,7 @@ The connector breaks down the different responsibilities into the following comp
 
 `http.record.mapper`
 
-[See `SourceRecordMapper`: Mapping `HttpRecord` to Kafka Connect's `SourceRecord`](#mapper)
+[See Mapping `HttpRecord` to Kafka Connect's `SourceRecord`: `SourceRecordMapper`](#mapper)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
@@ -107,7 +107,7 @@ The connector breaks down the different responsibilities into the following comp
 
 `http.throttler`
 
-[See `Throttler`: Throttling `HttpRequest`s](#throttler)
+[See Throttling `HttpRequest`s: `Throttler`](#throttler)
 
 *   Type: Class
 *   Default: `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
@@ -125,7 +125,7 @@ Initial offset, comma separated list of pairs
 
 <a name="request"/>
 
-### `HttpRequestFactory`: Preparing a `HttpRequest`
+### Preparing a `HttpRequest`: `HttpRequestFactory`
 The first thing our connector will need to do is prepare a `HttpRequest`
 
 #### Preparing a `HttpRequest` with `TemplateHttpRequestFactory`
@@ -181,7 +181,7 @@ Class responsible for creating the templates that will be used on every request.
 
 <a name="client"/>
 
-### `HttpClient`: Executing a `HttpRequest`
+### Executing a `HttpRequest`: `HttpClient`
 Once our HttpRequest is ready, we have to execute it to get some results out of it. That's the purpose of the `HttpClient`
 
 #### Executing a `HttpRequest` with `OkHttpClient`
@@ -217,7 +217,7 @@ Maximum number of idle connections in the connection pool
 
 <a name="response"/>
 
-### `HttpResponseParser`: Parsing a `HttpResponse`
+### Parsing a `HttpResponse`: `HttpResponseParser`
 Once our `HttpRequest` has been executed, as a result we'll have to deal with a `HttpResponse` and translate it into 
 a list of `HttpRecord`
 
@@ -291,7 +291,7 @@ This is the mechanism that enables sharing state in between `HttpRequests`. `Htt
 
 <a name="filter"/>
 
-### `HttpRecordFilterFactory`: Filtering out `HttpRecord`
+### Filtering out `HttpRecord`: `HttpRecordFilterFactory`
 
 There are cases where we'll be interested in filtering out certain records. For instance for de-duplication.
 
@@ -302,7 +302,7 @@ Useful when timestamp is used to filter the HTTP resource, but the filter doesn'
 
 <a name="mapper"/>
 
-### `SourceRecordMapper`: Mapping `HttpRecord` to Kafka Connect's `SourceRecord`
+### Mapping `HttpRecord` to Kafka Connect's `SourceRecord`: `SourceRecordMapper`
 
 Once we have our `HttpRecord`s we have to translate them into what Kafka Connect is expecting: `SourceRecord`s 
 
@@ -320,7 +320,7 @@ Name of the topic where the record will be sent to
 
 <a name="throttler"/>
 
-### `Throttler`: Throttling `HttpRequest`s
+### Throttling `HttpRequest`s: `Throttler`
 
 Controls the rate at which HTTP requests are executed.
 
