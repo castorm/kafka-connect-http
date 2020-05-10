@@ -58,7 +58,7 @@ See [Examples](examples), e.g.
 
 ### Configuration
 
-#### `http.request.factory`
+> #### `http.request.factory`
 > [Preparing a HttpRequest](#request)
 > *   Type: Class
 > *   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
