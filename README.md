@@ -344,7 +344,9 @@ Once we have our `HttpRecord`s we have to translate them into what Kafka Connect
 #### Mapping HttpRecord to Kafka Connect's SourceRecord with SchemedSourceRecordMapper
 
 Embeds the record properties into a common simple envelope to enable schema evolution. This envelope contains simple
-a key and a body properties. 
+a key and a body properties.
+
+Here is also where we'll tell Kafka Connect to what topic and on what partition do we want to send our record.
 
 ```java
 public interface SourceRecordMapper extends Configurable {
