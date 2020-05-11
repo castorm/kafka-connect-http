@@ -10,7 +10,8 @@ Set of Kafka Connect connectors that enable Kafka integration with external syst
 
 ## Getting Started
 
-If your Kafka Connect deployment is automated and packaged with Maven, you can unpack the artifact on Kafka Connect plugins folder. 
+If your Kafka Connect deployment is automated and packaged with Maven, you can unpack the artifact on Kafka Connect
+plugins folder.
 ```xml
 <plugin>
     <artifactId>maven-dependency-plugin</artifactId>
@@ -35,17 +36,20 @@ If your Kafka Connect deployment is automated and packaged with Maven, you can u
     </execution>
 </plugin>
 ```
-Otherwise, you'll have to do it manually by downloading the package from the [Releases Page](https://github.com/castorm/kafka-connect-http-plugin/releases).
+Otherwise, you'll have to do it manually by downloading the package from the
+[Releases Page](https://github.com/castorm/kafka-connect-http-plugin/releases).
 
-More details on how to [Install Connectors](https://docs.confluent.io/current/connect/managing/install.html)
+More details on how to [Install Connectors](https://docs.confluent.io/current/connect/managing/install.html).
 
 ## Source Connector
 `com.github.castorm.kafka.connect.http.HttpSourceConnector`
 
-The HTTP Source connector is meant for implementing [CDC (Change Data Capture)](https://en.wikipedia.org/wiki/Change_data_capture).
+The HTTP Source connector is meant for implementing 
+[CDC (Change Data Capture)](https://en.wikipedia.org/wiki/Change_data_capture).
 
 ### Requirements for CDC
-*   The HTTP resource contains an array of records that is ordered by a given set of properties present on every record (we'll call them **offset**)
+*   The HTTP resource contains an array of records that is ordered by a given set of properties present on every record
+    (we'll call them **offset**)
 *   The HTTP resource allows retrieving records starting from a given **offset**
 *   The **offset** properties are monotonically increasing
 
@@ -55,6 +59,30 @@ Kafka Connect will store internally these offsets so the connector can continue 
 
 See [Examples](examples), e.g. 
 *   [Jira Search Issues API](examples/jira-search-issues.md)
+
+### Extension points
+The connector can be easily extended by implementing your own version of any of the components below.
+
+These are better understood by looking at the source task implementation:
+```java
+public List<SourceRecord> poll() throws InterruptedException {
+
+    throttler.throttle(offset);
+
+    HttpRequest request = requestFactory.createRequest(offset);
+
+    HttpResponse response = requestExecutor.execute(request);
+
+    return responseParser.parse(response).stream()
+            .filter(recordFilterFactory.create(offset))
+            .map(recordMapper::map)
+            .collect(toList());
+}
+
+public void commitRecord(SourceRecord record) {
+    offset = Offset.of(record.sourceOffset(), record.timestamp());
+}
+```
 
 ### Configuration
 
@@ -114,14 +142,33 @@ See [Examples](examples), e.g.
 ### HttpRequestFactory: Preparing a HttpRequest
 The first thing our connector will need to do is prepare a `HttpRequest`
 
+```java
+public interface HttpRequestFactory extends Configurable {
+
+    HttpRequest createRequest(Offset offset);
+}
+```
+
 #### Preparing a HttpRequest with TemplateHttpRequestFactory
 This `HttpRequestFactory` is based on template resolution using the `Offset` of the last seen record.
 Templates can be provided for url, headers, query params and body.
 
+```java
+public interface TemplateFactory {
+
+    Template create(String template);
+}
+
+public interface Template {
+
+    String apply(Offset offset);
+}
+```
+
 > ##### `http.request.url`
 > Http method to use in the request.
 > *   Type: String
-> *   Default: "GET"
+> *   Default: `GET`
 > 
 > ##### `http.request.method`
 > Http url to use in the request, it can contain a `Template`
@@ -151,13 +198,22 @@ Templates can be provided for url, headers, query params and body.
 > *   Default: `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
 > *   Available classes:
 >     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
->     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory` Implementation based on [FreeMarker](https://freemarker.apache.org/)
+>     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
+          Implementation based on [FreeMarker](https://freemarker.apache.org/)
 
 ---
 <a name="client"/>
 
 ### HttpClient: Executing a HttpRequest
-Once our HttpRequest is ready, we have to execute it to get some results out of it. That's the purpose of the `HttpClient`
+Once our HttpRequest is ready, we have to execute it to get some results out of it. That's the purpose of the 
+`HttpClient`
+
+```java
+public interface HttpClient extends Configurable {
+
+    HttpResponse execute(HttpRequest request) throws IOException;
+}
+```
 
 #### Executing a HttpRequest with OkHttpClient
 Uses a [OkHttp](https://square.github.io/okhttp/) client. 
@@ -189,6 +245,13 @@ Uses a [OkHttp](https://square.github.io/okhttp/) client.
 Once our `HttpRequest` has been executed, as a result we'll have to deal with a `HttpResponse` and translate it into 
 a list of `HttpRecord`
 
+```java
+public interface HttpResponseParser extends Configurable {
+
+    List<HttpRecord> parse(HttpResponse response);
+}
+```
+
 #### Parsing a HttpResponse with JacksonHttpResponseParser
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in the response.
 
@@ -198,7 +261,8 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > *   Default: "/"
 > 
 > ##### `http.response.record.key.pointer`
-> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual record to be used as kafka record key
+> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual record to be used as kafka 
+  record key
 > This is especially important on partitioned topics  
 > *   Type: String
 > *   Default: ""
@@ -209,8 +273,10 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > *   Default: "/"
 > 
 > ##### `http.response.record.timestamp.pointer`
-> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual record to be used as kafka record timestamp
-> This is especially important to track progress, enable latency calculations, improved throttling and feedback to `TemplateHttpRequestFactory` 
+> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual record to be used as kafka 
+  record timestamp
+> This is especially important to track progress, enable latency calculations, improved throttling and feedback to 
+  `TemplateHttpRequestFactory` 
 > *   Type: String
 > *   Default: ""
 > 
@@ -219,8 +285,10 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > *   Type: String
 > *   Default: `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
 > *   Available classes:
->     *   `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser` Implementation based on based on a `DateTimeFormatter`
->     *   `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser` Implementation based on [Natty](http://natty.joestelmach.com/) parser
+>     *   `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser` 
+           Implementation based on based on a `DateTimeFormatter`
+>     *   `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser`
+           Implementation based on [Natty](http://natty.joestelmach.com/) parser
 > 
 > ##### `http.response.record.timestamp.parser.pattern`
 > When using `DateTimeFormatterTimestampParser`, a custom pattern can be specified 
@@ -228,13 +296,16 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > *   Default: `yyyy-MM-dd'T'HH:mm:ss.SSSX`
 > 
 > ##### `http.response.record.timestamp.parser.zone`
-> Timezone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid identifiers
+> Timezone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid
+  identifiers
 > *   Type: String
-> *   Default: "UTC"
+> *   Default: `UTC`
 > 
 > ##### `http.response.record.offset.pointer`
-> Comma separated list of `key=value` pairs where the key is the name of the property in the offset and the value is the [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value being used as offset for future requests
-> This is the mechanism that enables sharing state in between `HttpRequests`. `HttpRequestFactory` implementations receive this `Offset`.
+> Comma separated list of `key=value` pairs where the key is the name of the property in the offset and the value is
+  the [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value being used as offset for future requests
+> This is the mechanism that enables sharing state in between `HttpRequests`. `HttpRequestFactory` implementations 
+  receive this `Offset`.
 > *   Type: String
 > *   Default: ""
 
@@ -243,12 +314,25 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 
 ### HttpRecordFilterFactory: Filtering out HttpRecord
 
-There are cases where we'll be interested in filtering out certain records. For instance for de-duplication.
+There are cases where we'll be interested in filtering out certain records. One of these would be de-duplication.
+
+```java
+public interface HttpRecordFilterFactory extends Configurable {
+
+    Predicate<HttpRecord> create(Offset offset);
+}
+```
 
 #### Filtering out HttpRecord with OffsetTimestampFilterFactory
 
-De-duplicates based on `Offset`'s timestamp, filtering out records already processed. Assumes records will be ordered by timestamp.
-Useful when timestamp is used to filter the HTTP resource, but the filter doesn't have full timestamp granularity.
+De-duplicates based on `Offset`'s timestamp, filtering out records already processed. 
+Useful when timestamp is used to filter the HTTP resource, but the filter doesn't have full timestamp precision.
+Assumptions:
+*   Records are ordered by timestamp
+*   No two records can contain the same timestamp (to whatever precision the HTTP resource uses)
+
+If the latter assumption cannot be satisfied, data loss will happen if two records with the same timestamp fall under
+different HTTP responses.
 
 ---
 <a name="mapper"/>
@@ -259,7 +343,15 @@ Once we have our `HttpRecord`s we have to translate them into what Kafka Connect
 
 #### Mapping HttpRecord to Kafka Connect's SourceRecord with SchemedSourceRecordMapper
 
-Embeds the record properties into a common simple envelope to enable schema evolution. This envelope contains simple a key and a body properties. 
+Embeds the record properties into a common simple envelope to enable schema evolution. This envelope contains simple
+a key and a body properties. 
+
+```java
+public interface SourceRecordMapper extends Configurable {
+
+    SourceRecord map(HttpRecord record);
+}
+```
 
 > ##### `kafka.topic`
 > Name of the topic where the record will be sent to
@@ -274,6 +366,13 @@ Embeds the record properties into a common simple envelope to enable schema evol
 
 Controls the rate at which HTTP requests are executed.
 
+```java
+public interface Throttler extends Configurable {
+
+    void throttle(Offset offset) throws InterruptedException;
+}
+```
+
 #### Throttling HttpRequests with FixedIntervalThrottler
 
 Throttles rate of requests based on a fixed interval. 
@@ -285,7 +384,8 @@ Throttles rate of requests based on a fixed interval.
 
 #### Throttling HttpRequests with AdaptableIntervalThrottler
 
-Throttles rate of requests based on a fixed interval. However, it has two modes of operation, with two different intervals:
+Throttles rate of requests based on a fixed interval. However, it has two modes of operation, with two different 
+intervals:
 *   Up to date: No new records, or they have been created since last poll 
 *   Catching up: There were new record in last poll and they were created long ago
 
@@ -303,92 +403,6 @@ Throttles rate of requests based on a fixed interval. However, it has two modes 
 ---
 ## Development
 
-### SPI
-The connector can be easily extended by implementing your own version of any of the components below.
-
-These are better understood by looking at the source task implementation:
-```java
-public List<SourceRecord> poll() throws InterruptedException {
-
-    throttler.throttle(offset);
-
-    HttpRequest request = requestFactory.createRequest(offset);
-
-    HttpResponse response = requestExecutor.execute(request);
-
-    return responseParser.parse(response).stream()
-            .filter(recordFilterFactory.create(offset))
-            .map(recordMapper::map)
-            .collect(toList());
-}
-
-public void commitRecord(SourceRecord record) {
-    offset = Offset.of(record.sourceOffset(), record.timestamp());
-}
-```
-
-#### Throttler
-```java
-public interface Throttler extends Configurable {
-
-    void throttle(Offset offset) throws InterruptedException;
-}
-```
-
-#### HttpRequestFactory
-```java
-public interface HttpRequestFactory extends Configurable {
-
-    HttpRequest createRequest(Offset offset);
-}
-```
-
-#### OffsetTemplateFactory
-```java
-public interface TemplateFactory {
-
-    OffsetTemplate create(String template);
-}
-
-public interface Template {
-
-    String apply(Offset offset);
-}
-```
-
-#### HttpClient
-```java
-public interface HttpClient extends Configurable {
-
-    HttpResponse execute(HttpRequest request) throws IOException;
-}
-```
-
-#### HttpResponseParser
-```java
-public interface HttpResponseParser extends Configurable {
-
-    List<HttpRecord> parse(HttpResponse response);
-}
-```
-
-#### HttpRecordFilterFactory
-```java
-public interface HttpRecordFilterFactory extends Configurable {
-
-    Predicate<HttpRecord> create(Offset offset);
-}
-```
-
-#### SourceRecordMapper
-```java
-public interface SourceRecordMapper extends Configurable {
-
-    SourceRecord map(HttpRecord record);
-}
-```
-
----
 ### Building
 ```bash
 mvn package
