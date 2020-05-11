@@ -84,58 +84,6 @@ public void commitRecord(SourceRecord record) {
 }
 ```
 
-### Configuration
-
-> #### `http.request.factory`
-> [Preparing a HttpRequest](#request)
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
-> *   Available classes:
->     *   `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
-> 
-> #### `http.client`
-> [Executing a HttpRequest](#client)
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
-> *   Available classes:
->     *   `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
-> 
-> #### `http.response.parser`
-> [Parsing a HttpResponse](#response)
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
-> *   Available classes:
->     *   `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
-> 
-> #### `http.record.filter.factory`
-> [Filtering out HttpRecord](#filter)
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
-> *   Available classes:
->     *   `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
->     *   `com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory`
-> 
-> #### `http.record.mapper`
-> [Mapping HttpRecord to SourceRecord](#mapper)
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
-> *   Available classes:
->     *   `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
-> 
-> #### `http.throttler`
-> [Throttling HttpRequests](#throttler)
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
-> *   Available classes:
->     *   `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
->     *   `com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler`
-> 
-> #### `http.offset.initial`
-> Initial offset, comma separated list of pairs
-> *   Example: `property1=value1, property2=value2`
-> *   Type: String
-> *   Default: ""
-
 ---
 <a name="request"/>
 
@@ -148,6 +96,17 @@ public interface HttpRequestFactory extends Configurable {
     HttpRequest createRequest(Offset offset);
 }
 ```
+> #### `http.request.factory`
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
+>
+> #### `http.offset.initial`
+> Initial offset, comma separated list of pairs
+> *   Example: `property1=value1, property2=value2`
+> *   Type: String
+> *   Default: ""
 
 #### Preparing a HttpRequest with TemplateHttpRequestFactory
 This `HttpRequestFactory` is based on template resolution using the `Offset` of the last seen record.
@@ -196,7 +155,7 @@ public interface Template {
 > Class responsible for creating the templates that will be used on every request.
 > *   Type: Class
 > *   Default: `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
-> *   Available classes:
+> *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
 >     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
           Implementation based on [FreeMarker](https://freemarker.apache.org/)
@@ -214,6 +173,12 @@ public interface HttpClient extends Configurable {
     HttpResponse execute(HttpRequest request) throws IOException;
 }
 ```
+
+> #### `http.client`
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
 
 #### Executing a HttpRequest with OkHttpClient
 Uses a [OkHttp](https://square.github.io/okhttp/) client. 
@@ -252,6 +217,12 @@ public interface HttpResponseParser extends Configurable {
 }
 ```
 
+> #### `http.response.parser`
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
+
 #### Parsing a HttpResponse with JacksonHttpResponseParser
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in the response.
 
@@ -284,7 +255,7 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > Class responsible for converting the timestamp property captured above into a `java.time.Instant`.  
 > *   Type: String
 > *   Default: `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
-> *   Available classes:
+> *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser` 
            Implementation based on based on a `DateTimeFormatter`
 >     *   `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser`
@@ -323,6 +294,13 @@ public interface HttpRecordFilterFactory extends Configurable {
 }
 ```
 
+> #### `http.record.filter.factory`
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
+>     *   `com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory`
+
 #### Filtering out HttpRecord with OffsetTimestampFilterFactory
 
 De-duplicates based on `Offset`'s timestamp, filtering out records already processed. 
@@ -339,12 +317,7 @@ different HTTP responses.
 
 ### SourceRecordMapper: Mapping HttpRecord to Kafka Connect's SourceRecord
 
-Once we have our `HttpRecord`s we have to translate them into what Kafka Connect is expecting: `SourceRecord`s 
-
-#### Mapping HttpRecord to Kafka Connect's SourceRecord with SchemedSourceRecordMapper
-
-Embeds the record properties into a common simple envelope to enable schema evolution. This envelope contains simple
-a key and a body properties.
+Once we have our `HttpRecord`s we have to translate them into what Kafka Connect is expecting: `SourceRecord`s
 
 Here is also where we'll tell Kafka Connect to what topic and on what partition do we want to send our record.
 
@@ -354,6 +327,17 @@ public interface SourceRecordMapper extends Configurable {
     SourceRecord map(HttpRecord record);
 }
 ```
+
+> #### `http.record.mapper`
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper` 
+
+#### Mapping HttpRecord to Kafka Connect's SourceRecord with SchemedSourceRecordMapper
+
+Embeds the record properties into a common simple envelope to enable schema evolution. This envelope contains simple
+a key and a body properties.
 
 > ##### `kafka.topic`
 > Name of the topic where the record will be sent to
@@ -374,6 +358,13 @@ public interface Throttler extends Configurable {
     void throttle(Offset offset) throws InterruptedException;
 }
 ```
+
+> #### `http.throttler`
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
+>     *   `com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler`
 
 #### Throttling HttpRequests with FixedIntervalThrottler
 
