@@ -71,7 +71,7 @@
 
         <junit.version>5.6.2</junit.version>
         <mockito.version>3.3.3</mockito.version>
-        <assertj.version>3.16.0</assertj.version>
+        <assertj.version>3.16.1</assertj.version>
         <guava.version>29.0-jre</guava.version>
     </properties>
 
