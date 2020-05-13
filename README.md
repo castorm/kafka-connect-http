@@ -88,7 +88,7 @@ public void commitRecord(SourceRecord record) {
 <a name="request"/>
 
 ### HttpRequestFactory: Preparing a HttpRequest
-The first thing our connector will need to do is prepare a `HttpRequest`
+The first thing our connector will need to do is preparing a `HttpRequest`
 
 ```java
 public interface HttpRequestFactory extends Configurable {
@@ -219,6 +219,19 @@ public interface HttpResponseParser extends Configurable {
 
 > #### `http.response.parser`
 > *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.response.StatusCodeFilterResponseParser`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.response.StatusCodeFilterResponseParser`
+>     *   `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
+
+#### Parsing a HttpResponse with StatusCodeFilterResponseParser
+Does response filtering based on HTTP status codes:
+*   `200`..`299`: Delegate parsing to the delegate parser
+*   `300`..`399`: Continue with no records
+*   `400`..`599`: Halth the connector
+
+> ##### `http.response.parser.delegate`
+> *   Type: Class
 > *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
@@ -296,10 +309,10 @@ public interface HttpRecordFilterFactory extends Configurable {
 
 > #### `http.record.filter.factory`
 > *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
+> *   Default: `com.github.castorm.kafka.connect.http.response.PassthroughRecordFilterFactory`
 > *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory`
->     *   `com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory`
+>     *   `com.github.castorm.kafka.connect.http.response.PassthroughRecordFilterFactory`
+>     *   `com.github.castorm.kafka.connect.http.response.OffsetTimestampRecordFilterFactory`
 
 #### Filtering out HttpRecord with OffsetTimestampFilterFactory
 

@@ -2,6 +2,9 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.5.1 (TBD)
+-   First iteration of `StatusCodeFilterResponseParser` to cope with unexpected http status codes
+
 ## v0.5.0 (05/10/2020)
 -   `PollInterceptor` refactored into `Throttler`
 -   Implemented `FixedIntervalThrottler` with default interval of 10s

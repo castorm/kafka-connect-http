@@ -22,16 +22,16 @@ package com.github.castorm.kafka.connect.http.response;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
-import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.response.spi.HttpRecordFilterFactory;
+import org.junit.jupiter.api.Test;
 
-import java.util.function.Predicate;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class PassthroughFilterFactory implements HttpRecordFilterFactory {
+class PassthroughRecordFilterFactoryTest {
 
-    @Override
-    public Predicate<HttpRecord> create(Offset offset) {
-        return __ -> true;
+    PassthroughRecordFilterFactory factory = new PassthroughRecordFilterFactory();
+
+    @Test
+    void givenFactoryWithNull_whenTestNull_thenTrue() {
+        assertThat(factory.create(null).test(null)).isTrue();
     }
 }

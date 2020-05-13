@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.function.Predicate;
 
 @RequiredArgsConstructor
-public class OffsetTimestampFilterFactory implements HttpRecordFilterFactory {
+public class OffsetTimestampRecordFilterFactory implements HttpRecordFilterFactory {
 
     @Override
     public Predicate<HttpRecord> create(Offset offset) {

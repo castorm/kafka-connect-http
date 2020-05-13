@@ -30,17 +30,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
-import static com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactoryTest.Fixture.record;
-import static com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactoryTest.Fixture.now;
+import static com.github.castorm.kafka.connect.http.response.OffsetTimestampRecordFilterFactoryTest.Fixture.record;
+import static com.github.castorm.kafka.connect.http.response.OffsetTimestampRecordFilterFactoryTest.Fixture.now;
 import static edu.emory.mathcs.backport.java.util.Collections.emptyMap;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class OffsetTimestampFilterFactoryTest {
+class OffsetTimestampRecordFilterFactoryTest {
 
-    OffsetTimestampFilterFactory factory = new OffsetTimestampFilterFactory();
+    OffsetTimestampRecordFilterFactory factory = new OffsetTimestampRecordFilterFactory();
 
     @Test
     void givenOffset_whenTestEarlier_thenFalse() {

@@ -24,17 +24,17 @@ package com.github.castorm.kafka.connect.http;
 
 import com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
+import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
-import com.github.castorm.kafka.connect.http.response.OffsetTimestampFilterFactory;
-import com.github.castorm.kafka.connect.http.response.PassthroughFilterFactory;
-import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
+import com.github.castorm.kafka.connect.http.response.OffsetTimestampRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.response.PassthroughRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.response.StatusCodeFilterResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler;
 import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler;
@@ -85,7 +85,7 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenNoResponseParser_thenDefault() {
-        assertThat(configWithout("http.response.parser").getResponseParser()).isInstanceOf(JacksonHttpResponseParser.class);
+        assertThat(configWithout("http.response.parser").getResponseParser()).isInstanceOf(StatusCodeFilterResponseParser.class);
     }
 
     @Test
@@ -95,12 +95,12 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenNoResponseFilterFactory_thenDefault() {
-        assertThat(configWithout("http.record.filter.factory").getRecordFilterFactory()).isInstanceOf(PassthroughFilterFactory.class);
+        assertThat(configWithout("http.record.filter.factory").getRecordFilterFactory()).isInstanceOf(PassthroughRecordFilterFactory.class);
     }
 
     @Test
     void whenResponseFilterFactory_thenInitialized() {
-        assertThat(config("http.record.filter.factory", OffsetTimestampFilterFactory.class.getName()).getRecordFilterFactory()).isInstanceOf(OffsetTimestampFilterFactory.class);
+        assertThat(config("http.record.filter.factory", OffsetTimestampRecordFilterFactory.class.getName()).getRecordFilterFactory()).isInstanceOf(OffsetTimestampRecordFilterFactory.class);
     }
 
     @Test
