@@ -255,7 +255,6 @@
                         <version>2.0.0</version>
                         <configuration>
                             <licenseName>apache_v2</licenseName>
-                            <licenseResolver>${project.baseUri}/src/license</licenseResolver>
                         </configuration>
                         <executions>
                             <execution>
