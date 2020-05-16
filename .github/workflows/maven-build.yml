@@ -33,7 +33,7 @@ jobs:
         run: mvn -B package -P package
 
       - name: Prepare staging
-        run: mkdir staging && cp target/*.jar staging && cp target/*.tar.gz staging
+        run: mkdir staging && cp target/*.jar staging && cp target/*.zip staging
       - name: Archive staging
         uses: actions/upload-artifact@v1
         with:
