@@ -43,6 +43,10 @@ public class StatusCodeHttpResponsePolicy implements HttpResponsePolicy {
 
     private Set<Integer> skipCodes;
 
+    public StatusCodeHttpResponsePolicy() {
+        this(StatusCodeHttpResponsePolicyConfig::new);
+    }
+
     @Override
     public void configure(Map<String, ?> settings) {
         StatusCodeHttpResponsePolicyConfig config = configFactory.apply(settings);
