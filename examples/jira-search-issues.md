@@ -51,7 +51,7 @@ And based on the results we would be updating the `updated` filter for subsequen
         "http.request.headers": "Authorization: Basic TBD, Accept: application/json",
         "http.request.params": "jql=updated>=\"${timestamp_iso?datetime.iso?string['yyyy/MM/dd HH:mm']}\" ORDER BY updated ASC&maxResults=100",
         "http.request.template.factory": "com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory",    
-        "http.record.filter.factory": OffsetTimestampRecordFilterFactoryctory",
+        "http.record.filter.factory": "com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactory",
         "http.response.records.pointer": "/issues",
         "http.response.record.key.pointer": "/id",
         "http.response.record.value.pointer": "/",
