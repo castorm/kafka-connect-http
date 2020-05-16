@@ -28,7 +28,7 @@ import java.util.Map;
 
 public interface SourceRecordMapper extends Configurable {
 
-    SourceRecord map(HttpRecord HttpRecordFilterFactory);
+    SourceRecord map(HttpRecord record);
 
     default void configure(Map<String, ?> map) {
         // Do nothing
