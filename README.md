@@ -219,18 +219,42 @@ public interface HttpResponseParser extends Configurable {
 
 > #### `http.response.parser`
 > *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.response.StatusCodeFilterResponseParser`
+> *   Default: `com.github.castorm.kafka.connect.http.response.PolicyResponseParser`
 > *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.response.StatusCodeFilterResponseParser`
+>     *   `com.github.castorm.kafka.connect.http.response.PolicyResponseParser`
 >     *   `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
 
-#### Parsing a HttpResponse with StatusCodeFilterResponseParser
-Does response filtering based on HTTP status codes:
-*   `200`..`299`: Delegate parsing to the delegate parser
-*   `300`..`399`: Continue with no records
-*   `400`..`599`: Halth the connector
+#### Parsing a HttpResponse with PolicyResponseParser
+Vets the HTTP response deciding whether the response should be processed, skipped or failed. This decision is delegated
+to a `HttpResponsePolicy`. 
+When decision is to process response, this processing is delegated to a secondary `HttpResponseParser`.
 
-> ##### `http.response.parser.delegate`
+##### HttpResponsePolicy: Vetting a HttpResponse
+
+```java
+public interface HttpResponsePolicy extends Configurable {
+
+    HttpResponseOutcome resolve(HttpResponse response);
+
+    enum HttpResponseOutcome {
+        PROCESS, SKIP, FAIL
+    }
+}
+```
+
+###### Vetting a HttpResponse with StatusCodeResponsePolicy
+Does response vetting based on HTTP status codes:
+*   `200`..`299`: `HttpResponseOutcome.PROCESS`
+*   `300`..`399`: `HttpResponseOutcome.SKIP`
+*   `400`..`599`: `HttpResponseOutcome.FAIL`
+
+> ##### `http.response.policy`
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.response.StatusCodeResponsePolicy`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.response.StatusCodeResponsePolicy`
+
+> ##### `http.response.policy.delegate`
 > *   Type: Class
 > *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
 > *   Available implementations:

@@ -22,6 +22,7 @@ package com.github.castorm.kafka.connect.http.response;
 
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy;
 import lombok.Getter;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
@@ -32,19 +33,24 @@ import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
 
 @Getter
-public class StatusCodeFilterResponseParserConfig extends AbstractConfig {
+public class PolicyResponseParserConfig extends AbstractConfig {
 
-    private static final String PARSER_DELEGATE = "http.response.parser.delegate";
+    private static final String PARSER_DELEGATE = "http.response.policy.delegate";
+    private static final String POLICY = "http.response.policy";
 
     private final HttpResponseParser delegateParser;
 
-    public StatusCodeFilterResponseParserConfig(Map<String, ?> originals) {
+    private final HttpResponsePolicy policy;
+
+    public PolicyResponseParserConfig(Map<String, ?> originals) {
         super(config(), originals);
         delegateParser = getConfiguredInstance(PARSER_DELEGATE, HttpResponseParser.class);
+        policy = getConfiguredInstance(POLICY, HttpResponsePolicy.class);
     }
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(PARSER_DELEGATE, CLASS, JacksonHttpResponseParser.class, HIGH, "Response Parser Delegate Class");
+                .define(PARSER_DELEGATE, CLASS, JacksonHttpResponseParser.class, HIGH, "Response Parser Delegate Class")
+                .define(POLICY, CLASS, StatusCodeResponsePolicy.class, HIGH, "Response Policy Class");
     }
 }

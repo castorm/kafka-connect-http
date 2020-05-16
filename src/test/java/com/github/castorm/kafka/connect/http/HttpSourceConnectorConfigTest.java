@@ -32,7 +32,7 @@ import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.OffsetTimestampRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.response.PassthroughRecordFilterFactory;
-import com.github.castorm.kafka.connect.http.response.StatusCodeFilterResponseParser;
+import com.github.castorm.kafka.connect.http.response.PolicyResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler;
 import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler;
@@ -83,7 +83,7 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenNoResponseParser_thenDefault() {
-        assertThat(configWithout("http.response.parser").getResponseParser()).isInstanceOf(StatusCodeFilterResponseParser.class);
+        assertThat(configWithout("http.response.parser").getResponseParser()).isInstanceOf(PolicyResponseParser.class);
     }
 
     @Test

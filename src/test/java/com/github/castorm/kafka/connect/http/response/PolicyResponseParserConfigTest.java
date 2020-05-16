@@ -24,6 +24,7 @@ import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,7 @@ import java.util.Map;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StatusCodeFilterResponseParserConfigTest {
+class PolicyResponseParserConfigTest {
 
     @Test
     void whenNoDelegate_thenDefault() {
@@ -42,7 +43,17 @@ class StatusCodeFilterResponseParserConfigTest {
 
     @Test
     void whenDelegate_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.response.parser.delegate", TestResponseParser.class.getName())).getDelegateParser()).isInstanceOf(TestResponseParser.class);
+        assertThat(config(ImmutableMap.of("http.response.policy.delegate", TestResponseParser.class.getName())).getDelegateParser()).isInstanceOf(TestResponseParser.class);
+    }
+
+    @Test
+    void whenNoPolicy_thenDefault() {
+        assertThat(config(emptyMap()).getPolicy()).isInstanceOf(StatusCodeResponsePolicy.class);
+    }
+
+    @Test
+    void whenPolicy_thenInitialized() {
+        assertThat(config(ImmutableMap.of("http.response.policy", TestPolicy.class.getName())).getPolicy()).isInstanceOf(TestPolicy.class);
     }
 
     public static class TestResponseParser implements HttpResponseParser {
@@ -53,7 +64,13 @@ class StatusCodeFilterResponseParserConfigTest {
         }
     }
 
-    private static StatusCodeFilterResponseParserConfig config(Map<String, Object> settings) {
-        return new StatusCodeFilterResponseParserConfig(settings);
+    public static class TestPolicy implements HttpResponsePolicy {
+
+        @Override
+        public HttpResponseOutcome resolve(HttpResponse response) { return null; }
+    }
+
+    private static PolicyResponseParserConfig config(Map<String, Object> settings) {
+        return new PolicyResponseParserConfig(settings);
     }
 }

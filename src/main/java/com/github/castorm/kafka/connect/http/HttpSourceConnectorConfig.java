@@ -27,7 +27,7 @@ import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.PassthroughRecordFilterFactory;
-import com.github.castorm.kafka.connect.http.response.StatusCodeFilterResponseParser;
+import com.github.castorm.kafka.connect.http.response.PolicyResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler;
@@ -79,7 +79,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
                 .define(THROTTLER, CLASS, AdaptableIntervalThrottler.class, HIGH, "Poll Throttler Class")
                 .define(CLIENT, CLASS, OkHttpClient.class, HIGH, "Request Client Class")
                 .define(REQUEST_FACTORY, CLASS, TemplateHttpRequestFactory.class, HIGH, "Request Factory Class")
-                .define(RESPONSE_PARSER, CLASS, StatusCodeFilterResponseParser.class, HIGH, "Response Parser Class")
+                .define(RESPONSE_PARSER, CLASS, PolicyResponseParser.class, HIGH, "Response Parser Class")
                 .define(RECORD_FILTER_FACTORY, CLASS, PassthroughRecordFilterFactory.class, LOW, "Record Filter Factory Class")
                 .define(RECORD_MAPPER, CLASS, SchemedSourceRecordMapper.class, HIGH, "Record Mapper Class")
                 .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset");

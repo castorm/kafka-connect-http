@@ -20,45 +20,29 @@ package com.github.castorm.kafka.connect.http.response;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
-import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
-import static java.util.Collections.emptyList;
+import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.FAIL;
+import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.PROCESS;
+import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.SKIP;
 
 @Slf4j
 @RequiredArgsConstructor
-public class StatusCodeFilterResponseParser implements HttpResponseParser {
-
-    private final Function<Map<String, ?> , StatusCodeFilterResponseParserConfig> configFactory;
-
-    private HttpResponseParser delegate;
-
-    public StatusCodeFilterResponseParser() {
-        this(StatusCodeFilterResponseParserConfig::new);
-    }
+public class StatusCodeResponsePolicy implements HttpResponsePolicy {
 
     @Override
-    public void configure(Map<String, ?> settings) {
-        delegate = configFactory.apply(settings).getDelegateParser();
-    }
-
-    @Override
-    public List<HttpRecord> parse(HttpResponse response) {
+    public HttpResponseOutcome resolve(HttpResponse response) {
         if (response.getCode() >= 200 && response.getCode() < 300) {
-            return delegate.parse(response);
+            return PROCESS;
         } else if (response.getCode() >= 300 && response.getCode() < 400) {
             log.warn("Unexpected HttpResponse status code: {}, continuing with no records", response.getCode());
-            return emptyList();
+            return SKIP;
         } else {
             log.error("Unexpected HttpResponse status code: {}, halting the connector. Body: {}", response.getCode(), response.getBody());
-            throw new IllegalStateException(String.format("Unexpected HttpResponse status code: %s", response.getCode()));
+            return FAIL;
         }
     }
 }
