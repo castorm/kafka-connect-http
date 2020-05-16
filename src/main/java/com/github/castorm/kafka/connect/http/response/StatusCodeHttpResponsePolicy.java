@@ -25,6 +25,10 @@ import com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.FAIL;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.PROCESS;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.SKIP;
@@ -33,11 +37,24 @@ import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePol
 @RequiredArgsConstructor
 public class StatusCodeHttpResponsePolicy implements HttpResponsePolicy {
 
+    private final Function<Map<String, ?>, StatusCodeHttpResponsePolicyConfig> configFactory;
+
+    private Set<Integer> processCodes;
+
+    private Set<Integer> skipCodes;
+
+    @Override
+    public void configure(Map<String, ?> settings) {
+        StatusCodeHttpResponsePolicyConfig config = configFactory.apply(settings);
+        processCodes = config.getProcessCodes();
+        skipCodes = config.getSkipCodes();
+    }
+
     @Override
     public HttpResponseOutcome resolve(HttpResponse response) {
-        if (response.getCode() >= 200 && response.getCode() < 300) {
+        if (processCodes.contains(response.getCode())) {
             return PROCESS;
-        } else if (response.getCode() >= 300 && response.getCode() < 400) {
+        } else if (skipCodes.contains(response.getCode())) {
             log.warn("Unexpected HttpResponse status code: {}, continuing with no records", response.getCode());
             return SKIP;
         } else {

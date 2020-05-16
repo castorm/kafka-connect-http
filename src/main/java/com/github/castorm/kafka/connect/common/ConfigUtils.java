@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.common;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,17 +26,21 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.IntStream.rangeClosed;
 
 @UtilityClass
-public class MapUtils {
+public class ConfigUtils {
 
     public static Map<String, List<String>> breakDownHeaders(String headers) {
         return breakDownMultiValuePairs(headers, ",", ":");
@@ -73,5 +77,31 @@ public class MapUtils {
             throw new IllegalStateException("Incomplete pair: " + pairLine);
         }
         return new SimpleEntry<>(parts[0].trim(), parts[1].trim());
+    }
+
+    public static Set<Integer> parseIntegerRangedList(String rangedList) {
+        return Stream.of(rangedList.split(","))
+                .map(String::trim)
+                .map(ConfigUtils::parseIntegerRanged)
+                .flatMap(Set::stream)
+                .collect(toSet());
+    }
+
+    private static Set<Integer> parseIntegerRanged(String range) {
+        String[] rangeString = range.split("\\.\\.");
+        if (rangeString.length == 0 || rangeString[0].length() == 0) {
+            return emptySet();
+        } else if (rangeString.length == 1) {
+            return asSet(Integer.valueOf(rangeString[0].trim()));
+        } else if (rangeString.length == 2) {
+            Integer from = Integer.valueOf(rangeString[0].trim());
+            Integer to = Integer.valueOf(rangeString[1].trim());
+            return (from < to ? rangeClosed(from, to) : rangeClosed(to, from)).boxed().collect(toSet());
+        }
+        throw new IllegalStateException(String.format("Invalid range definition %s", range));
+    }
+
+    private static Set<Integer> asSet(Integer... values) {
+        return Stream.of(values).collect(toSet());
     }
 }

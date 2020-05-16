@@ -36,7 +36,7 @@ import org.apache.kafka.common.config.ConfigDef;
 
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.common.MapUtils.breakDownMap;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Importance.LOW;
 import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;

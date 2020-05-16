@@ -31,7 +31,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
-import static com.github.castorm.kafka.connect.common.MapUtils.breakDownMap;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;

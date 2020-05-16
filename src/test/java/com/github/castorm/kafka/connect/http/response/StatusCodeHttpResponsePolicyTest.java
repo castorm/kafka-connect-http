@@ -21,49 +21,68 @@ package com.github.castorm.kafka.connect.http.response;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.stream.Stream;
+
+import static com.github.castorm.kafka.connect.http.response.StatusCodeHttpResponsePolicyTest.Fixture.code;
 import static com.github.castorm.kafka.connect.http.response.StatusCodeHttpResponsePolicyTest.Fixture.response;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.FAIL;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.PROCESS;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.SKIP;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
+@ExtendWith(MockitoExtension.class)
 class StatusCodeHttpResponsePolicyTest {
 
-    StatusCodeHttpResponsePolicy policy = new StatusCodeHttpResponsePolicy();
+    StatusCodeHttpResponsePolicy policy;
 
-    @Test
-    void givenCode199_whenResolve_thenFail() {
-        assertThat(policy.resolve(response.withCode(199))).isEqualTo(FAIL);
+    @Mock
+    StatusCodeHttpResponsePolicyConfig config;
+
+    @BeforeEach
+    void setUp() {
+        policy = new StatusCodeHttpResponsePolicy(__ -> config);
     }
 
     @Test
-    void givenCode200_whenResolve_thenProcess() {
-        assertThat(policy.resolve(response.withCode(200))).isEqualTo(PROCESS);
+    void givenCodeProcess_whenResolve_thenProcess() {
+
+        given(config.getProcessCodes()).willReturn(Stream.of(code).collect(toSet()));
+        policy.configure(emptyMap());
+
+        assertThat(policy.resolve(response.withCode(code))).isEqualTo(PROCESS);
     }
 
     @Test
-    void givenCode299_whenResolve_thenDelegate() {
-        assertThat(policy.resolve(response.withCode(299))).isEqualTo(PROCESS);
+    void givenCodeSkip_whenResolve_thenSkip() {
+
+        given(config.getSkipCodes()).willReturn(Stream.of(code).collect(toSet()));
+        policy.configure(emptyMap());
+
+        assertThat(policy.resolve(response.withCode(code))).isEqualTo(SKIP);
     }
 
     @Test
-    void givenCode300_whenResolve_thenSkip() {
-        assertThat(policy.resolve(response.withCode(300))).isEqualTo(SKIP);
-    }
+    void givenCodeNoProcessNorSkip_whenResolve_thenFail() {
 
-    @Test
-    void givenCode400_whenResolve_thenFail() {
-        assertThat(policy.resolve(response.withCode(400))).isEqualTo(FAIL);
-    }
+        given(config.getProcessCodes()).willReturn(emptySet());
+        given(config.getSkipCodes()).willReturn(emptySet());
+        policy.configure(emptyMap());
 
-    @Test
-    void givenCode500_whenResolve_thenFail() {
-        assertThat(policy.resolve(response.withCode(400))).isEqualTo(FAIL);
+        assertThat(policy.resolve(response.withCode(code))).isEqualTo(FAIL);
     }
 
     interface Fixture {
         HttpResponse response = HttpResponse.builder().build();
+        int code = 200;
     }
 }

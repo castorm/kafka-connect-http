@@ -250,10 +250,19 @@ When the decision is to process the response, this processing is delegated to a 
 >     *   `com.github.castorm.kafka.connect.http.response.KvHttpResponseParser`
 
 ###### Vetting a HttpResponse with StatusCodeHttpResponsePolicy
-Does response vetting based on HTTP status codes:
-*   `200`..`299`: `HttpResponseOutcome.PROCESS`
-*   `300`..`399`: `HttpResponseOutcome.SKIP`
-*   `400`..`599`: `HttpResponseOutcome.FAIL`
+Does response vetting based on HTTP status codes in the response and the configuration below.
+
+> ##### `http.response.policy.codes.process`
+> Comma separated list of code ranges that will result in the parser processing the response
+> *   Example: `200..205, 207..210`
+> *   Type: String
+> *   Default: `200..299`
+>
+> ##### `http.response.policy.codes.skip`
+> Comma separated list of code ranges that will result in the parser skipping the response
+> *   Example: `300..305, 307..310`
+> *   Type: String
+> *   Default: `300..399`
 
 #### Parsing a HttpResponse with KvHttpResponseParser
 Parses the HTTP response into a key-value SourceRecord. This process is decomposed in two steps:

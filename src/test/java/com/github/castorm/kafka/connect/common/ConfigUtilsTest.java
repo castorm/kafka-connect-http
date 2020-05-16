@@ -24,15 +24,16 @@ import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap.SimpleEntry;
 
-import static com.github.castorm.kafka.connect.common.MapUtils.breakDownHeaders;
-import static com.github.castorm.kafka.connect.common.MapUtils.breakDownMap;
-import static com.github.castorm.kafka.connect.common.MapUtils.breakDownQueryParams;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownHeaders;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownQueryParams;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.parseIntegerRangedList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-class MapUtilsTest {
+class ConfigUtilsTest {
 
     @Test
     void whenBreakDownNullHeaders_thenEmptyMap() {
@@ -130,5 +131,25 @@ class MapUtilsTest {
     void whenBreakDownTwoFoldMap_thenBrokenDown() {
         assertThat(breakDownMap("name1=value1,name2=value2"))
                 .contains(new SimpleEntry<>("name1", "value1"), new SimpleEntry<>("name2", "value2"));
+    }
+
+    @Test
+    void givenEmpty_whenParsed_thenEmpty() {
+        assertThat(parseIntegerRangedList("")).isEmpty();
+    }
+
+    @Test
+    void givenInteger_whenParsed_thenInteger() {
+        assertThat(parseIntegerRangedList("200")).containsExactly(200);
+    }
+
+    @Test
+    void givenIntegerRange_whenParsed_thenIntegerRange() {
+        assertThat(parseIntegerRangedList("200..203")).containsExactly(200, 201, 202, 203);
+    }
+
+    @Test
+    void givenIntegerRanges_whenParsed_thenIntegerRanges() {
+        assertThat(parseIntegerRangedList("200..201, 203..204")).containsExactly(200, 201, 203, 204);
     }
 }
