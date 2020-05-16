@@ -28,15 +28,15 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-class SchemedSourceRecordMapperConfigTest {
+class SimpleKvSourceRecordMapperConfigTest {
 
     @Test
     void whenMissingKafkaTopic_thenException() {
-        assertThat(catchThrowable(() -> new SchemedSourceRecordMapperConfig(emptyMap()))).isInstanceOf(ConfigException.class);
+        assertThat(catchThrowable(() -> new SimpleKvSourceRecordMapperConfig(emptyMap()))).isInstanceOf(ConfigException.class);
     }
 
     @Test
     void whenKafkaTopic_thenInitialized() {
-        assertThat(new SchemedSourceRecordMapperConfig(ImmutableMap.of("kafka.topic", "test-topic")).getTopic()).isEqualTo("test-topic");
+        assertThat(new SimpleKvSourceRecordMapperConfig(ImmutableMap.of("kafka.topic", "test-topic")).getTopic()).isEqualTo("test-topic");
     }
 }

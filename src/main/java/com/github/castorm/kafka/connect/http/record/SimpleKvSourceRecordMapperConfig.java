@@ -30,13 +30,13 @@ import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 
 @Getter
-public class SchemedSourceRecordMapperConfig extends AbstractConfig {
+public class SimpleKvSourceRecordMapperConfig extends AbstractConfig {
 
     private static final String TOPIC = "kafka.topic";
 
     private final String topic;
 
-    SchemedSourceRecordMapperConfig(Map<String, ?> originals) {
+    SimpleKvSourceRecordMapperConfig(Map<String, ?> originals) {
         super(config(), originals);
         topic = getString(TOPIC);
     }

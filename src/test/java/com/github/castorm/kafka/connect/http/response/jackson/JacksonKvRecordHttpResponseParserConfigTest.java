@@ -25,26 +25,26 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserConfigTest.Fixture.config;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParserConfigTest.Fixture.config;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JacksonHttpResponseParserConfigTest {
+class JacksonKvRecordHttpResponseParserConfigTest {
 
     @Test
     void whenItemsParserClassConfigured_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.response.record.parser", "com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParser")).getRecordParser())
-                .isInstanceOf(JacksonHttpRecordParser.class);
+        assertThat(config(ImmutableMap.of("http.response.record.parser", "com.github.castorm.kafka.connect.http.response.jackson.")).getRecordParser())
+                .isInstanceOf(JacksonRecordParser.class);
     }
 
     @Test
     void whenMissingItemParserClassConfigured_thenInitialized() {
-        assertThat(config(emptyMap()).getRecordParser()).isInstanceOf(JacksonHttpRecordParser.class);
+        assertThat(config(emptyMap()).getRecordParser()).isInstanceOf(JacksonRecordParser.class);
     }
 
     interface Fixture {
-        static JacksonHttpResponseParserConfig config(Map<String, String> settings) {
-            return new JacksonHttpResponseParserConfig(settings);
+        static JacksonKvRecordHttpResponseParserConfig config(Map<String, String> settings) {
+            return new JacksonKvRecordHttpResponseParserConfig(settings);
         }
     }
 }

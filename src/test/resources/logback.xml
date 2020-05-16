@@ -26,16 +26,18 @@
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
-    <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient" level="DEBUG"/>
-    <logger name="com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler" level="DEBUG"/>
-    <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClientConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.HttpSourceConnectorConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient" level="DEBUG"/>
+    <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClientConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParserConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParserConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.response.jackson.JacksonRecordParserConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParserConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParserConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParserConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.response.KvHttpResponseParserConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottlerConfig" level="WARN"/>
     <logger name="com.joestelmach.natty" level="WARN"/>
 </configuration>

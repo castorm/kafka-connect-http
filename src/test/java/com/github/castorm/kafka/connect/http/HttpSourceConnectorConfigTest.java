@@ -22,17 +22,14 @@ package com.github.castorm.kafka.connect.http;
 
 import com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper;
-import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
-import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
-import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory;
-import com.github.castorm.kafka.connect.http.response.PolicyResponseParser;
+import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
+import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
+import com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler;
 import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler;
@@ -58,7 +55,7 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenThrottler_thenInitialized() {
-        assertThat(config("http.throttler", FixedIntervalThrottler.class.getName()).getThrottler()).isInstanceOf(FixedIntervalThrottler.class);
+        assertThat(config("http.throttler", "com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler").getThrottler()).isInstanceOf(FixedIntervalThrottler.class);
     }
 
     @Test
@@ -83,7 +80,7 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenNoResponseParser_thenDefault() {
-        assertThat(configWithout("http.response.parser").getResponseParser()).isInstanceOf(PolicyResponseParser.class);
+        assertThat(configWithout("http.response.parser").getResponseParser()).isInstanceOf(PolicyHttpResponseParser.class);
     }
 
     @Test
@@ -98,17 +95,7 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenResponseFilterFactory_thenInitialized() {
-        assertThat(config("http.record.filter.factory", OffsetTimestampRecordFilterFactory.class.getName()).getRecordFilterFactory()).isInstanceOf(OffsetTimestampRecordFilterFactory.class);
-    }
-
-    @Test
-    void whenNoRecordMapper_thenDefault() {
-        assertThat(configWithout("http.record.mapper").getRecordMapper()).isInstanceOf(SchemedSourceRecordMapper.class);
-    }
-
-    @Test
-    void whenRecordMapper_thenInitialized() {
-        assertThat(config("http.record.mapper", TestRecordMapper.class.getName()).getRecordMapper()).isInstanceOf(TestRecordMapper.class);
+        assertThat(config("http.record.filter.factory", "com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactory").getRecordFilterFactory()).isInstanceOf(OffsetTimestampRecordFilterFactory.class);
     }
 
     @Test
@@ -130,11 +117,7 @@ class HttpSourceConnectorConfigTest {
     }
 
     public static class TestResponseParser implements HttpResponseParser {
-        public List<HttpRecord> parse(HttpResponse response) { return null; }
-    }
-
-    public static class TestRecordMapper implements SourceRecordMapper {
-        public SourceRecord map(HttpRecord record) { return null; }
+        public List<SourceRecord> parse(HttpResponse response) { return null; }
     }
 
     interface Fixture {

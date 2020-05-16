@@ -23,15 +23,15 @@ package com.github.castorm.kafka.connect.http.response;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import org.junit.jupiter.api.Test;
 
-import static com.github.castorm.kafka.connect.http.response.StatusCodeResponsePolicyTest.Fixture.response;
+import static com.github.castorm.kafka.connect.http.response.StatusCodeHttpResponsePolicyTest.Fixture.response;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.FAIL;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.PROCESS;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.SKIP;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StatusCodeResponsePolicyTest {
+class StatusCodeHttpResponsePolicyTest {
 
-    StatusCodeResponsePolicy policy = new StatusCodeResponsePolicy();
+    StatusCodeHttpResponsePolicy policy = new StatusCodeHttpResponsePolicy();
 
     @Test
     void givenCode199_whenResolve_thenFail() {

@@ -22,10 +22,11 @@ package com.github.castorm.kafka.connect.http.response.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.github.castorm.kafka.connect.http.record.model.KvRecord;
+import com.github.castorm.kafka.connect.http.response.spi.KvRecordHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
+import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
@@ -35,47 +36,39 @@ import java.util.function.Function;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 
-public class JacksonHttpResponseParser implements HttpResponseParser {
+@RequiredArgsConstructor
+public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponseParser {
 
-    private final Function<Map<String, ?>, JacksonHttpResponseParserConfig> configFactory;
+    private final Function<Map<String, ?>, JacksonKvRecordHttpResponseParserConfig> configFactory;
 
-    private JacksonHttpRecordParser recordParser;
+    private JacksonRecordParser recordParser;
 
     private TimestampParser timestampParser;
 
-    public JacksonHttpResponseParser() {
-        this(JacksonHttpResponseParserConfig::new);
-    }
-
-    JacksonHttpResponseParser(Function<Map<String, ?>, JacksonHttpResponseParserConfig> configFactory) {
-        this.configFactory = configFactory;
+    public JacksonKvRecordHttpResponseParser() {
+        this(JacksonKvRecordHttpResponseParserConfig::new);
     }
 
     @Override
     public void configure(Map<String, ?> configs) {
-        JacksonHttpResponseParserConfig config = configFactory.apply(configs);
+        JacksonKvRecordHttpResponseParserConfig config = configFactory.apply(configs);
         recordParser = config.getRecordParser();
         timestampParser = config.getTimestampParser();
     }
 
     @Override
-    public List<HttpRecord> parse(HttpResponse response) {
-
+    public List<KvRecord> parse(HttpResponse response) {
         return recordParser.getRecords(response.getBody())
-                .map(this::mapToRecord)
+                .map(this::map)
                 .collect(toList());
     }
 
-    private HttpRecord mapToRecord(JsonNode node) {
-
-        Instant timestamp = recordParser.getTimestamp(node)
-                .map(timestampParser::parse)
-                .orElseGet(Instant::now);
-
-        return HttpRecord.builder()
+    private KvRecord map(JsonNode node) {
+        return KvRecord.builder()
                 .key(recordParser.getKey(node).orElseGet(() -> randomUUID().toString()))
                 .value(recordParser.getValue(node))
-                .offset(Offset.of(recordParser.getOffsets(node), timestamp))
-                .build();
+                .offset(Offset.of(recordParser.getOffsets(node), recordParser.getTimestamp(node)
+                        .map(timestampParser::parse)
+                        .orElseGet(Instant::now))).build();
     }
 }

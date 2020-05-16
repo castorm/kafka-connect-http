@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.record.spi;
+package com.github.castorm.kafka.connect.http.record.model;
 
 /*-
  * #%L
@@ -20,17 +20,19 @@ package com.github.castorm.kafka.connect.http.record.spi;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
-import org.apache.kafka.common.Configurable;
-import org.apache.kafka.connect.source.SourceRecord;
+import com.github.castorm.kafka.connect.http.model.Offset;
+import lombok.Builder;
+import lombok.Value;
+import lombok.With;
 
-import java.util.Map;
+@With
+@Value
+@Builder
+public class KvRecord {
 
-public interface SourceRecordMapper extends Configurable {
+    String key;
 
-    SourceRecord map(HttpRecord record);
+    String value;
 
-    default void configure(Map<String, ?> map) {
-        // Do nothing
-    }
+    Offset offset;
 }

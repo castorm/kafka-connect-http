@@ -39,7 +39,7 @@ import static org.apache.kafka.common.config.ConfigDef.Importance.MEDIUM;
 import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 
 @Getter
-public class JacksonHttpRecordParserConfig extends AbstractConfig {
+public class JacksonRecordParserConfig extends AbstractConfig {
 
     private static final String ITEMS_POINTER = "http.response.records.pointer";
     private static final String ITEM_KEY_POINTER = "http.response.record.key.pointer";
@@ -53,7 +53,7 @@ public class JacksonHttpRecordParserConfig extends AbstractConfig {
     private final Optional<JsonPointer> timestampPointer;
     private final Map<String, JsonPointer> offsetPointers;
 
-    JacksonHttpRecordParserConfig(Map<String, ?> originals) {
+    JacksonRecordParserConfig(Map<String, ?> originals) {
         super(config(), originals);
         recordsPointer = compile(getString(ITEMS_POINTER));
         keyPointer = ofNullable(getString(ITEM_KEY_POINTER)).map(JsonPointer::compile);

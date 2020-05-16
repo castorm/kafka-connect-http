@@ -31,7 +31,7 @@ import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePol
 
 @Slf4j
 @RequiredArgsConstructor
-public class StatusCodeResponsePolicy implements HttpResponsePolicy {
+public class StatusCodeHttpResponsePolicy implements HttpResponsePolicy {
 
     @Override
     public HttpResponseOutcome resolve(HttpResponse response) {

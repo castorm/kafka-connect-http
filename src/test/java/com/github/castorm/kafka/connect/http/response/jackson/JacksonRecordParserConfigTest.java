@@ -28,13 +28,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserConfigTest.Fixture.config;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserConfigTest.Fixture.configWithout;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpRecordParserConfigTest.Fixture.offsetConfig;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonRecordParserConfigTest.Fixture.config;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonRecordParserConfigTest.Fixture.configWithout;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonRecordParserConfigTest.Fixture.offsetConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-class JacksonHttpRecordParserConfigTest {
+class JacksonRecordParserConfigTest {
 
     @Test
     void whenItemsPointerConfigured_thenInitialized() {
@@ -97,22 +97,22 @@ class JacksonHttpRecordParserConfigTest {
     }
 
     interface Fixture {
-        static JacksonHttpRecordParserConfig config(String key, String value) {
+        static JacksonRecordParserConfig config(String key, String value) {
             Map<String, String> customMap = new HashMap<>();
             customMap.put(key, value);
-            return new JacksonHttpRecordParserConfig(customMap);
+            return new JacksonRecordParserConfig(customMap);
         }
 
-        static JacksonHttpRecordParserConfig configWithout(String key) {
+        static JacksonRecordParserConfig configWithout(String key) {
             Map<String, String> customMap = new HashMap<>();
             customMap.remove(key);
-            return new JacksonHttpRecordParserConfig(customMap);
+            return new JacksonRecordParserConfig(customMap);
         }
 
-        static JacksonHttpRecordParserConfig offsetConfig(String values) {
+        static JacksonRecordParserConfig offsetConfig(String values) {
             Map<String, String> customMap = new HashMap<>();
             customMap.put("http.response.record.offset.pointer", values);
-            return new JacksonHttpRecordParserConfig(customMap);
+            return new JacksonRecordParserConfig(customMap);
         }
     }
 }

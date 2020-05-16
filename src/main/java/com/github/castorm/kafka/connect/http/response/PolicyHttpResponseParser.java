@@ -20,11 +20,11 @@ package com.github.castorm.kafka.connect.http.response;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.List;
 import java.util.Map;
@@ -33,27 +33,27 @@ import java.util.function.Function;
 import static java.util.Collections.emptyList;
 
 @RequiredArgsConstructor
-public class PolicyResponseParser implements HttpResponseParser {
+public class PolicyHttpResponseParser implements HttpResponseParser {
 
-    private final Function<Map<String, ?>, PolicyResponseParserConfig> configFactory;
+    private final Function<Map<String, ?>, PolicyHttpResponseParserConfig> configFactory;
 
     private HttpResponseParser delegate;
 
     private HttpResponsePolicy policy;
 
-    public PolicyResponseParser() {
-        this(PolicyResponseParserConfig::new);
+    public PolicyHttpResponseParser() {
+        this(PolicyHttpResponseParserConfig::new);
     }
 
     @Override
     public void configure(Map<String, ?> settings) {
-        PolicyResponseParserConfig config = configFactory.apply(settings);
+        PolicyHttpResponseParserConfig config = configFactory.apply(settings);
         delegate = config.getDelegateParser();
         policy = config.getPolicy();
     }
 
     @Override
-    public List<HttpRecord> parse(HttpResponse response) {
+    public List<SourceRecord> parse(HttpResponse response) {
         switch (policy.resolve(response)) {
             case PROCESS:
                 return delegate.parse(response);
@@ -61,7 +61,7 @@ public class PolicyResponseParser implements HttpResponseParser {
                 return emptyList();
             case FAIL:
             default:
-                throw new IllegalStateException(String.format("Unexpected HttpResponse status code: %s", response.getCode()));
+                throw new IllegalStateException(String.format("Policy failed for response %s", response));
         }
     }
 }

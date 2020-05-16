@@ -28,8 +28,8 @@ plugins folder.
                     <groupId>com.github.castorm</groupId>
                     <artifactId>kafka-connect-http</artifactId>
                     <version>0.5.0</version>
-                    <type>tar.gz</type>
-                    <classifier>plugin</classifier>
+                    <type>zip</type>
+                    <classifier>package</classifier>
                 </artifactItem>
             </artifactItems>
         </configuration>
@@ -53,7 +53,7 @@ The HTTP Source connector is meant for implementing
 *   The HTTP resource allows retrieving records starting from a given **offset**
 *   The **offset** properties are monotonically increasing
 
-Kafka Connect will store internally these offsets so the connector can continue from where it left after restarting.
+Kafka Connect will store internally these offsets so the connector can continue from where it left after a restart.
 
 ### Examples
 
@@ -75,7 +75,6 @@ public List<SourceRecord> poll() throws InterruptedException {
 
     return responseParser.parse(response).stream()
             .filter(recordFilterFactory.create(offset))
-            .map(recordMapper::map)
             .collect(toList());
 }
 
@@ -90,13 +89,13 @@ public void commitRecord(SourceRecord record) {
 ### HttpRequestFactory: Preparing a HttpRequest
 The first thing our connector will need to do is preparing a `HttpRequest`
 
-```java
-public interface HttpRequestFactory extends Configurable {
-
-    HttpRequest createRequest(Offset offset);
-}
-```
 > #### `http.request.factory`
+> ```java
+> public interface HttpRequestFactory extends Configurable {
+> 
+>     HttpRequest createRequest(Offset offset);
+> }
+> ```
 > *   Type: Class
 > *   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
 > *   Available implementations:
@@ -111,18 +110,6 @@ public interface HttpRequestFactory extends Configurable {
 #### Preparing a HttpRequest with TemplateHttpRequestFactory
 This `HttpRequestFactory` is based on template resolution using the `Offset` of the last seen record.
 Templates can be provided for url, headers, query params and body.
-
-```java
-public interface TemplateFactory {
-
-    Template create(String template);
-}
-
-public interface Template {
-
-    String apply(Offset offset);
-}
-```
 
 > ##### `http.request.url`
 > Http method to use in the request.
@@ -152,6 +139,17 @@ public interface Template {
 > *   Default: ""
 > 
 > ##### `http.request.template.factory`
+> ```java
+> public interface TemplateFactory {
+> 
+>     Template create(String template);
+> }
+> 
+> public interface Template {
+> 
+>     String apply(Offset offset);
+> }
+> ```
 > Class responsible for creating the templates that will be used on every request.
 > *   Type: Class
 > *   Default: `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
@@ -167,14 +165,13 @@ public interface Template {
 Once our HttpRequest is ready, we have to execute it to get some results out of it. That's the purpose of the 
 `HttpClient`
 
-```java
-public interface HttpClient extends Configurable {
-
-    HttpResponse execute(HttpRequest request) throws IOException;
-}
-```
-
 > #### `http.client`
+> ```java
+> public interface HttpClient extends Configurable {
+> 
+>     HttpResponse execute(HttpRequest request) throws IOException;
+> }
+> ```
 > *   Type: Class
 > *   Default: `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
 > *   Available implementations:
@@ -208,59 +205,86 @@ Uses a [OkHttp](https://square.github.io/okhttp/) client.
 
 ### HttpResponseParser: Parsing a HttpResponse
 Once our `HttpRequest` has been executed, as a result we'll have to deal with a `HttpResponse` and translate it into 
-a list of `HttpRecord`
-
-```java
-public interface HttpResponseParser extends Configurable {
-
-    List<HttpRecord> parse(HttpResponse response);
-}
-```
+the list of `SourceRecord` that Kafka Connect is expecting. 
 
 > #### `http.response.parser`
+> ```java
+> public interface HttpResponseParser extends Configurable {
+> 
+>     List<SourceRecord> parse(HttpResponse response);
+> }
+> ```
 > *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.response.PolicyResponseParser`
+> *   Default: `com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser`
 > *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.response.PolicyResponseParser`
->     *   `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
+>     *   `com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser`
+>     *   `com.github.castorm.kafka.connect.http.response.KvHttpResponseParser`
 
-#### Parsing a HttpResponse with PolicyResponseParser
+#### Parsing a HttpResponse with PolicyHttpResponseParser
 Vets the HTTP response deciding whether the response should be processed, skipped or failed. This decision is delegated
 to a `HttpResponsePolicy`. 
-When decision is to process response, this processing is delegated to a secondary `HttpResponseParser`.
+When the decision is to process the response, this processing is delegated to a secondary `HttpResponseParser`.
 
 ##### HttpResponsePolicy: Vetting a HttpResponse
 
-```java
-public interface HttpResponsePolicy extends Configurable {
+> ##### `http.response.policy`
+> ```java
+> public interface HttpResponsePolicy extends Configurable {
+> 
+>     HttpResponseOutcome resolve(HttpResponse response);
+> 
+>     enum HttpResponseOutcome {
+>         PROCESS, SKIP, FAIL
+>     }
+> }
+> ```
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.response.StatusCodeHttpResponsePolicy`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.response.StatusCodeHttpResponsePolicy`
+>
+> ##### `http.response.policy.parser`
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.response.KvHttpResponseParser`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.response.KvHttpResponseParser`
 
-    HttpResponseOutcome resolve(HttpResponse response);
-
-    enum HttpResponseOutcome {
-        PROCESS, SKIP, FAIL
-    }
-}
-```
-
-###### Vetting a HttpResponse with StatusCodeResponsePolicy
+###### Vetting a HttpResponse with StatusCodeHttpResponsePolicy
 Does response vetting based on HTTP status codes:
 *   `200`..`299`: `HttpResponseOutcome.PROCESS`
 *   `300`..`399`: `HttpResponseOutcome.SKIP`
 *   `400`..`599`: `HttpResponseOutcome.FAIL`
 
-> ##### `http.response.policy`
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.response.StatusCodeResponsePolicy`
-> *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.response.StatusCodeResponsePolicy`
+#### Parsing a HttpResponse with KvHttpResponseParser
+Parses the HTTP response into a key-value SourceRecord. This process is decomposed in two steps:
+*   Parsing the `HttpResponse` into a `KvRecord`
+*   Mapping the `KvRecord` into a `SourceRecord`
 
-> ##### `http.response.policy.delegate`
+> ##### `http.response.record.parser`
+> ```java
+> public interface KvRecordHttpResponseParser extends Configurable {
+> 
+>     List<KvRecord> parse(HttpResponse response);
+> }
+> ```
 > *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
+> *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParser`
 > *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.response.jackson.JacksonHttpResponseParser`
+>     *   `com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParser`
+>
+> ##### `http.response.record.mapper`
+> ```java
+> public interface KvSourceRecordMapper extends Configurable {
+> 
+>     SourceRecord map(KvRecord record);
+> }
+> ```
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapper`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapper`
 
-#### Parsing a HttpResponse with JacksonHttpResponseParser
+##### Parsing a HttpResponse with JacksonKvRecordHttpResponseParser
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in the response.
 
 > ##### `http.response.records.pointer`
@@ -320,29 +344,13 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 ---
 <a name="mapper"/>
 
-### SourceRecordMapper: Mapping HttpRecord to Kafka Connect's SourceRecord
-
-Once we have our `HttpRecord`s we have to translate them into what Kafka Connect is expecting: `SourceRecord`s
-
-Here is also where we'll tell Kafka Connect to what topic and on what partition do we want to send our record.
-
-```java
-public interface SourceRecordMapper extends Configurable {
-
-    SourceRecord map(HttpRecord record);
-}
-```
-
-> #### `http.record.mapper`
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper`
-> *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper` 
-
-#### Mapping HttpRecord to Kafka Connect's SourceRecord with SchemedSourceRecordMapper
+### Mapping a KvRecord into SourceRecord with SimpleKvSourceRecordMapper
+Once we have our `KvRecord` we have to translate it into what Kafka Connect is expecting: `SourceRecord`s
 
 Embeds the record properties into a common simple envelope to enable schema evolution. This envelope contains simple
 a key and a body properties.
+
+Here is also where we'll tell Kafka Connect to what topic and on what partition do we want to send our record.
 
 > ##### `kafka.topic`
 > Name of the topic where the record will be sent to
@@ -354,17 +362,15 @@ a key and a body properties.
 <a name="filter"/>
 
 ### SourceRecordFilterFactory: Filtering out SourceRecord
-
-There are cases where we'll be interested in filtering out certain records. One of these would be de-duplication.
-
-```java
-public interface SourceRecordFilterFactory extends Configurable {
-
-    Predicate<SourceRecord> create(Offset offset);
-}
-```
+There are cases when we'll be interested in filtering out certain records. One of these would be de-duplication.
 
 > #### `http.record.filter.factory`
+> ```java
+> public interface SourceRecordFilterFactory extends Configurable {
+> 
+>     Predicate<SourceRecord> create(Offset offset);
+> }
+> ```
 > *   Type: Class
 > *   Default: `com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory`
 > *   Available implementations:
@@ -386,17 +392,15 @@ different HTTP responses.
 <a name="throttler"/>
 
 ### Throttler: Throttling HttpRequests
-
 Controls the rate at which HTTP requests are executed.
 
-```java
-public interface Throttler extends Configurable {
-
-    void throttle(Offset offset) throws InterruptedException;
-}
-```
-
 > #### `http.throttler`
+> ```java
+> public interface Throttler extends Configurable {
+> 
+>     void throttle(Offset offset) throws InterruptedException;
+> }
+> ```
 > *   Type: Class
 > *   Default: `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
 > *   Available implementations:

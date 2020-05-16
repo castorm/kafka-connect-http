@@ -20,9 +20,9 @@ package com.github.castorm.kafka.connect.http.record;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
+import com.github.castorm.kafka.connect.http.record.model.KvRecord;
+import com.github.castorm.kafka.connect.http.record.spi.KvSourceRecordMapper;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
@@ -33,7 +33,7 @@ import java.util.Map;
 import static java.util.Collections.emptyMap;
 import static org.apache.kafka.connect.data.SchemaBuilder.string;
 
-public class SchemedSourceRecordMapper implements SourceRecordMapper {
+public class SimpleKvSourceRecordMapper implements KvSourceRecordMapper {
 
     private static final String SCHEMA_KEY_KEY = "key";
     private static final Schema SCHEMA_KEY = SchemaBuilder.struct()
@@ -55,12 +55,12 @@ public class SchemedSourceRecordMapper implements SourceRecordMapper {
 
     @Override
     public void configure(Map<String, ?> configs) {
-        SchemedSourceRecordMapperConfig config = new SchemedSourceRecordMapperConfig(configs);
+        SimpleKvSourceRecordMapperConfig config = new SimpleKvSourceRecordMapperConfig(configs);
         topic = config.getTopic();
     }
 
     @Override
-    public SourceRecord map(HttpRecord record) {
+    public SourceRecord map(KvRecord record) {
 
         Struct key = keyStruct(record.getKey());
         Struct value = valueStruct(record.getValue());

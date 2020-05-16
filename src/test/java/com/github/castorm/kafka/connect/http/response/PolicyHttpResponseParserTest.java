@@ -20,19 +20,19 @@ package com.github.castorm.kafka.connect.http.response;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy;
 import com.google.common.collect.ImmutableList;
+import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.github.castorm.kafka.connect.http.response.PolicyResponseParserTest.Fixture.record;
-import static com.github.castorm.kafka.connect.http.response.PolicyResponseParserTest.Fixture.response;
+import static com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParserTest.Fixture.record;
+import static com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParserTest.Fixture.response;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.FAIL;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.PROCESS;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.SKIP;
@@ -45,12 +45,12 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
-class PolicyResponseParserTest {
+class PolicyHttpResponseParserTest {
 
-    PolicyResponseParser parser;
+    PolicyHttpResponseParser parser;
 
     @Mock
-    PolicyResponseParserConfig config;
+    PolicyHttpResponseParserConfig config;
 
     @Mock
     HttpResponseParser delegate;
@@ -60,7 +60,7 @@ class PolicyResponseParserTest {
 
     @BeforeEach
     void setUp() {
-        parser = new PolicyResponseParser(__ -> config);
+        parser = new PolicyHttpResponseParser(__ -> config);
         given(config.getDelegateParser()).willReturn(delegate);
         given(config.getPolicy()).willReturn(policy);
         parser.configure(emptyMap());
@@ -124,6 +124,6 @@ class PolicyResponseParserTest {
 
     interface Fixture {
         HttpResponse response = HttpResponse.builder().build();
-        HttpRecord record = HttpRecord.builder().key("myRecord").build();
+        SourceRecord record = new SourceRecord(null, null, null, null, "Something");
     }
 }

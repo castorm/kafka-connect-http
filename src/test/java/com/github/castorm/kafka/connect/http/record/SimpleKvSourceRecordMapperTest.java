@@ -20,8 +20,8 @@ package com.github.castorm.kafka.connect.http.record;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.data.Struct;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,70 +29,67 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
-import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.record;
-import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.now;
-import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.offset;
-import static com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapperTest.Fixture.value;
+import static com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperTest.Fixture.now;
+import static com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperTest.Fixture.offset;
+import static com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperTest.Fixture.record;
 import static java.time.Instant.now;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SchemedSourceRecordMapperTest {
+class SimpleKvSourceRecordMapperTest {
 
-    SchemedSourceRecordMapper mapper;
+    SimpleKvSourceRecordMapper factory;
 
     @BeforeEach
     void setUp() {
-        mapper = new SchemedSourceRecordMapper();
+        factory = new SimpleKvSourceRecordMapper();
     }
 
     @Test
     void givenTopic_whenMap_thenTopicMapped() {
 
-        mapper.configure(ImmutableMap.of("kafka.topic", "topic"));
+        factory.configure(ImmutableMap.of("kafka.topic", "topic"));
 
-        assertThat(mapper.map(record).topic()).isEqualTo("topic");
+        assertThat(factory.map(record).topic()).isEqualTo("topic");
     }
 
     @Test
     void givenKey_whenMap_thenIdMapped() {
-        assertThat(((Struct) mapper.map(record.withKey(value)).key()).get("key")).isEqualTo(value);
+        assertThat(((Struct) factory.map(record.withKey("value")).key()).get("key")).isEqualTo("value");
     }
 
     @Test
     void givenValue_whenMap_thenBodyMapped() {
-        assertThat(((Struct) mapper.map(record.withValue(value)).value()).get("body")).isEqualTo(value);
+        assertThat(((Struct) factory.map(record.withValue("value")).value()).get("body")).isEqualTo("value");
     }
 
     @Test
     void givenOffset_whenMap_thenOffsetMapped() {
-        assertThat(mapper.map(record.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
+        assertThat(factory.map(record.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
     }
 
     @Test
     void givenTimestamp_whenMap_thenTimestampMapped() {
-        assertThat(mapper.map(record.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
+        assertThat(factory.map(record.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
     }
 
     @Test
     void whenMap_thenNoPartitionMapped() {
-        assertThat(mapper.map(record).kafkaPartition()).isNull();
+        assertThat(factory.map(record).kafkaPartition()).isNull();
     }
 
     @Test
     void whenMap_thenKeySchemaMapped() {
-        assertThat(mapper.map(record).keySchema()).isNotNull();
+        assertThat(factory.map(record).keySchema()).isNotNull();
     }
 
     @Test
     void whenMap_thenValueSchemaMapped() {
-        assertThat(mapper.map(record).valueSchema()).isNotNull();
+        assertThat(factory.map(record).valueSchema()).isNotNull();
     }
 
     interface Fixture {
         Instant now = now();
-        String value = "value";
-        HttpRecord record = HttpRecord.builder().value(value).offset(Offset.of(emptyMap(), now())).build();
         Offset offset = Offset.of(ImmutableMap.of("k", "v"), now);
+        KvRecord record = KvRecord.builder().value("not-null").offset(offset).build();
     }
 }

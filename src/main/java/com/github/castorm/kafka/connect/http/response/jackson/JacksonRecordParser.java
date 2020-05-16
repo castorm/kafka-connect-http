@@ -32,37 +32,32 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.fasterxml.jackson.core.JsonPointer.compile;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 
 @RequiredArgsConstructor
-public class JacksonHttpRecordParser implements Configurable {
+public class JacksonRecordParser implements Configurable {
 
-    private static final JsonPointer JSON_ROOT = compile("/");
+    private final Function<Map<String, ?>, JacksonRecordParserConfig> configFactory;
 
-    private final Function<Map<String, ?>, JacksonHttpRecordParserConfig> configFactory;
+    private final ObjectMapper objectMapper;
 
-    private final Supplier<ObjectMapper> objectMapperFactory;
+    private final JacksonPropertyResolver propertyResolver;
 
-    private ObjectMapper objectMapper;
     private JsonPointer recordsPointer;
     private Optional<JsonPointer> keyPointer;
-    private JsonPointer valuePointer;
-    private Map<String, JsonPointer> offsetPointers;
     private Optional<JsonPointer> timestampPointer;
+    private Map<String, JsonPointer> offsetPointers;
+    private JsonPointer valuePointer;
 
-    public JacksonHttpRecordParser() {
-        this(JacksonHttpRecordParserConfig::new, ObjectMapper::new);
+    public JacksonRecordParser() {
+        this(JacksonRecordParserConfig::new, new ObjectMapper(), new JacksonPropertyResolver());
     }
 
     @Override
     public void configure(Map<String, ?> settings) {
-        JacksonHttpRecordParserConfig config = configFactory.apply(settings);
-        objectMapper = objectMapperFactory.get();
+        JacksonRecordParserConfig config = configFactory.apply(settings);
         recordsPointer = config.getRecordsPointer();
         keyPointer = config.getKeyPointer();
         valuePointer = config.getValuePointer();
@@ -71,37 +66,27 @@ public class JacksonHttpRecordParser implements Configurable {
     }
 
     Stream<JsonNode> getRecords(byte[] body) {
-
-        JsonNode deserializedBody = deserialize(body);
-
-        JsonNode records = getRequiredAt(deserializedBody, recordsPointer);
-
-        return records.isArray() ? stream(records.spliterator(), false) : Stream.of(records);
+        return propertyResolver.getArrayAt(deserialize(body), recordsPointer);
     }
 
     Optional<String> getKey(JsonNode node) {
-        return keyPointer.map(it -> getRequiredAt(node, it).asText());
+        return keyPointer.map(pointer -> propertyResolver.getObjectAt(node, pointer).asText());
+    }
+
+    Optional<String> getTimestamp(JsonNode node) {
+        return timestampPointer.map(pointer -> propertyResolver.getObjectAt(node, pointer).asText());
+    }
+
+    Map<String, Object> getOffsets(JsonNode node) {
+        return offsetPointers.entrySet().stream()
+                .collect(toMap(Entry::getKey, entry -> propertyResolver.getObjectAt(node, entry.getValue()).asText()));
     }
 
     String getValue(JsonNode node) {
 
-        JsonNode value = getRequiredAt(node, valuePointer);
+        JsonNode value = propertyResolver.getObjectAt(node, valuePointer);
 
         return value.isObject() ? serialize(value) : value.asText();
-    }
-
-    Optional<String> getTimestamp(JsonNode node) {
-        return timestampPointer
-                .map(it -> getRequiredAt(node, it))
-                .map(JsonNode::asText);
-    }
-
-    Map<String, Object> getOffsets(JsonNode node) {
-        return offsetPointers.entrySet().stream().collect(toMap(Entry::getKey, entry -> getRequiredAt(node, entry.getValue()).asText()));
-    }
-
-    private static JsonNode getRequiredAt(JsonNode body, JsonPointer recordsPointer) {
-        return JSON_ROOT.equals(recordsPointer) ? body : body.requiredAt(recordsPointer);
     }
 
     @SneakyThrows(IOException.class)
