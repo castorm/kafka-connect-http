@@ -62,7 +62,6 @@ public class StatusCodeHttpResponsePolicy implements HttpResponsePolicy {
             log.warn("Unexpected HttpResponse status code: {}, continuing with no records", response.getCode());
             return SKIP;
         } else {
-            log.error("Unexpected HttpResponse status code: {}, halting the connector. Body: {}", response.getCode(), response.getBody());
             return FAIL;
         }
     }

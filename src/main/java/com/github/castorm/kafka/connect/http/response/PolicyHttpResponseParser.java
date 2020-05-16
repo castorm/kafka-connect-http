@@ -61,7 +61,7 @@ public class PolicyHttpResponseParser implements HttpResponseParser {
                 return emptyList();
             case FAIL:
             default:
-                throw new IllegalStateException(String.format("Policy failed for response %s", response));
+                throw new IllegalStateException(String.format("Policy failed for response code: %s, body: %s", response.getCode(), new String(response.getBody())));
         }
     }
 }

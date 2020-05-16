@@ -41,7 +41,7 @@ import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static okhttp3.HttpUrl.parse;
 import static okhttp3.RequestBody.create;
-import static okhttp3.logging.HttpLoggingInterceptor.Level.BASIC;
+import static okhttp3.logging.HttpLoggingInterceptor.Level.BODY;
 
 @Slf4j
 public class OkHttpClient implements HttpClient {
@@ -64,7 +64,7 @@ public class OkHttpClient implements HttpClient {
 
     private static HttpLoggingInterceptor createLoggingInterceptor() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(log::debug);
-        interceptor.setLevel(BASIC);
+        interceptor.setLevel(BODY);
         return interceptor;
     }
 
@@ -89,7 +89,11 @@ public class OkHttpClient implements HttpClient {
     }
 
     private static HttpUrl mapUrl(String url, Map<String, List<String>> queryParams) {
-        HttpUrl.Builder urlBuilder = parse(url).newBuilder();
+        HttpUrl httpUrl = parse(url);
+        if (httpUrl == null) {
+            throw new IllegalStateException(String.format("Illegal url: %s", url));
+        }
+        HttpUrl.Builder urlBuilder = httpUrl.newBuilder();
         queryParams.forEach((k, list) -> list.forEach(v -> urlBuilder.addEncodedQueryParameter(k, v)));
         return urlBuilder.build();
     }

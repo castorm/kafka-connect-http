@@ -25,7 +25,7 @@ import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
@@ -95,7 +95,7 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenResponseFilterFactory_thenInitialized() {
-        assertThat(config("http.record.filter.factory", "com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactory").getRecordFilterFactory()).isInstanceOf(OffsetTimestampRecordFilterFactory.class);
+        assertThat(config("http.record.filter.factory", "com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory").getRecordFilterFactory()).isInstanceOf(OffsetRecordFilterFactory.class);
     }
 
     @Test

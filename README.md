@@ -385,6 +385,7 @@ There are cases when we'll be interested in filtering out certain records. One o
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory`
 >     *   `com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactory`
+>     *   `com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory`
 
 #### Filtering out SourceRecord with OffsetTimestampFilterFactory
 
@@ -394,8 +395,14 @@ Assumptions:
 *   Records are ordered by timestamp
 *   No two records can contain the same timestamp (to whatever precision the HTTP resource uses)
 
-If the latter assumption cannot be satisfied, data loss will happen if two records with the same timestamp fall under
-different HTTP responses.
+If the latter assumption cannot be satisfied, check `OffsetFilterFactory` to try and avoid data loss.
+
+#### Filtering out SourceRecord with OffsetFilterFactory
+
+De-duplicates based on full `Offset`
+Useful when timestamp alone is not unique but together with other properties is.
+Assumptions: 
+*   Records are ordered by timestamp and a property or set of properties that uniquely identify records
 
 ---
 <a name="throttler"/>

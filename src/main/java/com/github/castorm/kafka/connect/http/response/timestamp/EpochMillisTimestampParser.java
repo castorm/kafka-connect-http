@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.response.timestamp.spi;
+package com.github.castorm.kafka.connect.http.response.timestamp;
 
 /*-
  * #%L
@@ -20,16 +20,16 @@ package com.github.castorm.kafka.connect.http.response.timestamp.spi;
  * #L%
  */
 
-import org.apache.kafka.common.Configurable;
+import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
+import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;
-import java.util.Map;
 
-public interface TimestampParser extends Configurable {
+@RequiredArgsConstructor
+public class EpochMillisTimestampParser implements TimestampParser {
 
-    Instant parse(String timestamp);
-
-    default void configure(Map<String, ?> map) {
-        // Do nothing
+    @Override
+    public Instant parse(String timestamp) {
+        return Instant.ofEpochMilli(Long.valueOf(timestamp));
     }
 }
