@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.castorm</groupId>
-    <artifactId>kafka-connect-http-plugin</artifactId>
+    <artifactId>kafka-connect-http</artifactId>
     <version>0.5.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Kafka Connect HTTP Plugin</name>
+    <name>Kafka Connect HTTP</name>
     <description>Kafka Connect connectors enabling Kafka integration with external systems via HTTP</description>
-    <url>https://castorm.github.io/kafka-connect-http-plugin</url>
+    <url>https://castorm.github.io/kafka-connect-http</url>
     <inceptionYear>2020</inceptionYear>
 
     <organization>
@@ -35,23 +36,23 @@
 
     <issueManagement>
         <system>github.com</system>
-        <url>https://github.com/castorm/kafka-connect-http-plugin/issues</url>
+        <url>https://github.com/castorm/kafka-connect-http/issues</url>
     </issueManagement>
 
     <scm>
-        <url>https://github.com/castorm/kafka-connect-http-plugin</url>
-        <connection>scm:git:https://github.com/castorm/kafka-connect-http-plugin.git</connection>
+        <url>https://github.com/castorm/kafka-connect-http</url>
+        <connection>scm:git:https://github.com/castorm/kafka-connect-http.git</connection>
         <tag>v0.3.5</tag>
     </scm>
 
     <distributionManagement>
         <site>
             <id>wiki</id>
-            <url>https://github.com/castorm/kafka-connect-http-plugin/wiki</url>
+            <url>https://github.com/castorm/kafka-connect-http/wiki</url>
         </site>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/castorm/kafka-connect-http-plugin</url>
+            <url>https://maven.pkg.github.com/castorm/kafka-connect-http</url>
         </repository>
     </distributionManagement>
 
@@ -223,28 +224,81 @@
     <profiles>
         <profile>
             <id>package</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>3.3.0</version>
                         <configuration>
+                            <finalName>castorm-${project.artifactId}-${project.version}</finalName>
                             <descriptors>
-                                <descriptor>assembly.xml</descriptor>
+                                <descriptor>src/assembly/package.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
                             <execution>
-                                <id>assembly-single-package</id>
+                                <id>make-assembly</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>io.confluent</groupId>
+                        <version>0.11.3</version>
+                        <artifactId>kafka-connect-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>kafka-connect</goal>
+                                </goals>
                                 <configuration>
-                                    <formats>
-                                        <format>tar.gz</format>
-                                    </formats>
-                                    <tarLongFileMode>posix_warn</tarLongFileMode>
+                                    <title>${project.name}</title>
+                                    <name>${project.artifactId}</name>
+                                    <documentationUrl>${project.url}</documentationUrl>
+                                    <description>${project.description}</description>
+                                    <version>${project.version}</version>
+                                    <supportProviderName>${project.organization.name}</supportProviderName>
+                                    <supportSummary>CastorM supports the HTTP plugin alongside other contributors to
+                                        this open source project.</supportSummary>
+                                    <supportUrl>${issueManagement.url}</supportUrl>
+
+                                    <ownerUsername>castorm</ownerUsername>
+                                    <ownerType>user</ownerType>
+                                    <ownerName>Cástor Rodríguez</ownerName>
+                                    <ownerUrl>https://castorm.es</ownerUrl>
+
+                                    <componentTypes>
+                                        <componentType>source</componentType>
+                                    </componentTypes>
+
+                                    <tags>
+                                        <tag>http</tag>
+                                        <tag>rest</tag>
+                                        <tag>cdc</tag>
+                                        <tag>change-data-capture</tag>
+                                    </tags>
+
+                                    <requirements>
+                                        <requirement>HTTP resource to perform requests against</requirement>
+                                        <requirement>To perform change-data-capture with effectively-once delivery
+                                            guarantees, the HTTP resource should allow ordering and filtering by one or
+                                            more monotonically increasing properties such as sequence numbers or
+                                            timestamps
+                                        </requirement>
+                                    </requirements>
+
+                                    <deliveryGuarantee>
+                                        <deliveryGuarantee>exactlyOnce</deliveryGuarantee>
+                                    </deliveryGuarantee>
+
+                                    <confluentControlCenterIntegration>false</confluentControlCenterIntegration>
                                 </configuration>
                             </execution>
                         </executions>

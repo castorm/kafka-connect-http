@@ -2,7 +2,7 @@ package com.github.castorm.kafka.connect.common;
 
 /*-
  * #%L
- * kafka-connect-http-plugin
+ * kafka-connect-http
  * %%
  * Copyright (C) 2020 CastorM
  * %%

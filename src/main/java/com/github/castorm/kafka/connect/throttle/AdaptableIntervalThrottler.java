@@ -2,7 +2,7 @@ package com.github.castorm.kafka.connect.throttle;
 
 /*-
  * #%L
- * kafka-connect-http-plugin
+ * kafka-connect-http
  * %%
  * Copyright (C) 2020 CastorM
  * %%

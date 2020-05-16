@@ -1,10 +1,10 @@
 # Kafka Connect HTTP Connector
-[![Build](https://github.com/castorm/kafka-connect-http-plugin/workflows/Build/badge.svg)](https://github.com/castorm/kafka-connect-http-plugin/actions?query=workflow%3ABuild)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/35046c6e1af4450bb53f8625c9f286e5)](https://app.codacy.com/manual/castorm/kafka-connect-http-plugin?utm_source=github.com&utm_medium=referral&utm_content=castorm/kafka-connect-http-plugin&utm_campaign=Badge_Grade_Dashboard)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http-plugin?ref=badge_shield)
-[![Release to GitHub](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20GitHub/badge.svg)](https://github.com/castorm/kafka-connect-http-plugin/actions?query=workflow%3A%22Release+to+GitHub%22)
-[![Release to Maven Central](https://github.com/castorm/kafka-connect-http-plugin/workflows/Release%20to%20Maven%20Central/badge.svg)](https://github.com/castorm/kafka-connect-http-plugin/actions?query=workflow%3A%22Release+to+Maven+Central%22)
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.castorm/kafka-connect-http-plugin.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.castorm%22%20AND%20a:%22kafka-connect-http-plugin%22)
+[![Build](https://github.com/castorm/kafka-connect-http/workflows/Build/badge.svg)](https://github.com/castorm/kafka-connect-http/actions?query=workflow%3ABuild)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/35046c6e1af4450bb53f8625c9f286e5)](https://app.codacy.com/manual/castorm/kafka-connect-http?utm_source=github.com&utm_medium=referral&utm_content=castorm/kafka-connect-http&utm_campaign=Badge_Grade_Dashboard)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcastorm%2Fkafka-connect-http?ref=badge_shield)
+[![Release to GitHub](https://github.com/castorm/kafka-connect-http/workflows/Release%20to%20GitHub/badge.svg)](https://github.com/castorm/kafka-connect-http/actions?query=workflow%3A%22Release+to+GitHub%22)
+[![Release to Maven Central](https://github.com/castorm/kafka-connect-http/workflows/Release%20to%20Maven%20Central/badge.svg)](https://github.com/castorm/kafka-connect-http/actions?query=workflow%3A%22Release+to+Maven+Central%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.castorm/kafka-connect-http.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.castorm%22%20AND%20a:%22kafka-connect-http%22)
 
 Set of Kafka Connect connectors that enable Kafka integration with external systems via HTTP.
 
@@ -26,7 +26,7 @@ plugins folder.
             <artifactItems>
                 <artifactItem>
                     <groupId>com.github.castorm</groupId>
-                    <artifactId>kafka-connect-http-plugin</artifactId>
+                    <artifactId>kafka-connect-http</artifactId>
                     <version>0.5.0</version>
                     <type>tar.gz</type>
                     <classifier>plugin</classifier>
@@ -37,7 +37,7 @@ plugins folder.
 </plugin>
 ```
 Otherwise, you'll have to do it manually by downloading the package from the
-[Releases Page](https://github.com/castorm/kafka-connect-http-plugin/releases).
+[Releases Page](https://github.com/castorm/kafka-connect-http/releases).
 
 More details on how to [Install Connectors](https://docs.confluent.io/current/connect/managing/install.html).
 
