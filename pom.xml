@@ -267,7 +267,7 @@
                                     <supportProviderName>${project.organization.name}</supportProviderName>
                                     <supportSummary>CastorM supports the HTTP plugin alongside other contributors to
                                         this open source project.</supportSummary>
-                                    <supportUrl>${issueManagement.url}</supportUrl>
+                                    <supportUrl>${project.issueManagement.url}</supportUrl>
 
                                     <ownerUsername>castorm</ownerUsername>
                                     <ownerType>user</ownerType>
