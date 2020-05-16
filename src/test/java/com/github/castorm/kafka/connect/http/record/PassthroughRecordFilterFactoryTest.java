@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.response;
+package com.github.castorm.kafka.connect.http.record;
 
 /*-
  * #%L
@@ -20,6 +20,7 @@ package com.github.castorm.kafka.connect.http.response;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

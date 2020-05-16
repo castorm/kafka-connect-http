@@ -27,7 +27,7 @@ import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
-import com.github.castorm.kafka.connect.http.response.spi.HttpRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.spi.Throttler;
 import com.google.common.collect.ImmutableMap;
@@ -85,7 +85,7 @@ class HttpSourceTaskTest {
     HttpResponseParser responseParser;
 
     @Mock
-    HttpRecordFilterFactory recordFilterFactory;
+    SourceRecordFilterFactory recordFilterFactory;
 
     @Mock
     SourceRecordMapper recordMapper;

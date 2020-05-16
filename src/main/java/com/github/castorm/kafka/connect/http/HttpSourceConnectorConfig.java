@@ -26,9 +26,9 @@ import com.github.castorm.kafka.connect.http.record.SchemedSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordMapper;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
-import com.github.castorm.kafka.connect.http.response.PassthroughRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.response.PolicyResponseParser;
-import com.github.castorm.kafka.connect.http.response.spi.HttpRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler;
 import com.github.castorm.kafka.connect.throttle.spi.Throttler;
@@ -59,7 +59,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private final HttpRequestFactory requestFactory;
     private final HttpClient client;
     private final HttpResponseParser responseParser;
-    private final HttpRecordFilterFactory recordFilterFactory;
+    private final SourceRecordFilterFactory recordFilterFactory;
     private final SourceRecordMapper recordMapper;
     private final Map<String, String> initialOffset;
 
@@ -69,7 +69,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
         requestFactory = getConfiguredInstance(REQUEST_FACTORY, HttpRequestFactory.class);
         client = getConfiguredInstance(CLIENT, HttpClient.class);
         responseParser = getConfiguredInstance(RESPONSE_PARSER, HttpResponseParser.class);
-        recordFilterFactory = getConfiguredInstance(RECORD_FILTER_FACTORY, HttpRecordFilterFactory.class);
+        recordFilterFactory = getConfiguredInstance(RECORD_FILTER_FACTORY, SourceRecordFilterFactory.class);
         recordMapper = getConfiguredInstance(RECORD_MAPPER, SourceRecordMapper.class);
         initialOffset = breakDownMap(getString(OFFSET_INITIAL));
     }

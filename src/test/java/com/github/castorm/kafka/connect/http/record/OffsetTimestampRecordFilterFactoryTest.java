@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http.response;
+package com.github.castorm.kafka.connect.http.record;
 
 /*-
  * #%L
@@ -20,16 +20,16 @@ package com.github.castorm.kafka.connect.http.response;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
+import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
-import static com.github.castorm.kafka.connect.http.response.OffsetTimestampRecordFilterFactoryTest.Fixture.record;
-import static com.github.castorm.kafka.connect.http.response.OffsetTimestampRecordFilterFactoryTest.Fixture.now;
+import static com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactoryTest.Fixture.now;
+import static com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactoryTest.Fixture.record;
 import static edu.emory.mathcs.backport.java.util.Collections.emptyMap;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.MINUTES;
@@ -52,8 +52,8 @@ class OffsetTimestampRecordFilterFactoryTest {
 
     interface Fixture {
         Instant now = now();
-        static HttpRecord record(Instant timestamp) {
-            return HttpRecord.builder().offset(Offset.of(emptyMap(), timestamp)).build();
+        static SourceRecord record(Instant timestamp) {
+            return new SourceRecord(null, null, null, null, null, null, null, null, timestamp.toEpochMilli());
         }
     }
 }

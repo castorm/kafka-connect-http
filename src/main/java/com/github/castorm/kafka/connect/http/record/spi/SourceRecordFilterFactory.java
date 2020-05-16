@@ -1,8 +1,8 @@
-package com.github.castorm.kafka.connect.http.response;
+package com.github.castorm.kafka.connect.http.record.spi;
 
 /*-
  * #%L
- * Kafka Connect HTTP Plugin
+ * kafka-connect-http
  * %%
  * Copyright (C) 2020 CastorM
  * %%
@@ -20,18 +20,18 @@ package com.github.castorm.kafka.connect.http.response;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.response.spi.HttpRecordFilterFactory;
-import lombok.RequiredArgsConstructor;
+import org.apache.kafka.common.Configurable;
+import org.apache.kafka.connect.source.SourceRecord;
 
+import java.util.Map;
 import java.util.function.Predicate;
 
-@RequiredArgsConstructor
-public class OffsetTimestampRecordFilterFactory implements HttpRecordFilterFactory {
+public interface SourceRecordFilterFactory extends Configurable {
 
-    @Override
-    public Predicate<HttpRecord> create(Offset offset) {
-        return record -> record.getOffset().getTimestamp().isAfter(offset.getTimestamp());
+    Predicate<SourceRecord> create(Offset offset);
+
+    default void configure(Map<String, ?> map) {
+        // Do nothing
     }
 }

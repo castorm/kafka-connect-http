@@ -318,38 +318,6 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > *   Default: ""
 
 ---
-<a name="filter"/>
-
-### HttpRecordFilterFactory: Filtering out HttpRecord
-
-There are cases where we'll be interested in filtering out certain records. One of these would be de-duplication.
-
-```java
-public interface HttpRecordFilterFactory extends Configurable {
-
-    Predicate<HttpRecord> create(Offset offset);
-}
-```
-
-> #### `http.record.filter.factory`
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.response.PassthroughRecordFilterFactory`
-> *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.response.PassthroughRecordFilterFactory`
->     *   `com.github.castorm.kafka.connect.http.response.OffsetTimestampRecordFilterFactory`
-
-#### Filtering out HttpRecord with OffsetTimestampFilterFactory
-
-De-duplicates based on `Offset`'s timestamp, filtering out records already processed. 
-Useful when timestamp is used to filter the HTTP resource, but the filter doesn't have full timestamp precision.
-Assumptions:
-*   Records are ordered by timestamp
-*   No two records can contain the same timestamp (to whatever precision the HTTP resource uses)
-
-If the latter assumption cannot be satisfied, data loss will happen if two records with the same timestamp fall under
-different HTTP responses.
-
----
 <a name="mapper"/>
 
 ### SourceRecordMapper: Mapping HttpRecord to Kafka Connect's SourceRecord
@@ -381,6 +349,38 @@ a key and a body properties.
 > *   Required
 > *   Type: String
 > *   Default: ""
+
+---
+<a name="filter"/>
+
+### SourceRecordFilterFactory: Filtering out SourceRecord
+
+There are cases where we'll be interested in filtering out certain records. One of these would be de-duplication.
+
+```java
+public interface SourceRecordFilterFactory extends Configurable {
+
+    Predicate<SourceRecord> create(Offset offset);
+}
+```
+
+> #### `http.record.filter.factory`
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory`
+>     *   `com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactory`
+
+#### Filtering out SourceRecord with OffsetTimestampFilterFactory
+
+De-duplicates based on `Offset`'s timestamp, filtering out records already processed. 
+Useful when timestamp is used to filter the HTTP resource, but the filter does not have full timestamp precision.
+Assumptions:
+*   Records are ordered by timestamp
+*   No two records can contain the same timestamp (to whatever precision the HTTP resource uses)
+
+If the latter assumption cannot be satisfied, data loss will happen if two records with the same timestamp fall under
+different HTTP responses.
 
 ---
 <a name="throttler"/>

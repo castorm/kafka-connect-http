@@ -1,8 +1,8 @@
-package com.github.castorm.kafka.connect.http.response.spi;
+package com.github.castorm.kafka.connect.http.record;
 
 /*-
  * #%L
- * kafka-connect-http
+ * Kafka Connect HTTP Plugin
  * %%
  * Copyright (C) 2020 CastorM
  * %%
@@ -20,18 +20,16 @@ package com.github.castorm.kafka.connect.http.response.spi;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.HttpRecord;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import org.apache.kafka.common.Configurable;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactory;
+import org.apache.kafka.connect.source.SourceRecord;
 
-import java.util.Map;
 import java.util.function.Predicate;
 
-public interface HttpRecordFilterFactory extends Configurable {
+public class PassthroughRecordFilterFactory implements SourceRecordFilterFactory {
 
-    Predicate<HttpRecord> create(Offset offset);
-
-    default void configure(Map<String, ?> map) {
-        // Do nothing
+    @Override
+    public Predicate<SourceRecord> create(Offset offset) {
+        return __ -> true;
     }
 }
