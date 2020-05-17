@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 
 @RequiredArgsConstructor
 public class PolicyHttpResponseParser implements HttpResponseParser {
@@ -61,7 +62,7 @@ public class PolicyHttpResponseParser implements HttpResponseParser {
                 return emptyList();
             case FAIL:
             default:
-                throw new IllegalStateException(String.format("Policy failed for response code: %s, body: %s", response.getCode(), new String(response.getBody())));
+                throw new IllegalStateException(String.format("Policy failed for response code: %s, body: %s", response.getCode(), ofNullable(response.getBody()).map(String::new).orElse("")));
         }
     }
 }
