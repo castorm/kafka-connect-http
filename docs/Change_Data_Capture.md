@@ -1,3 +1,5 @@
+# Change Data Capture
+
 ### Introduction
 Given the nature of the transport we are using, we can't just subscribe to changes on a HTTP resource, we have to poll for them, that is retrieving changes periodically, via multiple requests.
 
