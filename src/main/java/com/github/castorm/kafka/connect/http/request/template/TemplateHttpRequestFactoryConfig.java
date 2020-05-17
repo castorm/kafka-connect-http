@@ -20,6 +20,7 @@ package com.github.castorm.kafka.connect.http.request.template;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory;
 import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
 import lombok.Getter;
 import org.apache.kafka.common.config.AbstractConfig;
@@ -72,6 +73,6 @@ public class TemplateHttpRequestFactoryConfig extends AbstractConfig {
                 .define(HEADERS, STRING, "", MEDIUM, "HTTP Headers Template")
                 .define(QUERY_PARAMS, STRING, "", MEDIUM, "HTTP Query Params Template")
                 .define(BODY, STRING, "", LOW, "HTTP Body Template")
-                .define(TEMPLATE_FACTORY, CLASS, NoTemplateFactory.class, LOW, "Template Factory Class");
+                .define(TEMPLATE_FACTORY, CLASS, FreeMarkerTemplateFactory.class, LOW, "Template Factory Class");
     }
 }

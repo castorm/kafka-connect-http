@@ -149,11 +149,11 @@ Templates can be provided for url, headers, query params and body.
 > ```
 > Class responsible for creating the templates that will be used on every request.
 > *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
+> *   Default: `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
 > *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
 >     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
           Implementation based on [FreeMarker](https://freemarker.apache.org/)
+>     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
 
 ---
 <a name="client"/>
@@ -321,8 +321,12 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > ##### `http.response.record.timestamp.parser`
 > Class responsible for converting the timestamp property captured above into a `java.time.Instant`.  
 > *   Type: String
-> *   Default: `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser`
+> *   Default: `com.github.castorm.kafka.connect.http.response.timestamp.EpochMillisOrDelegateTimestampParser`
 > *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.response.timestamp.EpochMillisTimestampParser` 
+           Implementation that captures the timestamp as an epoch millis long
+>     *   `com.github.castorm.kafka.connect.http.response.timestamp.EpochMillisOrDelegateTimestampParser` 
+           Implementation that tries to capture as epoch millis or delegates to another parser in case of failure
 >     *   `com.github.castorm.kafka.connect.http.response.timestamp.DateTimeFormatterTimestampParser` 
            Implementation based on based on a `DateTimeFormatter`
 >     *   `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser`
@@ -378,11 +382,11 @@ There are cases when we'll be interested in filtering out certain records. One o
 > }
 > ```
 > *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory`
+> *   Default: `com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory`
 > *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory`
->     *   `com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactory`
 >     *   `com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory`
+>     *   `com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactory`
+>     *   `com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory`
 
 #### Filtering out SourceRecord with OffsetTimestampFilterFactory
 

@@ -90,12 +90,12 @@ class HttpSourceConnectorConfigTest {
 
     @Test
     void whenNoResponseFilterFactory_thenDefault() {
-        assertThat(configWithout("http.record.filter.factory").getRecordFilterFactory()).isInstanceOf(PassthroughRecordFilterFactory.class);
+        assertThat(configWithout("http.record.filter.factory").getRecordFilterFactory()).isInstanceOf(OffsetRecordFilterFactory.class);
     }
 
     @Test
     void whenResponseFilterFactory_thenInitialized() {
-        assertThat(config("http.record.filter.factory", "com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory").getRecordFilterFactory()).isInstanceOf(OffsetRecordFilterFactory.class);
+        assertThat(config("http.record.filter.factory", "com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory").getRecordFilterFactory()).isInstanceOf(PassthroughRecordFilterFactory.class);
     }
 
     @Test

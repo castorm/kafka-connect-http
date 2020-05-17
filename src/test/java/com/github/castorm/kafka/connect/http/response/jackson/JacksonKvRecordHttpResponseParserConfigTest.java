@@ -20,6 +20,8 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.response.timestamp.EpochMillisOrDelegateTimestampParser;
+import com.github.castorm.kafka.connect.http.response.timestamp.EpochMillisTimestampParser;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
@@ -40,6 +42,17 @@ class JacksonKvRecordHttpResponseParserConfigTest {
     @Test
     void whenMissingItemParserClassConfigured_thenInitialized() {
         assertThat(config(emptyMap()).getRecordParser()).isInstanceOf(JacksonRecordParser.class);
+    }
+
+    @Test
+    void whenTimestampParserClassConfigured_thenInitialized() {
+        assertThat(config(ImmutableMap.of("http.response.record.timestamp.parser", "com.github.castorm.kafka.connect.http.response.timestamp.EpochMillisTimestampParser")).getTimestampParser())
+                .isInstanceOf(EpochMillisTimestampParser.class);
+    }
+
+    @Test
+    void whenMissingTimestampParserClassConfigured_thenInitialized() {
+        assertThat(config(emptyMap()).getTimestampParser()).isInstanceOf(EpochMillisOrDelegateTimestampParser.class);
     }
 
     interface Fixture {

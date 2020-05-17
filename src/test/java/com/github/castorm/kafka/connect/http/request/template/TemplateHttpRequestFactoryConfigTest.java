@@ -20,6 +20,7 @@ package com.github.castorm.kafka.connect.http.request.template;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory;
 import com.github.castorm.kafka.connect.http.request.template.spi.Template;
 import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
 import org.apache.kafka.common.config.ConfigException;
@@ -89,7 +90,7 @@ class TemplateHttpRequestFactoryConfigTest {
 
     @Test
     void whenMissingTemplateFactory_thenDefault() {
-        assertThat(configWithout("http.request.template.factory").getTemplateFactory()).isInstanceOf(NoTemplateFactory.class);
+        assertThat(configWithout("http.request.template.factory").getTemplateFactory()).isInstanceOf(FreeMarkerTemplateFactory.class);
     }
 
     @Test
