@@ -32,6 +32,8 @@ import static java.util.Collections.emptyMap;
 
 public class AdaptableIntervalThrottler implements Throttler {
 
+    private static final Offset EMPTY_OFFSET = Offset.of(emptyMap());
+
     private final Function<Map<String, ?>, AdaptableIntervalThrottlerConfig> configFactory;
 
     private Throttler tailThrottler;
@@ -40,7 +42,7 @@ public class AdaptableIntervalThrottler implements Throttler {
 
     private Long intervalMillis;
 
-    private Offset lastOffset = Offset.of(emptyMap());
+    private Offset lastOffset = EMPTY_OFFSET;
 
     public AdaptableIntervalThrottler() {
         this(AdaptableIntervalThrottlerConfig::new);
@@ -65,11 +67,15 @@ public class AdaptableIntervalThrottler implements Throttler {
     }
 
     private Throttler resolveThrottler(Offset offset) {
-        if (isCatchingUp(offset)) {
+        if (isFirst(offset) || isCatchingUp(offset)) {
             return catchupThrottler;
         } else {
             return tailThrottler;
         }
+    }
+
+    private boolean isFirst(Offset offset) {
+        return offset.equals(EMPTY_OFFSET);
     }
 
     private boolean isCatchingUp(Offset offset) {

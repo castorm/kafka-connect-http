@@ -65,6 +65,15 @@ class AdaptableIntervalThrottlerTest {
     }
 
     @Test
+    void givenFirst_whenThrottle_thenCathupThrottler() throws InterruptedException {
+
+        throttler.throttle(Offset.of(emptyMap()));
+
+        then(tailThrottler).should(never()).throttle(any());
+        then(catchupThrottler).should().throttle(Offset.of(emptyMap()));
+    }
+
+    @Test
     void givenNewRecordsLastNotLongAgo_whenThrottle_thenTailThrottler() throws InterruptedException {
 
         throttler.throttle(offset(now));
