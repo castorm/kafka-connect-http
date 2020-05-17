@@ -8,7 +8,7 @@
 
 Kafka Connect connector that enables [Change Data Capture](docs/Change_Data_Capture.md) from JSON/HTTP APIs into Kafka.
 
-## Is this connector for you?
+## This connector is for you if
 *   You want to (live) replicate a dataset exposed through JSON/HTTP API
 *   You want to do so efficiently
 *   You want to capture only changes, not full snapshots
