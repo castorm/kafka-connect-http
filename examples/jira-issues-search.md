@@ -1,12 +1,12 @@
-## Jira API Search Issues
+## Jira Issues Search API
 Documentation: [Search for issues using JQL (GET)](https://developer.atlassian.com/cloud/jira/platform/rest/v3/#api-rest-api-3-search-get)
 
 ### Sample Request
 ```bash
 curl --request GET \
-  --url '/rest/api/3/search?jql=project%20%3D%20HSP' \
   --user 'email@example.com:<api_token>' \
-  --header 'Accept: application/json'
+  --header 'Accept: application/json' \
+  --url 'http://domain/rest/api/3/search?jql=project%20%3D%20HSP'
 ```
 
 ### Sample Response
@@ -42,7 +42,7 @@ And based on the results we would be updating the `updated` filter for subsequen
 #### Sample Configuration
 ```json
 {
-    "name": "sample-search-issues.jira.source",
+    "name": "sample-search-issues.jira.http.source",
     "config": {
         "connector.class": "com.github.castorm.kafka.connect.http.HttpSourceConnector",
         "tasks.max": "1",
@@ -57,6 +57,7 @@ And based on the results we would be updating the `updated` filter for subsequen
         "http.response.record.value.pointer": "/",
         "http.response.record.timestamp.pointer": "/fields/updated",
         "http.throttler.interval.millis": "30000",
+        "http.throttler.catchup.interval.millis": "1000",
         "kafka.topic": "topic"
     }
 }

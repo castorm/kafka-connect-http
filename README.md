@@ -58,7 +58,8 @@ Kafka Connect will store internally these offsets so the connector can continue 
 ### Examples
 
 See [Examples](examples), e.g. 
-*   [Jira Search Issues API](examples/jira-search-issues.md)
+*   [Jira Issues Search API](examples/jira-issues-search.md)
+*   [Elasticsearch Search API](examples/elasticsearch-search.md)
 
 ### Extension points
 The connector can be easily extended by implementing your own version of any of the components below.
