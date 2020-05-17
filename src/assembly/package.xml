@@ -37,6 +37,7 @@
                 <include>licenses.html</include>
                 <include>licenses/</include>
                 <include>notices/</include>
+                <include>docs/</include>
             </includes>
         </fileSet>
         <fileSet>

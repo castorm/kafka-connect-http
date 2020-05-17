@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Kafka Connect HTTP</name>
-    <description>Kafka Connect connectors enabling Kafka integration with external systems via HTTP</description>
+    <description>Kafka Connect connector that enables Change Data Capture from JSON over HTTP APIs into Kafka.</description>
     <url>https://castorm.github.io/kafka-connect-http</url>
     <inceptionYear>2020</inceptionYear>
 

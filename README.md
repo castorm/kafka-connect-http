@@ -6,7 +6,20 @@
 [![Release to Maven Central](https://github.com/castorm/kafka-connect-http/workflows/Release%20to%20Maven%20Central/badge.svg)](https://github.com/castorm/kafka-connect-http/actions?query=workflow%3A%22Release+to+Maven+Central%22)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.castorm/kafka-connect-http.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.castorm%22%20AND%20a:%22kafka-connect-http%22)
 
-Set of Kafka Connect connectors that enable Kafka integration with external systems via HTTP.
+Kafka Connect connector that enables [Change Data Capture](docs/Change_Data_Capture.md) from JSON/HTTP APIs into Kafka.
+
+## Is this connector for you?
+*   You want to (live) replicate a dataset exposed through JSON/HTTP API
+*   You want to do so efficiently
+*   You want to capture only changes, not full snapshots
+*   You want to do so via configuration, with no custom coding
+*   You want to be able to extend the connector if it comes to that
+
+### Examples
+
+See [examples](examples), e.g. 
+*   [Jira Issues Search API](examples/jira-issues-search.md)
+*   [Elasticsearch Search API](examples/elasticsearch-search.md)
 
 ## Getting Started
 
@@ -43,23 +56,6 @@ More details on how to [Install Connectors](https://docs.confluent.io/current/co
 
 ## Source Connector
 `com.github.castorm.kafka.connect.http.HttpSourceConnector`
-
-The HTTP Source connector is meant for implementing 
-[CDC (Change Data Capture)](https://en.wikipedia.org/wiki/Change_data_capture).
-
-### Requirements for CDC
-*   The HTTP resource contains an array of records that is ordered by a given set of properties present on every record
-    (we'll call them **offset**)
-*   The HTTP resource allows retrieving records starting from a given **offset**
-*   The **offset** properties are monotonically increasing
-
-Kafka Connect will store internally these offsets so the connector can continue from where it left after a restart.
-
-### Examples
-
-See [Examples](examples), e.g. 
-*   [Jira Issues Search API](examples/jira-issues-search.md)
-*   [Elasticsearch Search API](examples/elasticsearch-search.md)
 
 ### Extension points
 The connector can be easily extended by implementing your own version of any of the components below.
