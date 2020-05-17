@@ -281,6 +281,8 @@
                                     <tags>
                                         <tag>http</tag>
                                         <tag>rest</tag>
+                                        <tag>api</tag>
+                                        <tag>json</tag>
                                         <tag>cdc</tag>
                                         <tag>change-data-capture</tag>
                                     </tags>
