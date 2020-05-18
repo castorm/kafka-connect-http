@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <name>Kafka Connect HTTP</name>
-    <description>Kafka Connect connector that enables Change Data Capture from JSON over HTTP APIs into Kafka.</description>
+    <description>Kafka Connect connector that enables Change Data Capture from JSON/HTTP APIs into Kafka.</description>
     <url>https://castorm.github.io/kafka-connect-http</url>
     <inceptionYear>2020</inceptionYear>
 
@@ -233,6 +233,7 @@
                         <version>3.3.0</version>
                         <configuration>
                             <finalName>castorm-${project.artifactId}-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
                                 <descriptor>src/assembly/package.xml</descriptor>
                             </descriptors>
