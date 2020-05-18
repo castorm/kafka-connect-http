@@ -2,9 +2,10 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## v0.5.1 (TBD)
+## v0.6.0 (05/18/2020)
 -   First iteration of `PolicyResponseParser` to cope with unexpected http status codes
 -   Implemented `OffsetRecordFilterFactory` to better manage de-duplication
+-   Simplify configuration by providing sensible defaults
 
 ## v0.5.0 (05/10/2020)
 -   `PollInterceptor` refactored into `Throttler`
