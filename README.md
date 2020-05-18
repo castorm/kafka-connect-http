@@ -40,9 +40,8 @@ plugins folder.
                 <artifactItem>
                     <groupId>com.github.castorm</groupId>
                     <artifactId>kafka-connect-http</artifactId>
-                    <version>0.6.0</version>
+                    <version>0.6.1</version>
                     <type>zip</type>
-                    <classifier>package</classifier>
                 </artifactItem>
             </artifactItems>
         </configuration>
