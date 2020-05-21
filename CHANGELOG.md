@@ -3,6 +3,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.6.2-SNAPSHOT (TBD)
+-   Bump okhttp.version from 4.7.0 to 4.7.2
 
 ## v0.6.1 (05/18/2020)
 -   Bump okhttp.version from 4.6.0 to 4.7.0
