@@ -2,6 +2,9 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.6.3 (05/22/2020)
+-   Rename plugin folder name to match artifactId
+
 ## v0.6.2 (05/22/2020)
 -   Bump okhttp.version from 4.6.0 to 4.7.2
 -   Assemble a package ready to be unpacked
