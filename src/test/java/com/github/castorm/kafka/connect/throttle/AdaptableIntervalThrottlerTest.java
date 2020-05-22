@@ -57,10 +57,10 @@ class AdaptableIntervalThrottlerTest {
 
     @BeforeEach
     void setUp() {
-        throttler = new AdaptableIntervalThrottler(__ -> config);
         given(tailThrottler.getIntervalMillis()).willReturn(intervalMillis);
         given(config.getTailThrottler()).willReturn(tailThrottler);
         given(config.getCatchupThrottler()).willReturn(catchupThrottler);
+        throttler = new AdaptableIntervalThrottler(__ -> config);
         throttler.configure(emptyMap());
     }
 
@@ -85,9 +85,11 @@ class AdaptableIntervalThrottlerTest {
     @Test
     void givenNewRecordsLastLongAgo_whenThrottle_thenCatchupThrottler() throws InterruptedException {
 
-        throttler.throttle(offset(now.minus(intervalMillis, MILLIS)));
+        Offset offset = offset(now.minus(intervalMillis, MILLIS));
 
-        then(catchupThrottler).should().throttle(offset(now.minus(intervalMillis, MILLIS)));
+        throttler.throttle(offset);
+
+        then(catchupThrottler).should().throttle(offset);
         then(tailThrottler).should(never()).throttle(any());
     }
 
