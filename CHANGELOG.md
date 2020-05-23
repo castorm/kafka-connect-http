@@ -2,7 +2,7 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## v0.7.0 (TBD)
+## v0.7.0 (05/23/2020)
 -   `http.response.records.pointer` renamed to `http.response.list.pointer`
 -   `http.response.record.value.pointer` renamed to `http.response.record.pointer`
 -   Enable compound keys on `JacksonRecordParser`
