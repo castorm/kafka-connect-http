@@ -339,7 +339,7 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > ##### `http.response.record.timestamp.parser.pattern`
 > When using `DateTimeFormatterTimestampParser`, a custom pattern can be specified 
 > *   Type: String
-> *   Default: `yyyy-MM-dd'T'HH:mm:ss.SSSX`
+> *   Default: `yyyy-MM-dd'T'HH:mm:ss[.SSS]X`
 > 
 > ##### `http.response.record.timestamp.parser.zone`
 > Timezone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid
