@@ -38,7 +38,7 @@ class JacksonRecordParserConfigTest {
 
     @Test
     void whenItemsPointerConfigured_thenInitialized() {
-        assertThat(config("http.response.records.pointer", "/test-pointer").getRecordsPointer()).isEqualTo(compile("/test-pointer"));
+        assertThat(config("http.response.list.pointer", "/test-pointer").getRecordsPointer()).isEqualTo(compile("/test-pointer"));
     }
 
     @Test
@@ -53,7 +53,7 @@ class JacksonRecordParserConfigTest {
 
     @Test
     void whenItemValuePointerConfigured_thenInitialized() {
-        assertThat(config("http.response.record.value.pointer", "/test-pointer").getValuePointer()).isEqualTo(compile("/test-pointer"));
+        assertThat(config("http.response.record.pointer", "/test-pointer").getValuePointer()).isEqualTo(compile("/test-pointer"));
     }
 
     @Test

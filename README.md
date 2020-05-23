@@ -293,7 +293,7 @@ Parses the HTTP response into a key-value SourceRecord. This process is decompos
 ##### Parsing a HttpResponse with JacksonKvRecordHttpResponseParser
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in the response.
 
-> ##### `http.response.records.pointer`
+> ##### `http.response.list.pointer`
 > [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property in the response body containing an array of records 
 > *   Type: String
 > *   Default: "/"
@@ -305,7 +305,7 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > *   Type: String
 > *   Default: ""
 > 
-> ##### `http.response.record.value.pointer`
+> ##### `http.response.record.pointer`
 > [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual record to be used as kafka record body
 > *   Type: String
 > *   Default: "/"

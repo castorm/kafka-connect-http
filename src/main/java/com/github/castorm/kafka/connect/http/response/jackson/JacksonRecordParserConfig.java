@@ -41,9 +41,9 @@ import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 @Getter
 public class JacksonRecordParserConfig extends AbstractConfig {
 
-    private static final String ITEMS_POINTER = "http.response.records.pointer";
+    private static final String LIST_POINTER = "http.response.list.pointer";
+    private static final String ITEM_POINTER = "http.response.record.pointer";
     private static final String ITEM_KEY_POINTER = "http.response.record.key.pointer";
-    private static final String ITEM_VALUE_POINTER = "http.response.record.value.pointer";
     private static final String ITEM_TIMESTAMP_POINTER = "http.response.record.timestamp.pointer";
     private static final String ITEM_OFFSET_VALUE_POINTER = "http.response.record.offset.pointer";
 
@@ -55,9 +55,9 @@ public class JacksonRecordParserConfig extends AbstractConfig {
 
     JacksonRecordParserConfig(Map<String, ?> originals) {
         super(config(), originals);
-        recordsPointer = compile(getString(ITEMS_POINTER));
+        recordsPointer = compile(getString(LIST_POINTER));
         keyPointer = ofNullable(getString(ITEM_KEY_POINTER)).map(JsonPointer::compile);
-        valuePointer = compile(getString(ITEM_VALUE_POINTER));
+        valuePointer = compile(getString(ITEM_POINTER));
         timestampPointer = ofNullable(getString(ITEM_TIMESTAMP_POINTER)).map(JsonPointer::compile);
         offsetPointers = breakDownMap(getString(ITEM_OFFSET_VALUE_POINTER)).entrySet().stream()
                 .map(entry -> new SimpleEntry<>(entry.getKey(), compile(entry.getValue())))
@@ -66,9 +66,9 @@ public class JacksonRecordParserConfig extends AbstractConfig {
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(ITEMS_POINTER, STRING, "/", HIGH, "Items JsonPointer")
+                .define(LIST_POINTER, STRING, "/", HIGH, "Items JsonPointer")
                 .define(ITEM_KEY_POINTER, STRING, null, HIGH, "Item Key JsonPointer")
-                .define(ITEM_VALUE_POINTER, STRING, "/", HIGH, "Item Value JsonPointer")
+                .define(ITEM_POINTER, STRING, "/", HIGH, "Item Value JsonPointer")
                 .define(ITEM_TIMESTAMP_POINTER, STRING, null, MEDIUM, "Item Timestamp JsonPointer")
                 .define(ITEM_OFFSET_VALUE_POINTER, STRING, "", MEDIUM, "Item Offset JsonPointers");
     }
