@@ -5,6 +5,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## v0.7.0 (TBD)
 -   `http.response.records.pointer` renamed to `http.response.list.pointer`
 -   `http.response.record.value.pointer` renamed to `http.response.record.pointer`
+-   Enable compound keys on `JacksonRecordParser`
 
 ## v0.6.3 (05/22/2020)
 -   Rename plugin folder name to match artifactId

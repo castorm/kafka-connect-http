@@ -23,6 +23,7 @@ package com.github.castorm.kafka.connect.http.response.jackson;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +32,7 @@ import static com.fasterxml.jackson.core.JsonPointer.compile;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonRecordParserConfigTest.Fixture.config;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonRecordParserConfigTest.Fixture.configWithout;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonRecordParserConfigTest.Fixture.offsetConfig;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -48,7 +50,12 @@ class JacksonRecordParserConfigTest {
 
     @Test
     void whenItemKeyPointerConfigured_thenInitialized() {
-        assertThat(config("http.response.record.key.pointer", "/test-pointer").getKeyPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
+        assertThat(config("http.response.record.key.pointer", "/test-pointer").getKeyPointer()).isEqualTo(asList(compile("/test-pointer")));
+    }
+
+    @Test
+    void whenItemKeyPointersConfigured_thenInitialized() {
+        assertThat(config("http.response.record.key.pointer", "/a,/b").getKeyPointer()).isEqualTo(asList(compile("/a"), compile("/b")));
     }
 
     @Test

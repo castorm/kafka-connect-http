@@ -28,12 +28,14 @@ import lombok.SneakyThrows;
 import org.apache.kafka.common.Configurable;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
 @RequiredArgsConstructor
@@ -46,7 +48,7 @@ public class JacksonRecordParser implements Configurable {
     private final JacksonPropertyResolver propertyResolver;
 
     private JsonPointer recordsPointer;
-    private Optional<JsonPointer> keyPointer;
+    private List<JsonPointer> keyPointer;
     private Optional<JsonPointer> timestampPointer;
     private Map<String, JsonPointer> offsetPointers;
     private JsonPointer valuePointer;
@@ -70,7 +72,11 @@ public class JacksonRecordParser implements Configurable {
     }
 
     Optional<String> getKey(JsonNode node) {
-        return keyPointer.map(pointer -> propertyResolver.getObjectAt(node, pointer).asText());
+        String key = keyPointer.stream()
+                .map(pointer -> propertyResolver.getObjectAt(node, pointer).asText())
+                .filter(it -> !it.isEmpty())
+                .collect(joining("+"));
+        return key.isEmpty() ? Optional.empty() : Optional.of(key);
     }
 
     Optional<String> getTimestamp(JsonNode node) {

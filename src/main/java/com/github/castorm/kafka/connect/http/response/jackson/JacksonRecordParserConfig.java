@@ -26,11 +26,14 @@ import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownList;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
@@ -48,7 +51,7 @@ public class JacksonRecordParserConfig extends AbstractConfig {
     private static final String ITEM_OFFSET_VALUE_POINTER = "http.response.record.offset.pointer";
 
     private final JsonPointer recordsPointer;
-    private final Optional<JsonPointer> keyPointer;
+    private final List<JsonPointer> keyPointer;
     private final JsonPointer valuePointer;
     private final Optional<JsonPointer> timestampPointer;
     private final Map<String, JsonPointer> offsetPointers;
@@ -56,7 +59,7 @@ public class JacksonRecordParserConfig extends AbstractConfig {
     JacksonRecordParserConfig(Map<String, ?> originals) {
         super(config(), originals);
         recordsPointer = compile(getString(LIST_POINTER));
-        keyPointer = ofNullable(getString(ITEM_KEY_POINTER)).map(JsonPointer::compile);
+        keyPointer = breakDownList(ofNullable(getString(ITEM_KEY_POINTER)).orElse("")).stream().map(JsonPointer::compile).collect(Collectors.toList());
         valuePointer = compile(getString(ITEM_POINTER));
         timestampPointer = ofNullable(getString(ITEM_TIMESTAMP_POINTER)).map(JsonPointer::compile);
         offsetPointers = breakDownMap(getString(ITEM_OFFSET_VALUE_POINTER)).entrySet().stream()
@@ -66,9 +69,9 @@ public class JacksonRecordParserConfig extends AbstractConfig {
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(LIST_POINTER, STRING, "/", HIGH, "Items JsonPointer")
-                .define(ITEM_KEY_POINTER, STRING, null, HIGH, "Item Key JsonPointer")
-                .define(ITEM_POINTER, STRING, "/", HIGH, "Item Value JsonPointer")
+                .define(LIST_POINTER, STRING, "/", HIGH, "Item List JsonPointer")
+                .define(ITEM_POINTER, STRING, "/", HIGH, "Item JsonPointer")
+                .define(ITEM_KEY_POINTER, STRING, null, HIGH, "Item Key JsonPointers")
                 .define(ITEM_TIMESTAMP_POINTER, STRING, null, MEDIUM, "Item Timestamp JsonPointer")
                 .define(ITEM_OFFSET_VALUE_POINTER, STRING, "", MEDIUM, "Item Offset JsonPointers");
     }

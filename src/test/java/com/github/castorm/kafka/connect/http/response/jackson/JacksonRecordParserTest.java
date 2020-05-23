@@ -42,7 +42,10 @@ import static com.github.castorm.kafka.connect.http.response.jackson.JacksonReco
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonRecordParserTest.Fixture.mapper;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonRecordParserTest.Fixture.pointer;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonRecordParserTest.Fixture.property;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
@@ -75,7 +78,7 @@ class JacksonRecordParserTest {
     @Test
     void givenNoPointer_whenGetKey_thenEmpty() {
 
-        given(config.getKeyPointer()).willReturn(Optional.empty());
+        given(config.getKeyPointer()).willReturn(emptyList());
         parser.configure(emptyMap());
 
         assertThat(parser.getKey(deserialize(item1))).isEmpty();
@@ -84,11 +87,22 @@ class JacksonRecordParserTest {
     @Test
     void givenPointer_whenGetKey_thenKeyAsText() {
 
-        given(config.getKeyPointer()).willReturn(Optional.of(pointer));
-        given(propertyResolver.getObjectAt(deserialize(item1), pointer)).willReturn(deserialize(item1));
+        given(config.getKeyPointer()).willReturn(singletonList(pointer));
+        given(propertyResolver.getObjectAt(deserialize(item1), pointer)).willReturn(deserialize(item1).at("/k1"));
         parser.configure(emptyMap());
 
-        assertThat(parser.getKey(deserialize(item1))).contains(deserialize(item1).asText());
+        assertThat(parser.getKey(deserialize(item1))).contains(property);
+    }
+
+    @Test
+    void givenPointers_whenGetKey_thenKeyAsTextConcatenated() {
+
+        JsonNode node = deserialize(item1);
+        given(config.getKeyPointer()).willReturn(asList(pointer, pointer));
+        given(propertyResolver.getObjectAt(node, pointer)).willReturn(node.at("/k1"));
+        parser.configure(emptyMap());
+
+        assertThat(parser.getKey(node)).contains(property + "+" + property);
     }
 
     @Test

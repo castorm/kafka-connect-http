@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import java.util.AbstractMap.SimpleEntry;
 
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownHeaders;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownList;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownQueryParams;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.parseIntegerRangedList;
@@ -151,5 +152,20 @@ class ConfigUtilsTest {
     @Test
     void givenIntegerRanges_whenParsed_thenIntegerRanges() {
         assertThat(parseIntegerRangedList("200..201, 203..204")).containsExactly(200, 201, 203, 204);
+    }
+
+    @Test
+    void whenBreakDownList_thenBrokenDown() {
+        assertThat(breakDownList("a,b")).containsExactly("a", "b");
+    }
+
+    @Test
+    void whenBreakDownListWithSpaces_thenBrokenDown() {
+        assertThat(breakDownList("  a  ,  b  ")).containsExactly("a", "b");
+    }
+
+    @Test
+    void whenBreakDownListEmpty_thenEmpty() {
+        assertThat(breakDownList("")).isEmpty();
     }
 }

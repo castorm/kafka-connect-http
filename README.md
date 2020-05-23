@@ -295,18 +295,22 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 
 > ##### `http.response.list.pointer`
 > [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property in the response body containing an array of records 
+> *   Example: "/items"
 > *   Type: String
 > *   Default: "/"
 > 
 > ##### `http.response.record.key.pointer`
-> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the identifier of the individual record to be used as kafka 
+> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the comma separated list of properties that compound, uniquely 
+  identify the individual record to be used as key in kafka 
   record key
-> This is especially important on partitioned topics  
+> This is especially important on partitioned topics
+> *   Example: "/id"
 > *   Type: String
 > *   Default: ""
 > 
 > ##### `http.response.record.pointer`
-> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual record to be used as kafka record body
+> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual record to be used as kafka record body. Useful
+  when the object we are interested in is under a nested structure
 > *   Type: String
 > *   Default: "/"
 > 

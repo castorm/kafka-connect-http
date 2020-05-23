@@ -87,6 +87,13 @@ public class ConfigUtils {
                 .collect(toSet());
     }
 
+    public static List<String> breakDownList(String itemList) {
+        return Stream.of(itemList.split(","))
+                .map(String::trim)
+                .filter(it -> !it.isEmpty())
+                .collect(toList());
+    }
+
     private static Set<Integer> parseIntegerRanged(String range) {
         String[] rangeString = range.split("\\.\\.");
         if (rangeString.length == 0 || rangeString[0].length() == 0) {
