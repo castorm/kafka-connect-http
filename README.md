@@ -106,7 +106,14 @@ The first thing our connector will need to do is preparing a `HttpRequest`
 
 #### Preparing a HttpRequest with TemplateHttpRequestFactory
 This `HttpRequestFactory` is based on template resolution using the `Offset` of the last seen record.
+
+`Offset` is nothing but a set of key-value pairs of the last acknowledged item parsed from the HTTP response. 
+You can reference these properties by key from the templates.
+On top of your custom keys, `Offset` will contain a reserved key for `timestamp` with the record's timestamp in 
+ISO 8601 format.
+
 Templates can be provided for url, headers, query params and body.
+
 
 > ##### `http.request.url`
 > Http method to use in the request.
@@ -299,6 +306,12 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > *   Type: String
 > *   Default: "/"
 > 
+> ##### `http.response.record.pointer`
+> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual record to be used as kafka record body. Useful
+  when the object we are interested in is under a nested structure
+> *   Type: String
+> *   Default: "/"
+> 
 > ##### `http.response.record.key.pointer`
 > [JsonPointer](https://tools.ietf.org/html/rfc6901) to the comma separated list of properties that compound, uniquely 
   identify the individual record to be used as key in kafka 
@@ -308,16 +321,10 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > *   Type: String
 > *   Default: ""
 > 
-> ##### `http.response.record.pointer`
-> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual record to be used as kafka record body. Useful
-  when the object we are interested in is under a nested structure
-> *   Type: String
-> *   Default: "/"
-> 
 > ##### `http.response.record.timestamp.pointer`
 > [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual record to be used as kafka 
   record timestamp
-> This is especially important to track progress, enable latency calculations, improved throttling and feedback to 
+  This is especially important to track progress, enable latency calculations, improved throttling and feedback to 
   `TemplateHttpRequestFactory` 
 > *   Type: String
 > *   Default: ""
@@ -348,10 +355,16 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > *   Default: `UTC`
 > 
 > ##### `http.response.record.offset.pointer`
-> Comma separated list of `key=value` pairs where the key is the name of the property in the offset and the value is
-  the [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value being used as offset for future requests
+> Comma separated list of `key=/value` pairs where the key is the name of the property in the offset and the value is
+> the [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value being used as offset for future requests
 > This is the mechanism that enables sharing state in between `HttpRequests`. `HttpRequestFactory` implementations 
-  receive this `Offset`.
+> receive this `Offset`.
+> 
+>  One of the roles of the offset, even if not required for preparing the next request, is helping in deduplication of
+> already seen items, by providing a sense of progress, assuming consistent ordering. (e.g. even if the response returns
+> the some repeated results in between requests because they have the same timestamp, anything prior to the last seen
+> offset will be ignored). see `OffsetFilterFactory`
+> *   Example: `id=/itemId`
 > *   Type: String
 > *   Default: ""
 

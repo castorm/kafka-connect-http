@@ -33,7 +33,7 @@ import static java.time.Instant.EPOCH;
 @EqualsAndHashCode
 public class Offset {
 
-    private static final String TIMESTAMP_ISO_KEY = "timestamp_iso";
+    private static final String TIMESTAMP_KEY = "timestamp";
 
     private final Map<String, ?> properties;
 
@@ -43,15 +43,15 @@ public class Offset {
 
     public static Offset of(Map<String, ?> properties) {
         Map<String, Object> props = new HashMap<>(properties);
-        if (!properties.containsKey(TIMESTAMP_ISO_KEY)) {
-            props.put(TIMESTAMP_ISO_KEY, EPOCH.toString());
+        if (!properties.containsKey(TIMESTAMP_KEY)) {
+            props.put(TIMESTAMP_KEY, EPOCH.toString());
         }
         return new Offset(props);
     }
 
     public static Offset of(Map<String, ?> properties, Instant timestamp) {
         Map<String, Object> props = new HashMap<>(properties);
-        props.put(TIMESTAMP_ISO_KEY, timestamp.toString());
+        props.put(TIMESTAMP_KEY, timestamp.toString());
         return new Offset(props);
     }
 
@@ -60,6 +60,6 @@ public class Offset {
     }
 
     public Instant getTimestamp() {
-        return Instant.parse((CharSequence) properties.get(TIMESTAMP_ISO_KEY));
+        return Instant.parse((CharSequence) properties.get(TIMESTAMP_KEY));
     }
 }
