@@ -26,6 +26,9 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.data.Struct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
@@ -33,58 +36,65 @@ import static com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordM
 import static com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperTest.Fixture.record;
 import static java.time.Instant.now;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
+@ExtendWith(MockitoExtension.class)
 class SimpleKvSourceRecordMapperTest {
 
-    SimpleKvSourceRecordMapper factory;
+    SimpleKvSourceRecordMapper mapper;
+
+    @Mock
+    SimpleKvSourceRecordMapperConfig config;
 
     @BeforeEach
     void setUp() {
-        factory = new SimpleKvSourceRecordMapper();
+        given(config.getTopic()).willReturn("topic");
+        given(config.getKeyPropertyName()).willReturn("customKey");
+        given(config.getValuePropertyName()).willReturn("customValue");
+        mapper = new SimpleKvSourceRecordMapper(__ -> config);
+        mapper.configure(emptyMap());
     }
 
     @Test
     void givenTopic_whenMap_thenTopicMapped() {
-
-        factory.configure(ImmutableMap.of("kafka.topic", "topic"));
-
-        assertThat(factory.map(record).topic()).isEqualTo("topic");
+        assertThat(mapper.map(record).topic()).isEqualTo("topic");
     }
 
     @Test
     void givenKey_whenMap_thenIdMapped() {
-        assertThat(((Struct) factory.map(record.withKey("value")).key()).get("key")).isEqualTo("value");
+        assertThat(((Struct) mapper.map(record.withKey("value")).key()).get("customKey")).isEqualTo("value");
     }
 
     @Test
     void givenValue_whenMap_thenBodyMapped() {
-        assertThat(((Struct) factory.map(record.withValue("value")).value()).get("body")).isEqualTo("value");
+        assertThat(((Struct) mapper.map(record.withValue("value")).value()).get("customValue")).isEqualTo("value");
     }
 
     @Test
     void givenOffset_whenMap_thenOffsetMapped() {
-        assertThat(factory.map(record.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
+        assertThat(mapper.map(record.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
     }
 
     @Test
     void givenTimestamp_whenMap_thenTimestampMapped() {
-        assertThat(factory.map(record.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
+        assertThat(mapper.map(record.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
     }
 
     @Test
     void whenMap_thenNoPartitionMapped() {
-        assertThat(factory.map(record).kafkaPartition()).isNull();
+        assertThat(mapper.map(record).kafkaPartition()).isNull();
     }
 
     @Test
     void whenMap_thenKeySchemaMapped() {
-        assertThat(factory.map(record).keySchema()).isNotNull();
+        assertThat(mapper.map(record).keySchema()).isNotNull();
     }
 
     @Test
     void whenMap_thenValueSchemaMapped() {
-        assertThat(factory.map(record).valueSchema()).isNotNull();
+        assertThat(mapper.map(record).valueSchema()).isNotNull();
     }
 
     interface Fixture {

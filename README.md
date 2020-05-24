@@ -376,8 +376,8 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 ### Mapping a KvRecord into SourceRecord with SimpleKvSourceRecordMapper
 Once we have our `KvRecord` we have to translate it into what Kafka Connect is expecting: `SourceRecord`s
 
-Embeds the record properties into a common simple envelope to enable schema evolution. This envelope contains simple
-a key and a body properties.
+Embeds the record properties into a common simple envelope to enable schema evolution. This envelope simply contains
+a key and a value properties with customizable field names.
 
 Here is also where we'll tell Kafka Connect to what topic and on what partition do we want to send our record.
 
@@ -386,6 +386,16 @@ Here is also where we'll tell Kafka Connect to what topic and on what partition 
 > *   Required
 > *   Type: String
 > *   Default: ""
+>
+> ##### `http.record.schema.key.property.name`
+> Name of the key property in the key-value envelope
+> *   Type: String
+> *   Default: "key"
+>
+> ##### `http.record.schema.value.property.name`
+> Name of the value property in the key-value envelope
+> *   Type: String
+> *   Default: "value"
 
 ---
 <a name="filter"/>
