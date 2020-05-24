@@ -23,7 +23,6 @@ package com.github.castorm.kafka.connect.http.response.jackson;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
