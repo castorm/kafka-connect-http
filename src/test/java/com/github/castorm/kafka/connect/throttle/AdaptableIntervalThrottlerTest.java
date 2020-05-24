@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,16 +66,18 @@ class AdaptableIntervalThrottlerTest {
     }
 
     @Test
-    void givenFirst_whenThrottle_thenCathupThrottler() throws InterruptedException {
+    void givenFirst_whenThrottle_thenCatchupThrottler() throws InterruptedException {
 
-        throttler.throttle(Offset.of(emptyMap()));
+        throttler.throttle(offset(now));
 
         then(tailThrottler).should(never()).throttle(any());
-        then(catchupThrottler).should().throttle(Offset.of(emptyMap()));
+        then(catchupThrottler).should().throttle(offset(now));
     }
 
     @Test
     void givenNewRecordsLastNotLongAgo_whenThrottle_thenTailThrottler() throws InterruptedException {
+
+        givenPreviousThrottle(offset(now.minus(intervalMillis - 1, MILLIS)));
 
         throttler.throttle(offset(now));
 
@@ -85,16 +88,18 @@ class AdaptableIntervalThrottlerTest {
     @Test
     void givenNewRecordsLastLongAgo_whenThrottle_thenCatchupThrottler() throws InterruptedException {
 
-        Offset offset = offset(now.minus(intervalMillis, MILLIS));
+        givenPreviousThrottle(offset(now.minus(intervalMillis + 2, MILLIS)));
 
-        throttler.throttle(offset);
+        throttler.throttle(offset(now.minus(intervalMillis + 1, MILLIS)));
 
-        then(catchupThrottler).should().throttle(offset);
+        then(catchupThrottler).should().throttle(offset(now.minus(intervalMillis + 1, MILLIS)));
         then(tailThrottler).should(never()).throttle(any());
     }
 
     @Test
     void givenNoNewRecordsLastNotLongAgo_whenThrottle_thenBothTailThrottler() throws InterruptedException {
+
+        givenPreviousThrottle(offset(now.minus(intervalMillis - 1, MILLIS)));
 
         throttler.throttle(offset(now));
         throttler.throttle(offset(now));
@@ -105,11 +110,18 @@ class AdaptableIntervalThrottlerTest {
     @Test
     void givenNoNewRecordsLastLongAgo_whenThrottle_thenOneCatchupOneTailThrottler() throws InterruptedException {
 
+        givenPreviousThrottle(offset(now.minus(intervalMillis + 1, MILLIS)));
+
         throttler.throttle(offset(now.minus(intervalMillis, MILLIS)));
         throttler.throttle(offset(now.minus(intervalMillis, MILLIS)));
 
         then(catchupThrottler).should().throttle(offset(now.minus(intervalMillis, MILLIS)));
         then(tailThrottler).should().throttle(offset(now.minus(intervalMillis, MILLIS)));
+    }
+
+    private void givenPreviousThrottle(Offset offset) throws InterruptedException {
+        throttler.throttle(offset);
+        reset(catchupThrottler, tailThrottler);
     }
 
     interface Fixture {

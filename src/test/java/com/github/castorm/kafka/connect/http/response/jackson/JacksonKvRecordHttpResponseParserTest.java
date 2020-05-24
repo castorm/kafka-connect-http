@@ -32,7 +32,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -161,7 +160,7 @@ class JacksonKvRecordHttpResponseParserTest {
     }
 
     @Test
-    void givenOneItemWithNoKey_thenConsistentUUIDMappedToOffset() throws IOException {
+    void givenOneItemWithNoKey_thenConsistentUUIDMappedToOffset() {
 
         givenRecords(Stream.of(record));
         given(recordParser.getOffsets(record)).willReturn(emptyMap());

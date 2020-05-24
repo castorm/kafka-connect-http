@@ -67,15 +67,15 @@ public class AdaptableIntervalThrottler implements Throttler {
     }
 
     private Throttler resolveThrottler(Offset offset) {
-        if (isFirst(offset) || isCatchingUp(offset)) {
+        if (isFirst() || isCatchingUp(offset)) {
             return catchupThrottler;
         } else {
             return tailThrottler;
         }
     }
 
-    private boolean isFirst(Offset offset) {
-        return offset.equals(EMPTY_OFFSET);
+    private boolean isFirst() {
+        return EMPTY_OFFSET.equals(lastOffset);
     }
 
     private boolean isCatchingUp(Offset offset) {
