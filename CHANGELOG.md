@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.7
 
-### v0.7.1 (TBD)
+### v0.7.1 (05/24/2020)
 -   `timestamp_iso` key in `Offset` renamed to plain `timestamp`
 -   `key` added to `Offset`
 -   `JacksonKvRecordHttpResponseParser` to generate a consistent `UUID` as key when key is missing
