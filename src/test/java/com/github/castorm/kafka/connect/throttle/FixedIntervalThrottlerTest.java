@@ -96,7 +96,7 @@ class FixedIntervalThrottlerTest {
     }
 
     interface Fixture {
-        Offset offset = Offset.of(emptyMap(), now());
+        Offset offset = Offset.of(emptyMap(), "key", now());
         long intervalMillis = 60000L;
         long lastPollMillis = System.currentTimeMillis();
     }

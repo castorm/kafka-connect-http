@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
+import static com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactoryTest.Fixture.key;
 import static com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactoryTest.Fixture.now;
 import static com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactoryTest.Fixture.record;
 import static edu.emory.mathcs.backport.java.util.Collections.emptyMap;
@@ -42,16 +43,18 @@ class OffsetTimestampRecordFilterFactoryTest {
 
     @Test
     void givenOffset_whenTestEarlier_thenFalse() {
-        assertThat(factory.create(Offset.of(emptyMap(), now)).test(record(now.minus(1, MINUTES)))).isFalse();
+        assertThat(factory.create(Offset.of(emptyMap(), key, now)).test(record(now.minus(1, MINUTES)))).isFalse();
     }
 
     @Test
     void givenOffset_whenTestLater_thenTrue() {
-        assertThat(factory.create(Offset.of(emptyMap(), now)).test(record(now.plus(1, MINUTES)))).isTrue();
+        assertThat(factory.create(Offset.of(emptyMap(), key, now)).test(record(now.plus(1, MINUTES)))).isTrue();
     }
 
     interface Fixture {
+        String key = "key";
         Instant now = now();
+
         static SourceRecord record(Instant timestamp) {
             return new SourceRecord(null, null, null, null, null, null, null, null, timestamp.toEpochMilli());
         }

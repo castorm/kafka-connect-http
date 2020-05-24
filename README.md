@@ -107,10 +107,12 @@ The first thing our connector will need to do is preparing a `HttpRequest`
 #### Preparing a HttpRequest with TemplateHttpRequestFactory
 This `HttpRequestFactory` is based on template resolution using the `Offset` of the last seen record.
 
-`Offset` is nothing but a set of key-value pairs of the last acknowledged item parsed from the HTTP response. 
-You can reference these properties by key from the templates.
-On top of your custom keys, `Offset` will contain a reserved key for `timestamp` with the record's timestamp in 
-ISO 8601 format.
+`Offset` is nothing but a set of key-value pairs of the last acknowledged item. This information is extracted from the
+item when parsing from the HTTP response. 
+You can reference these properties from the templates.
+In addition to your custom properties, `Offset` will contain these reserved properties:
+*   `key`: record's key
+*   `timestamp`: record's timestamp in ISO 8601 format
 
 Templates can be provided for url, headers, query params and body.
 
@@ -405,22 +407,25 @@ There are cases when we'll be interested in filtering out certain records. One o
 >     *   `com.github.castorm.kafka.connect.http.record.OffsetTimestampRecordFilterFactory`
 >     *   `com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory`
 
-#### Filtering out SourceRecord with OffsetTimestampFilterFactory
+#### Filtering out SourceRecord with OffsetTimestampRecordFilterFactory
 
-De-duplicates based on `Offset`'s timestamp, filtering out records already processed. 
+De-duplicates based on `Offset`'s timestamp, filtering out records with earlier or the same timestamp. 
 Useful when timestamp is used to filter the HTTP resource, but the filter does not have full timestamp precision.
 Assumptions:
 *   Records are ordered by timestamp
 *   No two records can contain the same timestamp (to whatever precision the HTTP resource uses)
 
-If the latter assumption cannot be satisfied, check `OffsetFilterFactory` to try and avoid data loss.
+If the latter assumption cannot be satisfied, check `OffsetRecordFilterFactory` to try and prevents data loss.
 
-#### Filtering out SourceRecord with OffsetFilterFactory
+#### Filtering out SourceRecord with OffsetRecordFilterFactory
 
-De-duplicates based on full `Offset`
-Useful when timestamp alone is not unique but together with other properties is.
+De-duplicates based on `Offset`'s timestamp, key and any other custom property present in the `Offset`, filtering out 
+records with earlier timestamps, or when in the same timestamp, only those up to the last seen `Offset` properties.
+Useful when timestamp alone is not unique but together with some other `Offset` property is.
 Assumptions: 
-*   Records are ordered by timestamp and a property or set of properties that uniquely identify records
+*   Records are ordered by timestamp
+*   There is an `Offset` property that uniquely identify records (e.g. key)
+*   There won't be new items preceding already seen ones 
 
 ---
 <a name="throttler"/>

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### v0.7.1 (TBD)
 -   `timestamp_iso` key in `Offset` renamed to plain `timestamp`
+-   `key` added to `Offset`
+-   `JacksonKvRecordHttpResponseParser` to generate a consistent `UUID` as key when key is missing 
 
 ### v0.7.0 (05/23/2020)
 -   `http.response.records.pointer` renamed to `http.response.list.pointer`

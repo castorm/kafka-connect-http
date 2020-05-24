@@ -89,7 +89,7 @@ class SimpleKvSourceRecordMapperTest {
 
     interface Fixture {
         Instant now = now();
-        Offset offset = Offset.of(ImmutableMap.of("k", "v"), now);
+        Offset offset = Offset.of(ImmutableMap.of("k", "v"), "key", now);
         KvRecord record = KvRecord.builder().value("not-null").offset(offset).build();
     }
 }

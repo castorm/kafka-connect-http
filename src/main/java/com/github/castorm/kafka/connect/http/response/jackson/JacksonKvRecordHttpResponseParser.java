@@ -27,13 +27,15 @@ import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.response.spi.KvRecordHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static java.util.UUID.randomUUID;
+import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor
@@ -64,11 +66,21 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
     }
 
     private KvRecord map(JsonNode node) {
+
+        String key = recordParser.getKey(node).orElseGet(() -> generateConsistentKey(node));
+
+        Instant timestamp = recordParser.getTimestamp(node)
+                .map(timestampParser::parse)
+                .orElseGet(Instant::now);
+
         return KvRecord.builder()
-                .key(recordParser.getKey(node).orElseGet(() -> randomUUID().toString()))
+                .key(key)
                 .value(recordParser.getValue(node))
-                .offset(Offset.of(recordParser.getOffsets(node), recordParser.getTimestamp(node)
-                        .map(timestampParser::parse)
-                        .orElseGet(Instant::now))).build();
+                .offset(Offset.of(recordParser.getOffsets(node), key, timestamp)).build();
+    }
+
+    @SneakyThrows(IOException.class)
+    private String generateConsistentKey(JsonNode node) {
+        return nameUUIDFromBytes(node.binaryValue()).toString();
     }
 }

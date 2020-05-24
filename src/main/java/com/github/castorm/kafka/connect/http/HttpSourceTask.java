@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
-import static java.time.Instant.ofEpochMilli;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -108,7 +107,7 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void commitRecord(SourceRecord record) {
-        offset = Offset.of(record.sourceOffset(), ofEpochMilli(record.timestamp()));
+        offset = Offset.of(record.sourceOffset());
     }
 
     @Override

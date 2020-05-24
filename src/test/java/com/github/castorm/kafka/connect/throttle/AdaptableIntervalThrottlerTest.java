@@ -117,7 +117,7 @@ class AdaptableIntervalThrottlerTest {
         long intervalMillis = 60000L;
 
         static Offset offset(Instant now) {
-            return Offset.of(emptyMap(), now);
+            return Offset.of(emptyMap(), "key", now);
         }
     }
 }

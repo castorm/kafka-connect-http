@@ -21,9 +21,9 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  */
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,20 +32,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParserTest.Fixture.bytes;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParserTest.Fixture.response;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParserTest.Fixture.timestamp;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParserTest.Fixture.timestampIso;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParserTest.Fixture.timestampParsed;
 import static java.time.Instant.ofEpochMilli;
 import static java.util.Collections.emptyMap;
+import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.stream.Stream.empty;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class JacksonKvRecordHttpResponseParserTest {
@@ -65,10 +68,11 @@ class JacksonKvRecordHttpResponseParserTest {
     JsonNode record;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         parser = new JacksonKvRecordHttpResponseParser(__ -> config);
         given(config.getRecordParser()).willReturn(recordParser);
         given(config.getTimestampParser()).willReturn(timestampParser);
+        lenient().when(record.binaryValue()).thenReturn("Binary Value".getBytes());
         parser.configure(emptyMap());
     }
 
@@ -112,9 +116,9 @@ class JacksonKvRecordHttpResponseParserTest {
 
         givenRecords(Stream.of(record));
         given(recordParser.getTimestamp(record)).willReturn(Optional.of(timestampIso));
-        given(timestampParser.parse(timestampIso)).willReturn(timestampParsed);
+        given(timestampParser.parse(timestampIso)).willReturn(timestamp);
 
-        assertThat(parser.parse(response)).first().extracting(KvRecord::getOffset).extracting(Offset::getTimestamp).isEqualTo(timestampParsed);
+        assertThat(parser.parse(response)).first().extracting(KvRecord::getOffset).extracting(Offset::getTimestamp).isEqualTo(timestamp);
     }
 
     @Test
@@ -135,6 +139,37 @@ class JacksonKvRecordHttpResponseParserTest {
         assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("offset-key")).isEqualTo("offset-value");
     }
 
+    @Test
+    void givenOneItem_thenTimestampMappedToOffset() {
+
+        givenRecords(Stream.of(record));
+        given(recordParser.getOffsets(record)).willReturn(emptyMap());
+        given(recordParser.getTimestamp(record)).willReturn(Optional.of(timestampIso));
+        given(timestampParser.parse(timestampIso)).willReturn(timestamp);
+
+        assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("timestamp")).isEqualTo(timestampIso);
+    }
+
+    @Test
+    void givenOneItem_thenKeyMappedToOffset() {
+
+        givenRecords(Stream.of(record));
+        given(recordParser.getOffsets(record)).willReturn(emptyMap());
+        given(recordParser.getKey(record)).willReturn(Optional.of("value"));
+
+        assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("key")).isEqualTo("value");
+    }
+
+    @Test
+    void givenOneItemWithNoKey_thenConsistentUUIDMappedToOffset() throws IOException {
+
+        givenRecords(Stream.of(record));
+        given(recordParser.getOffsets(record)).willReturn(emptyMap());
+        given(recordParser.getKey(record)).willReturn(Optional.empty());
+
+        assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("key")).isEqualTo(nameUUIDFromBytes(record.binaryValue()).toString());
+    }
+
     private void givenRecords(Stream<JsonNode> records) {
         given(recordParser.getRecords(eq(bytes))).willReturn(records);
     }
@@ -142,7 +177,7 @@ class JacksonKvRecordHttpResponseParserTest {
     interface Fixture {
         byte[] bytes = "bytes".getBytes();
         HttpResponse response = HttpResponse.builder().body(bytes).build();
-        String timestampIso = ofEpochMilli(42L).toString();
-        Instant timestampParsed = ofEpochMilli(43L);
+        Instant timestamp = ofEpochMilli(43L);
+        String timestampIso = timestamp.toString();
     }
 }

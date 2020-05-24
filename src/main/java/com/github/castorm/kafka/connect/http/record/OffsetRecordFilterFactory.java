@@ -28,8 +28,6 @@ import org.apache.kafka.connect.source.SourceRecord;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
-import static java.time.Instant.ofEpochMilli;
-
 @RequiredArgsConstructor
 public class OffsetRecordFilterFactory implements SourceRecordFilterFactory {
 
@@ -44,7 +42,7 @@ public class OffsetRecordFilterFactory implements SourceRecordFilterFactory {
         AtomicBoolean lastSeenReached = new AtomicBoolean(false);
         return delegate.create(offset).or(record -> {
             boolean result = lastSeenReached.get();
-            if (!result && Offset.of(record.sourceOffset(), ofEpochMilli(record.timestamp())).equals(offset)) {
+            if (!result && Offset.of(record.sourceOffset()).equals(offset)) {
                 lastSeenReached.set(true);
             }
             return result;

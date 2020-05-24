@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.now;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offsetInitialMap;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offsetMap;
@@ -181,9 +180,9 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         reset(requestFactory);
 
-        task.commitRecord(record(offsetMap, now));
+        task.commitRecord(record(offsetMap));
 
-        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap, now));
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap));
     }
 
     @Test
@@ -194,7 +193,7 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(record(offsetMap, now)));
+        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
 
         task.poll();
@@ -210,10 +209,10 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(record(offsetMap, now)));
+        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
 
-        assertThat(task.poll()).containsExactly(record(offsetMap, now));
+        assertThat(task.poll()).containsExactly(record(offsetMap));
     }
 
     @Test
@@ -224,7 +223,7 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(record(offsetMap, now)));
+        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
         given(recordFilterFactory.create(offset)).willReturn(__ -> false);
 
         assertThat(task.poll()).isEmpty();
@@ -257,15 +256,16 @@ class HttpSourceTaskTest {
     }
 
     interface Fixture {
-        Map<String, Object> offsetMap = ImmutableMap.of("k", "v");
+        Instant now = now();
+        String key = "customKey";
+        Map<String, Object> offsetMap = ImmutableMap.of("custom", "value", "key", key, "timestamp", now.toString());
         Map<String, String> offsetInitialMap = ImmutableMap.of("k2", "v2");
         Offset offset = Offset.of(offsetMap);
         HttpRequest request = HttpRequest.builder().build();
         HttpResponse response = HttpResponse.builder().build();
-        Instant now = now();
 
-        static SourceRecord record(Map<String, Object> offset, Instant timestamp) {
-            return new SourceRecord(emptyMap(), offset, null, null, null, null, null, null, timestamp.toEpochMilli());
+        static SourceRecord record(Map<String, Object> offset) {
+            return new SourceRecord(emptyMap(), offset, null, null, null, null, null, null, now.toEpochMilli());
         }
     }
 }

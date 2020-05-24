@@ -33,7 +33,11 @@ import static java.time.Instant.EPOCH;
 @EqualsAndHashCode
 public class Offset {
 
+    private static final String KEY_KEY = "key";
+    private static final String KEY_VALUE_DEFAULT = "";
+
     private static final String TIMESTAMP_KEY = "timestamp";
+    private static final String TIMESTAMP_VALUE_DEFAULT = EPOCH.toString();
 
     private final Map<String, ?> properties;
 
@@ -43,14 +47,14 @@ public class Offset {
 
     public static Offset of(Map<String, ?> properties) {
         Map<String, Object> props = new HashMap<>(properties);
-        if (!properties.containsKey(TIMESTAMP_KEY)) {
-            props.put(TIMESTAMP_KEY, EPOCH.toString());
-        }
+        props.putIfAbsent(TIMESTAMP_KEY, TIMESTAMP_VALUE_DEFAULT);
+        props.putIfAbsent(KEY_KEY, KEY_VALUE_DEFAULT);
         return new Offset(props);
     }
 
-    public static Offset of(Map<String, ?> properties, Instant timestamp) {
+    public static Offset of(Map<String, ?> properties, String key, Instant timestamp) {
         Map<String, Object> props = new HashMap<>(properties);
+        props.put(KEY_KEY, key);
         props.put(TIMESTAMP_KEY, timestamp.toString());
         return new Offset(props);
     }
@@ -59,7 +63,11 @@ public class Offset {
         return properties;
     }
 
+    public String getKey() {
+        return (String) properties.get(KEY_KEY);
+    }
+
     public Instant getTimestamp() {
-        return Instant.parse((CharSequence) properties.get(TIMESTAMP_KEY));
+        return Instant.parse((String) properties.get(TIMESTAMP_KEY));
     }
 }
