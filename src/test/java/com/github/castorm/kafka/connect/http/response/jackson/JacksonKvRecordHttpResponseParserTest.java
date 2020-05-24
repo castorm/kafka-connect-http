@@ -68,11 +68,11 @@ class JacksonKvRecordHttpResponseParserTest {
     JsonNode record;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         parser = new JacksonKvRecordHttpResponseParser(__ -> config);
         given(config.getRecordParser()).willReturn(recordParser);
         given(config.getTimestampParser()).willReturn(timestampParser);
-        lenient().when(record.binaryValue()).thenReturn("Binary Value".getBytes());
+        lenient().when(record.toString()).thenReturn("Binary Value");
         parser.configure(emptyMap());
     }
 
@@ -167,7 +167,7 @@ class JacksonKvRecordHttpResponseParserTest {
         given(recordParser.getOffsets(record)).willReturn(emptyMap());
         given(recordParser.getKey(record)).willReturn(Optional.empty());
 
-        assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("key")).isEqualTo(nameUUIDFromBytes(record.binaryValue()).toString());
+        assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("key")).isEqualTo(nameUUIDFromBytes(record.toString().getBytes()).toString());
     }
 
     private void givenRecords(Stream<JsonNode> records) {

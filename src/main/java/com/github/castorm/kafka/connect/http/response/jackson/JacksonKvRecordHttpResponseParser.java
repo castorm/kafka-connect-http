@@ -27,9 +27,7 @@ import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.response.spi.KvRecordHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -79,8 +77,7 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
                 .offset(Offset.of(recordParser.getOffsets(node), key, timestamp)).build();
     }
 
-    @SneakyThrows(IOException.class)
     private String generateConsistentKey(JsonNode node) {
-        return nameUUIDFromBytes(node.binaryValue()).toString();
+        return nameUUIDFromBytes(node.toString().getBytes()).toString();
     }
 }
