@@ -29,28 +29,31 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.charset.Charset;
 import java.time.Instant;
 
-import static com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapperTest.Fixture.now;
-import static com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapperTest.Fixture.offset;
-import static com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapperTest.Fixture.record;
+import static com.github.castorm.kafka.connect.http.record.BytesKvSourceRecordMapperTest.Fixture.charset;
+import static com.github.castorm.kafka.connect.http.record.BytesKvSourceRecordMapperTest.Fixture.now;
+import static com.github.castorm.kafka.connect.http.record.BytesKvSourceRecordMapperTest.Fixture.offset;
+import static com.github.castorm.kafka.connect.http.record.BytesKvSourceRecordMapperTest.Fixture.record;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class StringKvSourceRecordMapperTest {
+class BytesKvSourceRecordMapperTest {
 
-    StringKvSourceRecordMapper mapper;
+    BytesKvSourceRecordMapper mapper;
 
     @Mock
-    StringKvSourceRecordMapperConfig config;
+    BytesKvSourceRecordMapperConfig config;
 
     @BeforeEach
     void setUp() {
         given(config.getTopic()).willReturn("topic");
-        mapper = new StringKvSourceRecordMapper(__ -> config);
+        given(config.getCharset()).willReturn(charset);
+        mapper = new BytesKvSourceRecordMapper(__ -> config);
         mapper.configure(emptyMap());
     }
 
@@ -61,12 +64,12 @@ class StringKvSourceRecordMapperTest {
 
     @Test
     void givenKey_whenMap_thenIdMapped() {
-        assertThat(mapper.map(record.withKey("value")).key()).isEqualTo("value");
+        assertThat(mapper.map(record.withKey("value")).key()).isEqualTo("value".getBytes(charset));
     }
 
     @Test
     void givenValue_whenMap_thenBodyMapped() {
-        assertThat(mapper.map(record.withValue("value")).value()).isEqualTo("value");
+        assertThat(mapper.map(record.withValue("value")).value()).isEqualTo("value".getBytes(charset));
     }
 
     @Test
@@ -97,6 +100,7 @@ class StringKvSourceRecordMapperTest {
     interface Fixture {
         Instant now = now();
         Offset offset = Offset.of(ImmutableMap.of("k", "v"), "key", now);
-        KvRecord record = KvRecord.builder().value("not-null").offset(offset).build();
+        KvRecord record = KvRecord.builder().key("not-null").value("not-null").offset(offset).build();
+        Charset charset = Charset.forName("UTF-8");
     }
 }

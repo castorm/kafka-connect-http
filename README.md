@@ -40,7 +40,7 @@ plugins folder.
                 <artifactItem>
                     <groupId>com.github.castorm</groupId>
                     <artifactId>kafka-connect-http</artifactId>
-                    <version>0.7.2</version>
+                    <version>0.7.3</version>
                     <type>tar.gz</type>
                     <classifier>plugin</classifier>
                 </artifactItem>
@@ -300,7 +300,14 @@ Parses the HTTP response into a key-value SourceRecord. This process is decompos
 >     *   `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper` Maps **key** to a *Struct schema*
 >         with a single property `key`, and **value** to a *Struct schema* with a single property `value`
 >     *   `com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapper` Maps both **key** and **value** to 
->         a string schema with a single value 
+>         a `String` schema
+>     *   `com.github.castorm.kafka.connect.http.record.BytesKvSourceRecordMapper` Maps both **key** and **value** to
+>         a `byte[]` schema in a configurable charset
+>
+> ##### `http.response.record.mapper.charset`
+> Charset use when `BytesKvSourceRecordMapper`.
+> *   Type: String
+> *   Default: `UTF-8`
 
 ##### Parsing a HttpResponse with JacksonKvRecordHttpResponseParser
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in the response.

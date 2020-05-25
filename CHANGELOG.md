@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.7
 
+### v0.7.3 (05/25/2020)
+-   Provide `BytesKvSourceRecordMapper` to avoid both the envelope wrapping key and value and the escaped encoding of the json document 
+
 ### v0.7.2 (05/25/2020)
 -   Provide `StringKvSourceRecordMapper` to avoid the envelope wrapping key and value
 
