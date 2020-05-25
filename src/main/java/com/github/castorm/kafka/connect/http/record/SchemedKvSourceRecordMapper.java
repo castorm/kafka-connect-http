@@ -36,20 +36,20 @@ import static java.util.Collections.emptyMap;
 import static org.apache.kafka.connect.data.SchemaBuilder.string;
 
 @RequiredArgsConstructor
-public class SimpleKvSourceRecordMapper implements KvSourceRecordMapper {
+public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
 
     private static Map<String, ?> sourcePartition = emptyMap();
 
-    private final Function<Map<String, ?>, SimpleKvSourceRecordMapperConfig> configFactory;
+    private final Function<Map<String, ?>, SchemedKvSourceRecordMapperConfig> configFactory;
 
-    private SimpleKvSourceRecordMapperConfig config;
+    private SchemedKvSourceRecordMapperConfig config;
 
     private Schema keySchema;
 
     private Schema valueSchema;
 
-    public SimpleKvSourceRecordMapper() {
-        this(SimpleKvSourceRecordMapperConfig::new);
+    public SchemedKvSourceRecordMapper() {
+        this(SchemedKvSourceRecordMapperConfig::new);
     }
 
     @Override

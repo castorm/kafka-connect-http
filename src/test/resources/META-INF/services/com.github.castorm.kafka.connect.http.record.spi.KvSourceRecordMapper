@@ -1,1 +1,1 @@
-com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapper
+com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper

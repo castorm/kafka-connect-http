@@ -38,7 +38,7 @@
     <logger name="com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParserConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.response.StatusCodeHttpResponsePolicyConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.response.KvHttpResponseParserConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottlerConfig" level="WARN"/>
     <logger name="com.joestelmach.natty" level="WARN"/>

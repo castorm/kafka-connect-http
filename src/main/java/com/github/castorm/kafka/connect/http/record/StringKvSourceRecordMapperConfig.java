@@ -27,31 +27,22 @@ import org.apache.kafka.common.config.ConfigDef;
 import java.util.Map;
 
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
-import static org.apache.kafka.common.config.ConfigDef.Importance.LOW;
 import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 
 @Getter
-public class SimpleKvSourceRecordMapperConfig extends AbstractConfig {
+public class StringKvSourceRecordMapperConfig extends AbstractConfig {
 
     private static final String TOPIC = "kafka.topic";
-    private static final String KEY_PROPERTY_NAME = "http.record.schema.key.property.name";
-    private static final String VALUE_PROPERTY_NAME = "http.record.schema.value.property.name";
 
     private final String topic;
-    private final String keyPropertyName;
-    private final String valuePropertyName;
 
-    SimpleKvSourceRecordMapperConfig(Map<String, ?> originals) {
+    StringKvSourceRecordMapperConfig(Map<String, ?> originals) {
         super(config(), originals);
         topic = getString(TOPIC);
-        keyPropertyName = getString(KEY_PROPERTY_NAME);
-        valuePropertyName = getString(VALUE_PROPERTY_NAME);
     }
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(TOPIC, STRING, HIGH, "Kafka Topic")
-                .define(KEY_PROPERTY_NAME, STRING, "key", LOW, "Key property name in KVSchema")
-                .define(VALUE_PROPERTY_NAME, STRING, "value", LOW, "Value property name in KVSchema");
+                .define(TOPIC, STRING, HIGH, "Kafka Topic");
     }
 }

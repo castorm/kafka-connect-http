@@ -20,7 +20,7 @@ package com.github.castorm.kafka.connect.http.response;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapper;
+import com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.spi.KvSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.KvRecordHttpResponseParser;
@@ -51,6 +51,6 @@ public class KvHttpResponseParserConfig extends AbstractConfig {
     public static ConfigDef config() {
         return new ConfigDef()
                 .define(RECORD_PARSER_CLASS, CLASS, JacksonKvRecordHttpResponseParser.class, LOW, "Key-Value Record Parser class")
-                .define(RECORD_MAPPER_CLASS, CLASS, SimpleKvSourceRecordMapper.class, LOW, "Key-Value Record Factory class");
+                .define(RECORD_MAPPER_CLASS, CLASS, SchemedKvSourceRecordMapper.class, LOW, "Key-Value Record Factory class");
     }
 }

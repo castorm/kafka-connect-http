@@ -27,16 +27,16 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperConfigTest.Fixture.minimumConfig;
+import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperConfigTest.Fixture.minimumConfig;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-class SimpleKvSourceRecordMapperConfigTest {
+class SchemedKvSourceRecordMapperConfigTest {
 
     @Test
     void whenMissingKafkaTopic_thenException() {
-        assertThat(catchThrowable(() -> new SimpleKvSourceRecordMapperConfig(emptyMap()))).isInstanceOf(ConfigException.class);
+        assertThat(catchThrowable(() -> new SchemedKvSourceRecordMapperConfig(emptyMap()))).isInstanceOf(ConfigException.class);
     }
 
     @Test
@@ -66,11 +66,11 @@ class SimpleKvSourceRecordMapperConfigTest {
 
     interface Fixture {
 
-        static SimpleKvSourceRecordMapperConfig minimumConfig(Map<String, String> customConfig) {
+        static SchemedKvSourceRecordMapperConfig minimumConfig(Map<String, String> customConfig) {
             HashMap<String, String> finalConfig = new HashMap<>();
             finalConfig.put("kafka.topic", "test-topic");
             finalConfig.putAll(customConfig);
-            return new SimpleKvSourceRecordMapperConfig(finalConfig);
+            return new SchemedKvSourceRecordMapperConfig(finalConfig);
         }
     }
 }

@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.7
 
+### v0.7.2 (05/25/2020)
+-   Provide `StringKvSourceRecordMapper` to avoid the envelope wrapping key and value
+
 ### v0.7.1 (05/24/2020)
 -   `timestamp_iso` key in `Offset` renamed to plain `timestamp`
 -   `key` added to `Offset`

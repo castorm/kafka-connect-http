@@ -21,7 +21,7 @@ package com.github.castorm.kafka.connect.http.response;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
-import com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapper;
+import com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.record.spi.KvSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParser;
@@ -51,7 +51,7 @@ class KvHttpResponseParserConfigTest {
 
     @Test
     void whenNoPolicy_thenDefault() {
-        assertThat(config(emptyMap()).getRecordMapper()).isInstanceOf(SimpleKvSourceRecordMapper.class);
+        assertThat(config(emptyMap()).getRecordMapper()).isInstanceOf(SchemedKvSourceRecordMapper.class);
     }
 
     @Test

@@ -23,7 +23,6 @@ package com.github.castorm.kafka.connect.http.record;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.google.common.collect.ImmutableMap;
-import org.apache.kafka.connect.data.Struct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,28 +31,26 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
-import static com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperTest.Fixture.now;
-import static com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperTest.Fixture.offset;
-import static com.github.castorm.kafka.connect.http.record.SimpleKvSourceRecordMapperTest.Fixture.record;
+import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.now;
+import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.offset;
+import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.record;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class SimpleKvSourceRecordMapperTest {
+class StringKvSourceRecordMapperTest {
 
-    SimpleKvSourceRecordMapper mapper;
+    StringKvSourceRecordMapper mapper;
 
     @Mock
-    SimpleKvSourceRecordMapperConfig config;
+    StringKvSourceRecordMapperConfig config;
 
     @BeforeEach
     void setUp() {
         given(config.getTopic()).willReturn("topic");
-        given(config.getKeyPropertyName()).willReturn("customKey");
-        given(config.getValuePropertyName()).willReturn("customValue");
-        mapper = new SimpleKvSourceRecordMapper(__ -> config);
+        mapper = new StringKvSourceRecordMapper(__ -> config);
         mapper.configure(emptyMap());
     }
 
@@ -64,12 +61,12 @@ class SimpleKvSourceRecordMapperTest {
 
     @Test
     void givenKey_whenMap_thenIdMapped() {
-        assertThat(((Struct) mapper.map(record.withKey("value")).key()).get("customKey")).isEqualTo("value");
+        assertThat(mapper.map(record.withKey("value")).key()).isEqualTo("value");
     }
 
     @Test
     void givenValue_whenMap_thenBodyMapped() {
-        assertThat(((Struct) mapper.map(record.withValue("value")).value()).get("customValue")).isEqualTo("value");
+        assertThat(mapper.map(record.withValue("value")).value()).isEqualTo("value");
     }
 
     @Test
