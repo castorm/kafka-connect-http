@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
+import static org.apache.kafka.connect.data.SchemaBuilder.int64;
 import static org.apache.kafka.connect.data.SchemaBuilder.string;
 
 @RequiredArgsConstructor
@@ -58,20 +59,24 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
         config = configFactory.apply(settings);
         keySchema = SchemaBuilder.struct()
                 .name("com.github.castorm.kafka.connect.http.Key").doc("Message Key")
-                .field(config.getKeyPropertyName(), string().optional().doc("HTTP Item key").build())
+                .field(config.getKeyPropertyName(), string().optional().doc("HTTP Record Key").build())
                 .build();
         valueSchema = SchemaBuilder.struct()
                 .name("com.github.castorm.kafka.connect.http.Value").doc("Message Value")
-                .field(config.getValuePropertyName(), string().doc("HTTP Item value").build())
+                .field(config.getValuePropertyName(), string().doc("HTTP Record Value").build())
+                .field(config.getKeyPropertyName(), string().optional().doc("HTTP Record Key").build())
+                .field("timestamp", int64().optional().doc("HTTP Record Timestamp").build())
                 .build();
     }
 
     @Override
     public SourceRecord map(KvRecord record) {
 
-        Struct key = keyStruct(record.getKey());
-        Struct value = valueStruct(record.getValue());
         Offset offset = record.getOffset();
+        Long timestamp = offset.getTimestamp().map(Instant::toEpochMilli).orElseGet(System::currentTimeMillis);
+
+        Struct key = keyStruct(record.getKey());
+        Struct value = valueStruct(record.getKey(), record.getValue(), timestamp);
 
         return new SourceRecord(
                 sourcePartition,
@@ -82,14 +87,17 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
                 key,
                 value.schema(),
                 value,
-                offset.getTimestamp().map(Instant::toEpochMilli).orElseGet(System::currentTimeMillis));
+                timestamp);
     }
 
     private Struct keyStruct(String key) {
         return new Struct(keySchema).put(config.getKeyPropertyName(), key);
     }
 
-    private Struct valueStruct(String body) {
-        return new Struct(valueSchema).put(config.getValuePropertyName(), body);
+    private Struct valueStruct(String key, String value, Long timestamp) {
+        return new Struct(valueSchema)
+                .put(config.getKeyPropertyName(), key)
+                .put(config.getValuePropertyName(), value)
+                .put("timestamp", timestamp);
     }
 }

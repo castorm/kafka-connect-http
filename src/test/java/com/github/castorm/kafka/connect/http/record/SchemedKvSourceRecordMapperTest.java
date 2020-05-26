@@ -63,13 +63,23 @@ class SchemedKvSourceRecordMapperTest {
     }
 
     @Test
-    void givenKey_whenMap_thenIdMapped() {
-        assertThat(((Struct) mapper.map(record.withKey("value")).key()).get("customKey")).isEqualTo("value");
+    void givenKey_whenMap_thenKeyMapped() {
+        assertThat(((Struct) mapper.map(record.withKey("key")).key()).get("customKey")).isEqualTo("key");
     }
 
     @Test
-    void givenValue_whenMap_thenBodyMapped() {
+    void givenValue_whenMap_thenValueMapped() {
         assertThat(((Struct) mapper.map(record.withValue("value")).value()).get("customValue")).isEqualTo("value");
+    }
+
+    @Test
+    void givenKey_whenMap_thenValueKeyMapped() {
+        assertThat(((Struct) mapper.map(record.withKey("key")).value()).get("customKey")).isEqualTo("key");
+    }
+
+    @Test
+    void givenOffsetTimestamp_whenMap_thenValueTimestampMapped() {
+        assertThat(((Struct) mapper.map(record.withOffset(offset)).value()).get("timestamp")).isEqualTo(now.toEpochMilli());
     }
 
     @Test
