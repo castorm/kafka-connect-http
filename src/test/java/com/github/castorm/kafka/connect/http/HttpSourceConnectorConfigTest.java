@@ -26,7 +26,9 @@ import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter;
 import com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser;
@@ -89,6 +91,16 @@ class HttpSourceConnectorConfigTest {
     }
 
     @Test
+    void whenNoRecordSorter_thenDefault() {
+        assertThat(configWithout("http.record.sorter").getRecordSorter()).isInstanceOf(OrderDirectionSourceRecordSorter.class);
+    }
+
+    @Test
+    void whenRecordSorter_thenInitialized() {
+        assertThat(config("http.record.sorter", TestRecordSorter.class.getName()).getRecordSorter()).isInstanceOf(TestRecordSorter.class);
+    }
+
+    @Test
     void whenNoResponseFilterFactory_thenDefault() {
         assertThat(configWithout("http.record.filter.factory").getRecordFilterFactory()).isInstanceOf(OffsetRecordFilterFactory.class);
     }
@@ -118,6 +130,10 @@ class HttpSourceConnectorConfigTest {
 
     public static class TestResponseParser implements HttpResponseParser {
         public List<SourceRecord> parse(HttpResponse response) { return null; }
+    }
+
+    public static class TestRecordSorter implements SourceRecordSorter {
+        public List<SourceRecord> sort(List<SourceRecord> records) { return null; }
     }
 
     interface Fixture {

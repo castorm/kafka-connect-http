@@ -25,6 +25,7 @@ import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.spi.Throttler;
@@ -82,6 +83,9 @@ class HttpSourceTaskTest {
     HttpResponseParser responseParser;
 
     @Mock
+    SourceRecordSorter recordSorter;
+
+    @Mock
     SourceRecordFilterFactory recordFilterFactory;
 
     @BeforeEach
@@ -94,6 +98,7 @@ class HttpSourceTaskTest {
         given(config.getRequestFactory()).willReturn(requestFactory);
         given(config.getClient()).willReturn(client);
         given(config.getResponseParser()).willReturn(responseParser);
+        given(config.getRecordSorter()).willReturn(recordSorter);
         given(config.getRecordFilterFactory()).willReturn(recordFilterFactory);
     }
 
@@ -210,9 +215,25 @@ class HttpSourceTaskTest {
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
         given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(recordSorter.sort(asList(record(offsetMap)))).willReturn(asList(record(offsetMap)));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
 
         assertThat(task.poll()).containsExactly(record(offsetMap));
+    }
+
+    @Test
+    void givenTaskStarted_whenPoll_thenResultsSorted() throws InterruptedException, IOException {
+
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+        task.start(emptyMap());
+        given(requestFactory.createRequest(offset)).willReturn(request);
+        given(client.execute(request)).willReturn(response);
+        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(recordSorter.sort(asList(record(offsetMap)))).willReturn(asList(record(offsetMap), record(offsetMap)));
+        given(recordFilterFactory.create(offset)).willReturn(__ -> true);
+
+        assertThat(task.poll()).containsExactly(record(offsetMap), record(offsetMap));
     }
 
     @Test
