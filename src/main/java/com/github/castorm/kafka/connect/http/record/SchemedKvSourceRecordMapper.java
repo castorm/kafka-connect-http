@@ -40,18 +40,22 @@ import static org.apache.kafka.connect.data.SchemaBuilder.string;
 @RequiredArgsConstructor
 public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
 
+    private static final String KEY_FIELD_NAME = "key";
+    private static final String VALUE_FIELD_NAME = "value";
+    private static final String TIMESTAMP_FIELD_NAME = "timestamp";
+
     private static Map<String, ?> sourcePartition = emptyMap();
 
-    private final Function<Map<String, ?>, SchemedKvSourceRecordMapperConfig> configFactory;
+    private final Function<Map<String, ?>, SourceRecordMapperConfig> configFactory;
 
-    private SchemedKvSourceRecordMapperConfig config;
+    private SourceRecordMapperConfig config;
 
     private Schema keySchema;
 
     private Schema valueSchema;
 
     public SchemedKvSourceRecordMapper() {
-        this(SchemedKvSourceRecordMapperConfig::new);
+        this(SourceRecordMapperConfig::new);
     }
 
     @Override
@@ -59,13 +63,13 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
         config = configFactory.apply(settings);
         keySchema = SchemaBuilder.struct()
                 .name("com.github.castorm.kafka.connect.http.Key").doc("Message Key")
-                .field(config.getKeyPropertyName(), string().optional().doc("HTTP Record Key").build())
+                .field(KEY_FIELD_NAME, string().optional().doc("HTTP Record Key").build())
                 .build();
         valueSchema = SchemaBuilder.struct()
                 .name("com.github.castorm.kafka.connect.http.Value").doc("Message Value")
-                .field(config.getValuePropertyName(), string().doc("HTTP Record Value").build())
-                .field(config.getKeyPropertyName(), string().optional().doc("HTTP Record Key").build())
-                .field("timestamp", int64().optional().doc("HTTP Record Timestamp").build())
+                .field(VALUE_FIELD_NAME, string().doc("HTTP Record Value").build())
+                .field(KEY_FIELD_NAME, string().optional().doc("HTTP Record Key").build())
+                .field(TIMESTAMP_FIELD_NAME, int64().optional().doc("HTTP Record Timestamp").build())
                 .build();
     }
 
@@ -91,13 +95,13 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
     }
 
     private Struct keyStruct(String key) {
-        return new Struct(keySchema).put(config.getKeyPropertyName(), key);
+        return new Struct(keySchema).put(KEY_FIELD_NAME, key);
     }
 
     private Struct valueStruct(String key, String value, Long timestamp) {
         return new Struct(valueSchema)
-                .put(config.getKeyPropertyName(), key)
-                .put(config.getValuePropertyName(), value)
-                .put("timestamp", timestamp);
+                .put(KEY_FIELD_NAME, key)
+                .put(VALUE_FIELD_NAME, value)
+                .put(TIMESTAMP_FIELD_NAME, timestamp);
     }
 }

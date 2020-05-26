@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.7
 
+### v0.7.5 (TBD)
+-   Fix https://github.com/castorm/kafka-connect-http/issues/22: build fails with jdk 11
+-   Simplify `SchemedKvSourceRecordMapper` by removing irrelevant configuration
+
 ### v0.7.4 (05/26/2020)
 -   Avoid storing default timestamp in `Offset` to better manage the scenario in which connector config goes from 
     not specifying `http.response.record.timestamp.pointer` to specifying one

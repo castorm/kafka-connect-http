@@ -46,13 +46,11 @@ class SchemedKvSourceRecordMapperTest {
     SchemedKvSourceRecordMapper mapper;
 
     @Mock
-    SchemedKvSourceRecordMapperConfig config;
+    SourceRecordMapperConfig config;
 
     @BeforeEach
     void setUp() {
         given(config.getTopic()).willReturn("topic");
-        given(config.getKeyPropertyName()).willReturn("customKey");
-        given(config.getValuePropertyName()).willReturn("customValue");
         mapper = new SchemedKvSourceRecordMapper(__ -> config);
         mapper.configure(emptyMap());
     }
@@ -64,17 +62,17 @@ class SchemedKvSourceRecordMapperTest {
 
     @Test
     void givenKey_whenMap_thenKeyMapped() {
-        assertThat(((Struct) mapper.map(record.withKey("key")).key()).get("customKey")).isEqualTo("key");
+        assertThat(((Struct) mapper.map(record.withKey("key")).key()).get("key")).isEqualTo("key");
     }
 
     @Test
     void givenValue_whenMap_thenValueMapped() {
-        assertThat(((Struct) mapper.map(record.withValue("value")).value()).get("customValue")).isEqualTo("value");
+        assertThat(((Struct) mapper.map(record.withValue("value")).value()).get("value")).isEqualTo("value");
     }
 
     @Test
     void givenKey_whenMap_thenValueKeyMapped() {
-        assertThat(((Struct) mapper.map(record.withKey("key")).value()).get("customKey")).isEqualTo("key");
+        assertThat(((Struct) mapper.map(record.withKey("key")).value()).get("key")).isEqualTo("key");
     }
 
     @Test

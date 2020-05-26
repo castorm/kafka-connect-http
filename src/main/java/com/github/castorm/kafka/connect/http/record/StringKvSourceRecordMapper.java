@@ -34,6 +34,7 @@ import java.util.function.Function;
 import static java.util.Collections.emptyMap;
 import static org.apache.kafka.connect.data.SchemaBuilder.string;
 
+@Deprecated
 @RequiredArgsConstructor
 public class StringKvSourceRecordMapper implements KvSourceRecordMapper {
 
@@ -43,12 +44,12 @@ public class StringKvSourceRecordMapper implements KvSourceRecordMapper {
 
     private static final Schema valueSchema = string().build();
 
-    private final Function<Map<String, ?>, StringKvSourceRecordMapperConfig> configFactory;
+    private final Function<Map<String, ?>, SourceRecordMapperConfig> configFactory;
 
-    private StringKvSourceRecordMapperConfig config;
+    private SourceRecordMapperConfig config;
 
     public StringKvSourceRecordMapper() {
-        this(StringKvSourceRecordMapperConfig::new);
+        this(SourceRecordMapperConfig::new);
     }
 
     @Override

@@ -45,7 +45,7 @@ class StringKvSourceRecordMapperTest {
     StringKvSourceRecordMapper mapper;
 
     @Mock
-    StringKvSourceRecordMapperConfig config;
+    SourceRecordMapperConfig config;
 
     @BeforeEach
     void setUp() {
