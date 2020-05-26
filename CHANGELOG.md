@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### v0.7.4 (05/26/2020)
 -   Avoid storing default timestamp in `Offset` to better manage the scenario in which connector config goes from 
     not specifying `http.response.record.timestamp.pointer` to specifying one
+-   Remove `BytesKvSourceRecordMapper` before it gets actually used for considering it redundant
 
 ### v0.7.3 (05/25/2020)
 -   Provide `BytesKvSourceRecordMapper` to avoid both the envelope wrapping key and value and the escaped encoding of the json document 
