@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,9 @@ package com.github.castorm.kafka.connect.http;
 import com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser;
@@ -49,6 +51,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private static final String CLIENT = "http.client";
     private static final String REQUEST_FACTORY = "http.request.factory";
     private static final String RESPONSE_PARSER = "http.response.parser";
+    private static final String RECORD_SORTER = "http.record.sorter";
     private static final String RECORD_FILTER_FACTORY = "http.record.filter.factory";
     private static final String OFFSET_INITIAL = "http.offset.initial";
 
@@ -57,6 +60,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private final HttpClient client;
     private final HttpResponseParser responseParser;
     private final SourceRecordFilterFactory recordFilterFactory;
+    private final SourceRecordSorter recordSorter;
     private final Map<String, String> initialOffset;
 
     HttpSourceConnectorConfig(Map<String, ?> originals) {
@@ -65,6 +69,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
         requestFactory = getConfiguredInstance(REQUEST_FACTORY, HttpRequestFactory.class);
         client = getConfiguredInstance(CLIENT, HttpClient.class);
         responseParser = getConfiguredInstance(RESPONSE_PARSER, HttpResponseParser.class);
+        recordSorter = getConfiguredInstance(RECORD_SORTER, SourceRecordSorter.class);
         recordFilterFactory = getConfiguredInstance(RECORD_FILTER_FACTORY, SourceRecordFilterFactory.class);
         initialOffset = breakDownMap(getString(OFFSET_INITIAL));
     }
@@ -75,6 +80,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
                 .define(CLIENT, CLASS, OkHttpClient.class, HIGH, "Request Client Class")
                 .define(REQUEST_FACTORY, CLASS, TemplateHttpRequestFactory.class, HIGH, "Request Factory Class")
                 .define(RESPONSE_PARSER, CLASS, PolicyHttpResponseParser.class, HIGH, "Response Parser Class")
+                .define(RECORD_SORTER, CLASS, OrderDirectionSourceRecordSorter.class, LOW, "Record Sorter Class")
                 .define(RECORD_FILTER_FACTORY, CLASS, OffsetRecordFilterFactory.class, LOW, "Record Filter Factory Class")
                 .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset");
     }

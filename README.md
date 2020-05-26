@@ -70,7 +70,9 @@ public List<SourceRecord> poll() throws InterruptedException {
 
     HttpResponse response = requestExecutor.execute(request);
 
-    return responseParser.parse(response).stream()
+    List<SourceRecord> records = responseParser.parse(response);
+
+    return recordSorter.sort(records).stream()
             .filter(recordFilterFactory.create(offset))
             .collect(toList());
 }
@@ -399,6 +401,34 @@ Here is also where we'll tell Kafka Connect to what topic and on what partition 
 > Name of the value property in the key-value envelope
 > *   Type: String
 > *   Default: "value"
+
+---
+<a name="sorter"/>
+
+### SourceRecordSorter: Sorting SourceRecords
+Some Http resources not designed for CDC, return snapshots with most recent records first. In this cases de-duplication
+is especially important, as subsequent request are likely to produce similar results. The de-duplication mechanisms 
+offered by this connector are order-dependent, as they are usually based on timestamps.
+
+To enable de-duplication in cases like this, we can instruct the connector to assume a specific order direction, either
+`ASC`, `DESC`, or `IMPLICIT`, where implicit figures it out based on records' timestamps.
+
+> #### `http.record.sorter`
+> ```java
+> public interface SourceRecordSorter extends Configurable {
+> 
+>     List<SourceRecord> sort(List<SourceRecord> records);
+> }
+> ```
+> *   Type: Class
+> *   Default: `com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter`
+>
+> #### `http.response.list.order.direction`
+> Order direction of the results in the response list.
+> *   Type: `Enum { ASC, DESC, IMPLICIT }`
+> *   Default: `IMPLICIT`
 
 ---
 <a name="filter"/>

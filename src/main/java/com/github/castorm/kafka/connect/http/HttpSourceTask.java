@@ -25,6 +25,7 @@ import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.spi.Throttler;
@@ -56,6 +57,8 @@ public class HttpSourceTask extends SourceTask {
 
     private HttpResponseParser responseParser;
 
+    private SourceRecordSorter recordSorter;
+
     private SourceRecordFilterFactory recordFilterFactory;
 
     @Getter
@@ -80,6 +83,7 @@ public class HttpSourceTask extends SourceTask {
         offset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset());
         requestExecutor = config.getClient();
         responseParser = config.getResponseParser();
+        recordSorter = config.getRecordSorter();
         recordFilterFactory = config.getRecordFilterFactory();
     }
 
@@ -92,7 +96,9 @@ public class HttpSourceTask extends SourceTask {
 
         HttpResponse response = execute(request);
 
-        return responseParser.parse(response).stream()
+        List<SourceRecord> records = responseParser.parse(response);
+
+        return recordSorter.sort(records).stream()
                 .filter(recordFilterFactory.create(offset))
                 .collect(toList());
     }

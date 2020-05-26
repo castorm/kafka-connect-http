@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
     not specifying `http.response.record.timestamp.pointer` to specifying one
 -   Remove `BytesKvSourceRecordMapper` before it gets actually used for considering it redundant
 -   `SchemedKvSourceRecordMapper` to produce a value with key and timestamp
+-   Implement a `SourceRecordSorter` to enable support of HTTP resources with reverse order of records
 
 ### v0.7.3 (05/25/2020)
 -   Provide `BytesKvSourceRecordMapper` to avoid both the envelope wrapping key and value and the escaped encoding of the json document 
