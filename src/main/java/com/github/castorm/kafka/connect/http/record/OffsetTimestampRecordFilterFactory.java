@@ -25,15 +25,14 @@ import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactor
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.connect.source.SourceRecord;
 
+import java.time.Instant;
 import java.util.function.Predicate;
-
-import static java.time.Instant.ofEpochMilli;
 
 @RequiredArgsConstructor
 public class OffsetTimestampRecordFilterFactory implements SourceRecordFilterFactory {
 
     @Override
     public Predicate<SourceRecord> create(Offset offset) {
-        return record -> ofEpochMilli(record.timestamp()).isAfter(offset.getTimestamp());
+        return record -> record.timestamp() > offset.getTimestamp().map(Instant::toEpochMilli).orElse(0L);
     }
 }

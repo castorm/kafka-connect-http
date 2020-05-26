@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.source.SourceRecord;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -69,6 +70,6 @@ public class StringKvSourceRecordMapper implements KvSourceRecordMapper {
                 record.getKey(),
                 valueSchema,
                 record.getValue(),
-                offset.getTimestamp().toEpochMilli());
+                offset.getTimestamp().map(Instant::toEpochMilli).orElseGet(System::currentTimeMillis));
     }
 }

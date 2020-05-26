@@ -28,6 +28,7 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.source.SourceRecord;
 
 import java.nio.charset.Charset;
+import java.time.Instant;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -71,6 +72,6 @@ public class BytesKvSourceRecordMapper implements KvSourceRecordMapper {
                 record.getKey().getBytes(config.getCharset()),
                 valueSchema,
                 record.getValue().getBytes(config.getCharset()),
-                offset.getTimestamp().toEpochMilli());
+                offset.getTimestamp().map(Instant::toEpochMilli).orElseGet(System::currentTimeMillis));
     }
 }

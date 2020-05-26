@@ -26,6 +26,7 @@ import com.github.castorm.kafka.connect.throttle.spi.Throttler;
 import java.util.Map;
 import java.util.function.Function;
 
+import static java.time.Instant.EPOCH;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.emptyMap;
@@ -80,7 +81,7 @@ public class AdaptableIntervalThrottler implements Throttler {
 
     private boolean isCatchingUp(Offset offset) {
         boolean thereWereNewItems = !lastOffset.getTimestamp().equals(offset.getTimestamp());
-        boolean longAgoSinceLastItem = offset.getTimestamp().isBefore(now().minus(intervalMillis, MILLIS));
+        boolean longAgoSinceLastItem = offset.getTimestamp().orElse(EPOCH).isBefore(now().minus(intervalMillis, MILLIS));
         return thereWereNewItems && longAgoSinceLastItem;
     }
 }

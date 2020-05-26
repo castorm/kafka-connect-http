@@ -29,6 +29,7 @@ import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -81,7 +82,7 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
                 key,
                 value.schema(),
                 value,
-                offset.getTimestamp().toEpochMilli());
+                offset.getTimestamp().map(Instant::toEpochMilli).orElseGet(System::currentTimeMillis));
     }
 
     private Struct keyStruct(String key) {

@@ -41,6 +41,7 @@ import static com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRe
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParserTest.Fixture.timestamp;
 import static com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParserTest.Fixture.timestampIso;
 import static java.time.Instant.ofEpochMilli;
+import static java.time.Instant.parse;
 import static java.util.Collections.emptyMap;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.stream.Stream.empty;
@@ -117,7 +118,7 @@ class JacksonKvRecordHttpResponseParserTest {
         given(recordParser.getTimestamp(record)).willReturn(Optional.of(timestampIso));
         given(timestampParser.parse(timestampIso)).willReturn(timestamp);
 
-        assertThat(parser.parse(response)).first().extracting(KvRecord::getOffset).extracting(Offset::getTimestamp).isEqualTo(timestamp);
+        assertThat(parser.parse(response)).first().extracting(KvRecord::getOffset).extracting(Offset::getTimestamp).isEqualTo(Optional.of(timestamp));
     }
 
     @Test
@@ -146,7 +147,7 @@ class JacksonKvRecordHttpResponseParserTest {
         given(recordParser.getTimestamp(record)).willReturn(Optional.of(timestampIso));
         given(timestampParser.parse(timestampIso)).willReturn(timestamp);
 
-        assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("timestamp")).isEqualTo(timestampIso);
+        assertThat(parser.parse(response).stream().findFirst().get().getOffset().getTimestamp()).contains(parse(timestampIso));
     }
 
     @Test
@@ -156,7 +157,7 @@ class JacksonKvRecordHttpResponseParserTest {
         given(recordParser.getOffsets(record)).willReturn(emptyMap());
         given(recordParser.getKey(record)).willReturn(Optional.of("value"));
 
-        assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("key")).isEqualTo("value");
+        assertThat(parser.parse(response).stream().findFirst().get().getOffset().getKey()).contains("value");
     }
 
     @Test
@@ -166,7 +167,7 @@ class JacksonKvRecordHttpResponseParserTest {
         given(recordParser.getOffsets(record)).willReturn(emptyMap());
         given(recordParser.getKey(record)).willReturn(Optional.empty());
 
-        assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("key")).isEqualTo(nameUUIDFromBytes(record.toString().getBytes()).toString());
+        assertThat(parser.parse(response).stream().findFirst().get().getOffset().getKey()).contains(nameUUIDFromBytes(record.toString().getBytes()).toString());
     }
 
     private void givenRecords(Stream<JsonNode> records) {

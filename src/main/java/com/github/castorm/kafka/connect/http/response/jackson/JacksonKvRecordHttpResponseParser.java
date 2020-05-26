@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.UUID.nameUUIDFromBytes;
@@ -66,15 +67,18 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
     private KvRecord map(JsonNode node) {
 
         String key = recordParser.getKey(node).orElseGet(() -> generateConsistentKey(node));
+        Optional<Instant> timestamp = recordParser.getTimestamp(node).map(timestampParser::parse);
+        Map<String, Object> offsets = recordParser.getOffsets(node);
 
-        Instant timestamp = recordParser.getTimestamp(node)
-                .map(timestampParser::parse)
-                .orElseGet(Instant::now);
+        Offset offset = timestamp
+                .map(ts -> Offset.of(offsets, key, ts))
+                .orElseGet(() -> Offset.of(offsets, key));
 
         return KvRecord.builder()
                 .key(key)
                 .value(recordParser.getValue(node))
-                .offset(Offset.of(recordParser.getOffsets(node), key, timestamp)).build();
+                .offset(offset)
+                .build();
     }
 
     private String generateConsistentKey(JsonNode node) {
