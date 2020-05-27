@@ -31,6 +31,7 @@ import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.throttle.spi.Throttler;
 import edu.emory.mathcs.backport.java.util.Collections;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
@@ -45,6 +46,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 public class HttpSourceTask extends SourceTask {
 
     private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
@@ -98,9 +100,13 @@ public class HttpSourceTask extends SourceTask {
 
         List<SourceRecord> records = responseParser.parse(response);
 
-        return recordSorter.sort(records).stream()
+        List<SourceRecord> filteredRecords = recordSorter.sort(records).stream()
                 .filter(recordFilterFactory.create(offset))
                 .collect(toList());
+
+        log.info("Request for offset={} yields {}/{} unseen records", offset.toMap(), records.size(), filteredRecords.size());
+
+        return filteredRecords;
     }
 
     private HttpResponse execute(HttpRequest request) {
