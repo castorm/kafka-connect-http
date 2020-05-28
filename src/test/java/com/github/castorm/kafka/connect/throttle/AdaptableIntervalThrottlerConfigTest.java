@@ -47,7 +47,7 @@ class AdaptableIntervalThrottlerConfigTest {
 
     @Test
     void whenCatchupIntervalMillis_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.throttle.catchup.interval.millis", "73")).getCatchupThrottler().getIntervalMillis()).isEqualTo(73L);
+        assertThat(config(ImmutableMap.of("http.throttler.catchup.interval.millis", "73")).getCatchupThrottler().getIntervalMillis()).isEqualTo(73L);
     }
 
     private static AdaptableIntervalThrottlerConfig config(Map<String, Object> settings) {
