@@ -104,7 +104,7 @@ public class HttpSourceTask extends SourceTask {
                 .filter(recordFilterFactory.create(offset))
                 .collect(toList());
 
-        log.info("Request for offset={} yields {}/{} unseen records", offset.toMap(), records.size(), filteredRecords.size());
+        log.info("Request for offset {} yields {}/{} new records", offset.toMap(), filteredRecords.size(), records.size());
 
         return filteredRecords;
     }
