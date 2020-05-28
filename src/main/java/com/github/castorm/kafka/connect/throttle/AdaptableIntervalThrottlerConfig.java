@@ -36,7 +36,7 @@ import static org.apache.kafka.common.config.ConfigDef.Type.LONG;
 public class AdaptableIntervalThrottlerConfig extends AbstractConfig {
 
     private static final String TAIL_INTERVAL_MILLIS = "http.throttler.interval.millis";
-    private static final String CATCHUP_INTERVAL_MILLIS = "http.throttle.catchup.interval.millis";
+    private static final String CATCHUP_INTERVAL_MILLIS = "http.throttler.catchup.interval.millis";
 
     private final FixedIntervalThrottler tailThrottler;
     private final FixedIntervalThrottler catchupThrottler;

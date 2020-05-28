@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.7
 
+### v0.7.6 (05/28/2020)
+-   Fix typo in `http.throttler.catchup.interval.millis` configuration property
+
 ### v0.7.5 (05/27/2020)
 -   Fix https://github.com/castorm/kafka-connect-http/issues/22: build fails with jdk 11
 -   Simplify `SchemedKvSourceRecordMapper` by removing irrelevant configuration

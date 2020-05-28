@@ -35,6 +35,7 @@ import java.util.function.Supplier;
 
 import static com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerTest.Fixture.intervalMillis;
 import static com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerTest.Fixture.lastPollMillis;
+import static com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerTest.Fixture.maxExecutionTimeMillis;
 import static com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerTest.Fixture.offset;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyMap;
@@ -74,7 +75,7 @@ class FixedIntervalThrottlerTest {
 
         then(sleeper).should().sleep(sleepMillis.capture());
 
-        assertThat(sleepMillis.getValue()).isCloseTo(intervalMillis, offset(intervalMillis / 10));
+        assertThat(sleepMillis.getValue()).isCloseTo(intervalMillis, offset(maxExecutionTimeMillis));
     }
 
     @Test
@@ -97,7 +98,8 @@ class FixedIntervalThrottlerTest {
 
     interface Fixture {
         Offset offset = Offset.of(emptyMap(), "key", now());
-        long intervalMillis = 60000L;
+        long intervalMillis = 300000L;
         long lastPollMillis = System.currentTimeMillis();
+        long maxExecutionTimeMillis = 500L;
     }
 }
