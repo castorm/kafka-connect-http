@@ -57,7 +57,7 @@ public class AdaptableIntervalThrottlerConfig extends AbstractConfig {
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(TAIL_INTERVAL_MILLIS, LONG, 10000L, HIGH, "Throttle Tail Interval Millis")
-                .define(CATCHUP_INTERVAL_MILLIS, LONG, 1000L, HIGH, "Throttle Catchup Interval Millis");
+                .define(TAIL_INTERVAL_MILLIS, LONG, 60000L, HIGH, "Throttle Tail Interval Millis")
+                .define(CATCHUP_INTERVAL_MILLIS, LONG, 30000L, HIGH, "Throttle Catchup Interval Millis");
     }
 }
