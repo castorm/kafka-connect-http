@@ -301,6 +301,8 @@ Parses the HTTP response into a key-value SourceRecord. This process is decompos
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper` Maps **key** to a *Struct schema*
 >         with a single property `key`, and **value** to a *Struct schema* with a single property `value`
+>     *   `com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapper` Maps both **key** and **value** to 
+>         a `String` schema
 
 ##### Parsing a HttpResponse with JacksonKvRecordHttpResponseParser
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in the response.
