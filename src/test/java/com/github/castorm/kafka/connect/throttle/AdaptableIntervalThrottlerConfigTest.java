@@ -32,7 +32,7 @@ class AdaptableIntervalThrottlerConfigTest {
 
     @Test
     void whenTailIntervalMillis_thenDefault() {
-        assertThat(config(emptyMap()).getTailThrottler().getIntervalMillis()).isEqualTo(10000L);
+        assertThat(config(emptyMap()).getTailThrottler().getIntervalMillis()).isEqualTo(60000L);
     }
 
     @Test
@@ -42,7 +42,7 @@ class AdaptableIntervalThrottlerConfigTest {
 
     @Test
     void whenCatchupIntervalMillis_thenDefault() {
-        assertThat(config(emptyMap()).getCatchupThrottler().getIntervalMillis()).isEqualTo(1000L);
+        assertThat(config(emptyMap()).getCatchupThrottler().getIntervalMillis()).isEqualTo(30000L);
     }
 
     @Test
