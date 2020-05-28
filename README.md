@@ -40,7 +40,7 @@ plugins folder.
                 <artifactItem>
                     <groupId>com.github.castorm</groupId>
                     <artifactId>kafka-connect-http</artifactId>
-                    <version>0.7.5</version>
+                    <version>0.7.6</version>
                     <type>tar.gz</type>
                     <classifier>plugin</classifier>
                 </artifactItem>
