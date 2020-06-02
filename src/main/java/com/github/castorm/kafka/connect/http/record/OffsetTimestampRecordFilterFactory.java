@@ -33,6 +33,7 @@ public class OffsetTimestampRecordFilterFactory implements SourceRecordFilterFac
 
     @Override
     public Predicate<SourceRecord> create(Offset offset) {
-        return record -> record.timestamp() > offset.getTimestamp().map(Instant::toEpochMilli).orElse(0L);
+        Long offsetTimestampMillis = offset.getTimestamp().map(Instant::toEpochMilli).orElse(0L);
+        return record -> record.timestamp() > offsetTimestampMillis;
     }
 }
