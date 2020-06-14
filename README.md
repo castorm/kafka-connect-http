@@ -140,12 +140,8 @@ intervals:
 ---
 <a name="request"/>
 
-### HttpRequestFactory: Creating a HttpRequest
-The first thing our connector will need to do is creating a `HttpRequest`.
-
-When preparing a request, the `HttpRequestFactory` will have access to:
-*   `Partition` properties // TODO: See Partition
-*   `Offset` properties // TODO: See Offset
+### HttpRequestFactory: Preparing a HttpRequest
+The first thing our connector will need to do is preparing a `HttpRequest`
 
 > #### `http.request.factory`
 > ```java
