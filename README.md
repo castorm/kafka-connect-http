@@ -140,8 +140,8 @@ intervals:
 ---
 <a name="request"/>
 
-### HttpRequestFactory: Preparing a HttpRequest
-The first thing our connector will need to do is preparing a `HttpRequest`
+### HttpRequestFactory: Creating a HttpRequest
+The first thing our connector will need to do is creating a `HttpRequest`.
 
 > #### `http.request.factory`
 > ```java
