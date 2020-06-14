@@ -27,6 +27,7 @@ import org.apache.kafka.connect.source.SourceRecord;
 import java.util.List;
 import java.util.Map;
 
+@FunctionalInterface
 public interface HttpResponseParser extends Configurable {
 
     List<SourceRecord> parse(HttpResponse response);

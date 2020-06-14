@@ -26,6 +26,7 @@ import org.apache.kafka.common.Configurable;
 
 import java.util.Map;
 
+@FunctionalInterface
 public interface HttpRequestFactory extends Configurable {
 
     HttpRequest createRequest(Offset offset);

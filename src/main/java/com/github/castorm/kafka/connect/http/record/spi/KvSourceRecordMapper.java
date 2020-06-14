@@ -26,6 +26,7 @@ import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.Map;
 
+@FunctionalInterface
 public interface KvSourceRecordMapper extends Configurable {
 
     SourceRecord map(KvRecord record);

@@ -23,7 +23,15 @@ package com.github.castorm.kafka.connect.throttle.spi;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import org.apache.kafka.common.Configurable;
 
+import java.util.Map;
+
+@FunctionalInterface
 public interface Throttler extends Configurable {
 
     void throttle(Offset lastConfirmedOffset) throws InterruptedException;
+
+    @Override
+    default void configure(Map<String, ?> configs) {
+        // Do nothing
+    }
 }

@@ -27,6 +27,7 @@ import org.apache.kafka.connect.source.SourceRecord;
 import java.util.Map;
 import java.util.function.Predicate;
 
+@FunctionalInterface
 public interface SourceRecordFilterFactory extends Configurable {
 
     Predicate<SourceRecord> create(Offset offset);

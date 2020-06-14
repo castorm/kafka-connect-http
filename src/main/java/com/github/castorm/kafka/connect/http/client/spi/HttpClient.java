@@ -27,6 +27,7 @@ import org.apache.kafka.common.Configurable;
 import java.io.IOException;
 import java.util.Map;
 
+@FunctionalInterface
 public interface HttpClient extends Configurable {
 
     HttpResponse execute(HttpRequest request) throws IOException;
