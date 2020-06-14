@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.Configurable;
 import org.apache.kafka.connect.source.SourceRecord;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -88,7 +89,7 @@ public class HttpSourceTaskPartition implements Configurable {
         return getRemainingMillis() == 0;
     }
 
-    List<SourceRecord> poll() {
+    List<SourceRecord> poll() throws IOException {
 
         timer.reset(offset.getTimestamp().orElse(now()));
 

@@ -34,10 +34,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.*;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offset1;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offset2;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.partition1;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.partition2;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.record;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -102,7 +107,7 @@ class HttpSourceTaskTest {
     }
 
     @Test
-    void givenPartitionsNotReady_whenPoll_thenPartitionsNotPolled() throws InterruptedException {
+    void givenPartitionsNotReady_whenPoll_thenPartitionsNotPolled() throws InterruptedException, IOException {
 
         given(taskPartition1.isReady()).willReturn(false);
         given(taskPartition2.isReady()).willReturn(false);
@@ -114,7 +119,7 @@ class HttpSourceTaskTest {
     }
 
     @Test
-    void givenPartitionReady_whenPoll_thenPartitionIsPolled() throws InterruptedException {
+    void givenPartitionReady_whenPoll_thenPartitionIsPolled() throws InterruptedException, IOException {
 
         given(taskPartition1.isReady()).willReturn(true);
         given(taskPartition2.isReady()).willReturn(false);
@@ -125,7 +130,7 @@ class HttpSourceTaskTest {
     }
 
     @Test
-    void givenPartitionReadyAndPollReturnsRecord_whenPoll_thenRecord() throws InterruptedException {
+    void givenPartitionReadyAndPollReturnsRecord_whenPoll_thenRecord() throws InterruptedException, IOException {
 
         given(taskPartition1.isReady()).willReturn(true);
         given(taskPartition2.isReady()).willReturn(false);
@@ -135,7 +140,7 @@ class HttpSourceTaskTest {
     }
 
     @Test
-    void givenTwoPartitionsReadyAndPollReturnsRecords_whenPoll_thenRecordsCombined() throws InterruptedException {
+    void givenTwoPartitionsReadyAndPollReturnsRecords_whenPoll_thenRecordsCombined() throws InterruptedException, IOException {
 
         given(taskPartition1.isReady()).willReturn(true);
         given(taskPartition2.isReady()).willReturn(true);
@@ -146,7 +151,7 @@ class HttpSourceTaskTest {
     }
 
     @Test
-    void givenPartitionReadyAndPollFailed_whenPoll_thenFailed() {
+    void givenPartitionReadyAndPollFailed_whenPoll_thenFailed() throws IOException {
 
         given(taskPartition1.isReady()).willReturn(true);
         given(taskPartition2.isReady()).willReturn(false);

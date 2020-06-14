@@ -38,6 +38,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 
@@ -122,7 +123,7 @@ class HttpSourceTaskPartitionTest {
     }
 
     @Test
-    void givenOffset_whenPoll_thenTimerReset() {
+    void givenOffset_whenPoll_thenTimerReset() throws IOException {
 
         given(requestFactory.createRequest(partition, offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
@@ -136,7 +137,7 @@ class HttpSourceTaskPartitionTest {
     }
 
     @Test
-    void givenOffset_whenPoll_thenResultsReturned() {
+    void givenOffset_whenPoll_thenResultsReturned() throws IOException {
 
         given(requestFactory.createRequest(partition, offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
@@ -148,7 +149,7 @@ class HttpSourceTaskPartitionTest {
     }
 
     @Test
-    void givenTaskStarted_whenPoll_thenResultsSorted() {
+    void givenTaskStarted_whenPoll_thenResultsSorted() throws IOException {
 
         given(requestFactory.createRequest(partition, offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
@@ -160,7 +161,7 @@ class HttpSourceTaskPartitionTest {
     }
 
     @Test
-    void givenTaskStarted_whenPoll_thenFilterFilters() {
+    void givenTaskStarted_whenPoll_thenFilterFilters() throws IOException {
 
         given(requestFactory.createRequest(partition, offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
