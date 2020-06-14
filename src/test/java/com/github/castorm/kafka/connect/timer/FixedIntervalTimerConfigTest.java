@@ -37,4 +37,9 @@ class FixedIntervalTimerConfigTest {
     void whenPollIntervalMillis_thenInitialized() {
         assertThat(new FixedIntervalTimerConfig(ImmutableMap.of("http.timer.interval.millis", "42")).getPollIntervalMillis()).isEqualTo(42L);
     }
+
+    @Test
+    void whenDeprecatedPollIntervalMillis_thenInitialized() {
+        assertThat(new FixedIntervalTimerConfig(ImmutableMap.of("http.throttler.interval.millis", "42")).getPollIntervalMillis()).isEqualTo(42L);
+    }
 }
