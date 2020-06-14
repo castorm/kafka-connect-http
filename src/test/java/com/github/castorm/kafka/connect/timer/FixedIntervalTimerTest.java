@@ -30,7 +30,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.github.castorm.kafka.connect.timer.FixedIntervalTimerTest.Fixture.*;
+import static com.github.castorm.kafka.connect.timer.FixedIntervalTimerTest.Fixture.intervalMillis;
+import static com.github.castorm.kafka.connect.timer.FixedIntervalTimerTest.Fixture.lastPollMillis;
+import static com.github.castorm.kafka.connect.timer.FixedIntervalTimerTest.Fixture.maxExecutionTimeMillis;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;

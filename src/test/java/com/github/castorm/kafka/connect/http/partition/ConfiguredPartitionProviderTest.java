@@ -23,7 +23,6 @@ package com.github.castorm.kafka.connect.http.partition;
 import com.github.castorm.kafka.connect.http.model.Partition;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -39,14 +38,8 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(MockitoExtension.class)
 class ConfiguredPartitionProviderTest {
 
-    ConfiguredPartitionProvider provider;
-
     @Mock
     ConfiguredPartitionProviderConfig config;
-
-    @BeforeEach
-    void setUp() {
-    }
 
     @Test
     void givenNoPartition_whenGetPartitions_thenEmpty() {

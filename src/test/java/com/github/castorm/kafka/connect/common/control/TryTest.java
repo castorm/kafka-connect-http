@@ -24,7 +24,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.Callable;
 
-import static com.github.castorm.kafka.connect.common.control.TryTest.Fixture.*;
+import static com.github.castorm.kafka.connect.common.control.TryTest.Fixture.cause;
+import static com.github.castorm.kafka.connect.common.control.TryTest.Fixture.value;
+import static com.github.castorm.kafka.connect.common.control.TryTest.Fixture.willFail;
+import static com.github.castorm.kafka.connect.common.control.TryTest.Fixture.willSucceed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 

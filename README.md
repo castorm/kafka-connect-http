@@ -171,7 +171,7 @@ This `HttpRequestFactory` is based on template resolution.
 > 
 > ##### `http.request.url`
 > Http url to use in the request.
-> *   **Required**
+> *   __Required__
 > *   Type: `String`
 > 
 > ##### `http.request.headers`
@@ -361,9 +361,9 @@ Parses the HTTP response into a key-value SourceRecord. This process is decompos
 > *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper`
 > *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper` Maps **key** to a *Struct schema*
->         with a single property `key`, and **value** to a *Struct schema* with a single property `value`
->     *   `com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapper` Maps both **key** and **value** to 
+>     *   `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper` Maps __key__ to a *Struct schema*
+>         with a single property `key`, and __value__ to a *Struct schema* with a single property `value`
+>     *   `com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapper` Maps both __key__ and __value__ to 
 >         a `String` schema
 
 ##### Parsing a HttpResponse with JacksonKvRecordHttpResponseParser
@@ -450,7 +450,7 @@ Here is also where we'll tell Kafka Connect to what topic and on what partition 
 
 > ##### `kafka.topic`
 > Name of the topic where the record will be sent to
-> *   **Required**
+> *   __Required__
 > *   Type: `String`
 > *   Default: `""`
 >
@@ -557,7 +557,7 @@ We use [SemVer](http://semver.org/) for versioning.
 
 ## Authors
 
-*   **Cástor Rodríguez** - Only contributor so far - [castorm](https://github.com/castorm)
+*   __Cástor Rodríguez__ - Only contributor so far - [castorm](https://github.com/castorm)
 
 ## License
 

@@ -26,7 +26,13 @@ import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap.SimpleEntry;
 
-import static com.github.castorm.kafka.connect.common.ConfigUtils.*;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownHeaders;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownList;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMapList;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownQueryParams;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.parseIntegerRangedList;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.replaceKey;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;

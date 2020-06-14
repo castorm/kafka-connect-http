@@ -32,7 +32,11 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 import static java.util.stream.IntStream.rangeClosed;
 
 @UtilityClass

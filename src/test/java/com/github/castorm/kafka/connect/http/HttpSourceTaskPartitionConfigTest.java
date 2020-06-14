@@ -43,7 +43,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskPartitionConfigTest.Fixture.*;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskPartitionConfigTest.Fixture.config;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskPartitionConfigTest.Fixture.configWithout;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskPartitionConfigTest.Fixture.defaultMap;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 

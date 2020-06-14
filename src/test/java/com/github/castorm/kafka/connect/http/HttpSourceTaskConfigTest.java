@@ -30,7 +30,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskConfigTest.Fixture.*;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskConfigTest.Fixture.config;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskConfigTest.Fixture.configWithout;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskConfigTest.Fixture.defaultMap;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskConfigTest.Fixture.partition;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
