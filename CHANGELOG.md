@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.7
 
+### v0.7.7 (TBD)
+-   Provided different log levels for `OkHttpClient`.`TRACE`: `BODY`, `DEBUG`: `BASIC`, `*`: `NONE`
+
 ### v0.7.6 (05/28/2020)
 -   Fix typo in `http.throttler.catchup.interval.millis` configuration property
 -   Change default polling interval to 60s and 30s when catching up
