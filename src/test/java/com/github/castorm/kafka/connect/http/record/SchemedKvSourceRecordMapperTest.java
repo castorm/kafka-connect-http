@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.record;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.data.Struct;
@@ -34,6 +35,8 @@ import java.time.Instant;
 
 import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.now;
 import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.offset;
+import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.partition;
+import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.patitionMap;
 import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.record;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyMap;
@@ -57,56 +60,63 @@ class SchemedKvSourceRecordMapperTest {
 
     @Test
     void givenTopic_whenMap_thenTopicMapped() {
-        assertThat(mapper.map(record).topic()).isEqualTo("topic");
+        assertThat(mapper.map(record, partition).topic()).isEqualTo("topic");
+    }
+
+    @Test
+    void givenPartition_whenMap_thenPartitionMapped() {
+        assertThat(mapper.map(record, partition).sourcePartition()).isEqualTo(patitionMap);
     }
 
     @Test
     void givenKey_whenMap_thenKeyMapped() {
-        assertThat(((Struct) mapper.map(record.withKey("key")).key()).get("key")).isEqualTo("key");
+        assertThat(((Struct) mapper.map(record.withKey("key"), partition).key()).get("key")).isEqualTo("key");
     }
 
     @Test
     void givenValue_whenMap_thenValueMapped() {
-        assertThat(((Struct) mapper.map(record.withValue("value")).value()).get("value")).isEqualTo("value");
+        assertThat(((Struct) mapper.map(record.withValue("value"), partition).value()).get("value")).isEqualTo("value");
     }
 
     @Test
     void givenKey_whenMap_thenValueKeyMapped() {
-        assertThat(((Struct) mapper.map(record.withKey("key")).value()).get("key")).isEqualTo("key");
+        assertThat(((Struct) mapper.map(record.withKey("key"), partition).value()).get("key")).isEqualTo("key");
     }
 
     @Test
     void givenOffsetTimestamp_whenMap_thenValueTimestampMapped() {
-        assertThat(((Struct) mapper.map(record.withOffset(offset)).value()).get("timestamp")).isEqualTo(now.toEpochMilli());
+        assertThat(((Struct) mapper.map(record.withOffset(offset), partition).value()).get("timestamp")).isEqualTo(now.toEpochMilli());
     }
 
     @Test
     void givenOffset_whenMap_thenOffsetMapped() {
-        assertThat(mapper.map(record.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
+        assertThat(mapper.map(record.withOffset(offset), partition).sourceOffset()).isEqualTo(offset.toMap());
     }
 
     @Test
     void givenTimestamp_whenMap_thenTimestampMapped() {
-        assertThat(mapper.map(record.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
+        assertThat(mapper.map(record.withOffset(offset), partition).timestamp()).isEqualTo(now.toEpochMilli());
     }
 
     @Test
     void whenMap_thenNoPartitionMapped() {
-        assertThat(mapper.map(record).kafkaPartition()).isNull();
+        assertThat(mapper.map(record, partition).kafkaPartition()).isNull();
     }
 
     @Test
     void whenMap_thenKeySchemaMapped() {
-        assertThat(mapper.map(record).keySchema()).isNotNull();
+        assertThat(mapper.map(record, partition).keySchema()).isNotNull();
     }
 
     @Test
     void whenMap_thenValueSchemaMapped() {
-        assertThat(mapper.map(record).valueSchema()).isNotNull();
+        assertThat(mapper.map(record, partition).valueSchema()).isNotNull();
     }
 
     interface Fixture {
         Instant now = now();
+        ImmutableMap<String, String> patitionMap = ImmutableMap.of("p", "v");
+        Partition partition = Partition.of(patitionMap);
         Offset offset = Offset.of(ImmutableMap.of("k", "v"), "key", now);
         KvRecord record = KvRecord.builder().value("not-null").offset(offset).build();
     }

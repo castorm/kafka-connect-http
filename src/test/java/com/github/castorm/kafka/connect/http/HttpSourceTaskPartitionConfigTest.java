@@ -25,6 +25,7 @@ import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter;
 import com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory;
@@ -33,9 +34,8 @@ import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
-import com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler;
-import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler;
-import com.google.common.collect.ImmutableMap;
+import com.github.castorm.kafka.connect.timer.AdaptableIntervalTimer;
+import com.github.castorm.kafka.connect.timer.FixedIntervalTimer;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.Test;
 
@@ -43,21 +43,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.HttpSourceConnectorConfigTest.Fixture.config;
-import static com.github.castorm.kafka.connect.http.HttpSourceConnectorConfigTest.Fixture.configWithout;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskPartitionConfigTest.Fixture.*;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HttpSourceConnectorConfigTest {
+class HttpSourceTaskPartitionConfigTest {
 
     @Test
-    void whenNoThrottler_thenDefault() {
-        assertThat(configWithout("http.throttler").getThrottler()).isInstanceOf(AdaptableIntervalThrottler.class);
+    void whenNoTimer_thenDefault() {
+        assertThat(configWithout("http.timer").getTimer()).isInstanceOf(AdaptableIntervalTimer.class);
     }
 
     @Test
-    void whenThrottler_thenInitialized() {
-        assertThat(config("http.throttler", "com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler").getThrottler()).isInstanceOf(FixedIntervalThrottler.class);
+    void whenTimer_thenInitialized() {
+        assertThat(config("http.timer", "com.github.castorm.kafka.connect.timer.FixedIntervalTimer").getTimer()).isInstanceOf(FixedIntervalTimer.class);
     }
 
     @Test
@@ -110,26 +109,16 @@ class HttpSourceConnectorConfigTest {
         assertThat(config("http.record.filter.factory", "com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory").getRecordFilterFactory()).isInstanceOf(PassthroughRecordFilterFactory.class);
     }
 
-    @Test
-    void whenNoInitialOffset_thenDefault() {
-        assertThat(configWithout("http.offset.initial").getInitialOffset()).isEqualTo(emptyMap());
-    }
-
-    @Test
-    void whenInitialOffset_thenInitialized() {
-        assertThat(config("http.offset.initial", "k=v").getInitialOffset()).isEqualTo(ImmutableMap.of("k", "v"));
-    }
-
     public static class TestHttpClient implements HttpClient {
         public HttpResponse execute(HttpRequest request) { return null; }
     }
 
     public static class TestRequestFactory implements HttpRequestFactory {
-        public HttpRequest createRequest(Offset offset) { return null; }
+        public HttpRequest createRequest(Partition partition, Offset offset) { return null; }
     }
 
     public static class TestResponseParser implements HttpResponseParser {
-        public List<SourceRecord> parse(HttpResponse response) { return null; }
+        public List<SourceRecord> parse(HttpResponse response, Partition partition) { return null; }
     }
 
     public static class TestRecordSorter implements SourceRecordSorter {
@@ -137,24 +126,26 @@ class HttpSourceConnectorConfigTest {
     }
 
     interface Fixture {
+        Partition partition = Partition.of("test", emptyMap());
+
         static Map<String, String> defaultMap() {
             return new HashMap<String, String>() {{
                 put("kafka.topic", "topic");
                 put("http.request.url", "foo");
-                put("http.response.json.record.offset.value.pointer", "/baz");
+                put("http.response.json.record.offset1.value.pointer", "/baz");
             }};
         }
 
-        static HttpSourceConnectorConfig config(String key, String value) {
+        static HttpSourceTaskPartitionConfig config(String key, String value) {
             Map<String, String> customMap = defaultMap();
             customMap.put(key, value);
-            return new HttpSourceConnectorConfig(customMap);
+            return new HttpSourceTaskPartitionConfig(partition, customMap);
         }
 
-        static HttpSourceConnectorConfig configWithout(String key) {
+        static HttpSourceTaskPartitionConfig configWithout(String key) {
             Map<String, String> customMap = defaultMap();
             customMap.remove(key);
-            return new HttpSourceConnectorConfig(customMap);
+            return new HttpSourceTaskPartitionConfig(partition, customMap);
         }
     }
 }

@@ -25,6 +25,7 @@ import org.apache.kafka.common.Configurable;
 import java.time.Instant;
 import java.util.Map;
 
+@FunctionalInterface
 public interface TimestampParser extends Configurable {
 
     Instant parse(String timestamp);

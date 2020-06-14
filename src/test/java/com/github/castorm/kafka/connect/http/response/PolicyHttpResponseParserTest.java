@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.response;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy;
 import com.google.common.collect.ImmutableList;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParserTest.Fixture.partition;
 import static com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParserTest.Fixture.record;
 import static com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParserTest.Fixture.response;
 import static com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy.HttpResponseOutcome.FAIL;
@@ -71,7 +73,7 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(FAIL);
 
-        assertThat(catchThrowable(() -> parser.parse(response))).isInstanceOf(IllegalStateException.class);
+        assertThat(catchThrowable(() -> parser.parse(response, partition))).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -79,9 +81,9 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(FAIL);
 
-        catchThrowable(() -> parser.parse(response));
+        catchThrowable(() -> parser.parse(response, partition));
 
-        then(delegate).should(never()).parse(any());
+        then(delegate).should(never()).parse(any(), any());
     }
 
     @Test
@@ -89,9 +91,9 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(PROCESS);
 
-        parser.parse(response);
+        parser.parse(response, partition);
 
-        then(delegate).should().parse(response);
+        then(delegate).should().parse(response, partition);
     }
 
     @Test
@@ -99,9 +101,9 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(PROCESS);
 
-        given(delegate.parse(response)).willReturn(ImmutableList.of(record));
+        given(delegate.parse(response, partition)).willReturn(ImmutableList.of(record));
 
-        assertThat(parser.parse(response)).containsExactly(record);
+        assertThat(parser.parse(response, partition)).containsExactly(record);
     }
 
     @Test
@@ -109,9 +111,9 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(SKIP);
 
-        parser.parse(response);
+        parser.parse(response, partition);
 
-        then(delegate).should(never()).parse(any());
+        then(delegate).should(never()).parse(any(), any());
     }
 
     @Test
@@ -119,11 +121,12 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(SKIP);
 
-        assertThat(parser.parse(response)).isEmpty();
+        assertThat(parser.parse(response, partition)).isEmpty();
     }
 
     interface Fixture {
         HttpResponse response = HttpResponse.builder().build();
+        Partition partition = Partition.of(emptyMap());
         SourceRecord record = new SourceRecord(null, null, null, null, "Something");
     }
 }

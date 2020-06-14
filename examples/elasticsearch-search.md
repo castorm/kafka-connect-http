@@ -67,8 +67,8 @@ queries.
         "http.response.record.pointer": "/_source",
         "http.response.record.offset.pointer": "timestamp=/sort/0",
         "http.response.record.timestamp.pointer": "/sort/0",
-        "http.throttler.interval.millis": "30000",
-        "http.throttler.catchup.interval.millis": "1000",
+        "http.timer.interval.millis": "30000",
+        "http.timer.catchup.interval.millis": "1000",
         "kafka.topic": "topic"
     }
 }

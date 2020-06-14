@@ -24,12 +24,12 @@ import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import org.apache.kafka.common.Configurable;
 
-import java.io.IOException;
 import java.util.Map;
 
+@FunctionalInterface
 public interface HttpClient extends Configurable {
 
-    HttpResponse execute(HttpRequest request) throws IOException;
+    HttpResponse execute(HttpRequest request);
 
     default void configure(Map<String, ?> map) {
         // Do nothing

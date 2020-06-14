@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.response;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.record.spi.KvSourceRecordMapper;
@@ -70,7 +71,7 @@ class KvHttpResponseParserConfigTest {
     public static class TestRecordMapper implements KvSourceRecordMapper {
 
         @Override
-        public SourceRecord map(KvRecord record) { return null; }
+        public SourceRecord map(KvRecord record, Partition partition) { return null; }
     }
 
     private static KvHttpResponseParserConfig config(Map<String, Object> settings) {

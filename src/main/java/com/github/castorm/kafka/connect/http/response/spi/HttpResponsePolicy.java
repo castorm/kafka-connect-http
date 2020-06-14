@@ -25,6 +25,7 @@ import org.apache.kafka.common.Configurable;
 
 import java.util.Map;
 
+@FunctionalInterface
 public interface HttpResponsePolicy extends Configurable {
 
     HttpResponseOutcome resolve(HttpResponse response);

@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.response;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.record.spi.KvSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.response.spi.KvRecordHttpResponseParser;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.github.castorm.kafka.connect.http.response.KvHttpResponseParserTest.Fixture.partition;
 import static com.github.castorm.kafka.connect.http.response.KvHttpResponseParserTest.Fixture.record;
 import static com.github.castorm.kafka.connect.http.response.KvHttpResponseParserTest.Fixture.response;
 import static com.github.castorm.kafka.connect.http.response.KvHttpResponseParserTest.Fixture.sourceRecord;
@@ -68,7 +70,7 @@ class KvHttpResponseParserTest {
 
         given(recordParser.parse(response)).willReturn(emptyList());
 
-        assertThat(parser.parse(response)).isEmpty();
+        assertThat(parser.parse(response, partition)).isEmpty();
     }
 
     @Test
@@ -76,23 +78,24 @@ class KvHttpResponseParserTest {
 
         given(recordParser.parse(response)).willReturn(singletonList(record));
 
-        parser.parse(response);
+        parser.parse(response, partition);
 
-        then(recordFactory).should().map(record);
+        then(recordFactory).should().map(record, partition);
     }
 
     @Test
     void givenEmptyList_whenParse_thenItemsMappedReturned() {
 
         given(recordParser.parse(response)).willReturn(singletonList(record));
-        given(recordFactory.map(record)).willReturn(sourceRecord);
+        given(recordFactory.map(record, partition)).willReturn(sourceRecord);
 
-        assertThat(parser.parse(response)).containsExactly(sourceRecord);
+        assertThat(parser.parse(response, partition)).containsExactly(sourceRecord);
     }
 
     interface Fixture {
         HttpResponse response = HttpResponse.builder().build();
         KvRecord record = KvRecord.builder().build();
+        Partition partition = Partition.of(emptyMap());
         SourceRecord sourceRecord = new SourceRecord(null, null, null, null, null);
     }
 }

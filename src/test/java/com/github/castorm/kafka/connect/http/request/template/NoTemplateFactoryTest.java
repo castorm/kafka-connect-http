@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.request.template;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyMap;
@@ -32,6 +33,6 @@ class NoTemplateFactoryTest {
 
     @Test
     void givenTemplate_whenApply_thenAsIs() {
-        assertThat(factory.create("template").apply(Offset.of(emptyMap()))).isEqualTo("template");
+        assertThat(factory.create("template").apply(Partition.of(emptyMap()), Offset.of(emptyMap()))).isEqualTo("template");
     }
 }

@@ -23,13 +23,9 @@ package com.github.castorm.kafka.connect.http.client.okhttp;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Call;
-import okhttp3.ConnectionPool;
-import okhttp3.HttpUrl;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import okhttp3.*;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 import java.io.IOException;
@@ -41,7 +37,7 @@ import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static okhttp3.HttpUrl.parse;
 import static okhttp3.RequestBody.create;
-import static okhttp3.logging.HttpLoggingInterceptor.Level.BODY;
+import static okhttp3.logging.HttpLoggingInterceptor.Level.*;
 
 @Slf4j
 public class OkHttpClient implements HttpClient {
@@ -63,24 +59,29 @@ public class OkHttpClient implements HttpClient {
     }
 
     private static HttpLoggingInterceptor createLoggingInterceptor() {
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(log::debug);
-        interceptor.setLevel(BODY);
-        return interceptor;
+        if (log.isTraceEnabled()) {
+            return new HttpLoggingInterceptor(log::trace).setLevel(BODY);
+        } else if (log.isDebugEnabled()) {
+            return new HttpLoggingInterceptor(log::debug).setLevel(BASIC);
+        } else {
+            return new HttpLoggingInterceptor(log::info).setLevel(NONE);
+        }
     }
 
     @Override
-    public HttpResponse execute(HttpRequest httpRequest) throws IOException {
+    @SneakyThrows(IOException.class)
+    public HttpResponse execute(HttpRequest httpRequest) {
 
-        Request request = fromHttpRequest(httpRequest);
+        Request request = mapHttpRequest(httpRequest);
 
         Call call = client.newCall(request);
 
         try (Response response = call.execute()) {
-            return toHttpResponse(response);
+            return mapHttpResponse(response);
         }
     }
 
-    private static Request fromHttpRequest(HttpRequest request) {
+    private static Request mapHttpRequest(HttpRequest request) {
         Request.Builder builder = new Request.Builder();
         builder.url(mapUrl(request.getUrl(), request.getQueryParams()));
         addHeaders(builder, request);
@@ -130,7 +131,7 @@ public class OkHttpClient implements HttpClient {
         return empty();
     }
 
-    private static HttpResponse toHttpResponse(Response response) throws IOException {
+    private static HttpResponse mapHttpResponse(Response response) throws IOException {
         return HttpResponse.builder()
                 .code(response.code())
                 .body(response.body() != null ? response.body().bytes() : new byte[0])

@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.record;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.record.spi.KvSourceRecordMapper;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.function.Function;
 
-import static java.util.Collections.emptyMap;
 import static org.apache.kafka.connect.data.SchemaBuilder.int64;
 import static org.apache.kafka.connect.data.SchemaBuilder.string;
 
@@ -43,8 +43,6 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
     private static final String KEY_FIELD_NAME = "key";
     private static final String VALUE_FIELD_NAME = "value";
     private static final String TIMESTAMP_FIELD_NAME = "timestamp";
-
-    private static Map<String, ?> sourcePartition = emptyMap();
 
     private final Function<Map<String, ?>, SourceRecordMapperConfig> configFactory;
 
@@ -74,7 +72,7 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
     }
 
     @Override
-    public SourceRecord map(KvRecord record) {
+    public SourceRecord map(KvRecord record, Partition partition) {
 
         Offset offset = record.getOffset();
         Long timestamp = offset.getTimestamp().map(Instant::toEpochMilli).orElseGet(System::currentTimeMillis);
@@ -83,7 +81,7 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
         Struct value = valueStruct(record.getKey(), record.getValue(), timestamp);
 
         return new SourceRecord(
-                sourcePartition,
+                partition.toMap(),
                 offset.toMap(),
                 config.getTopic(),
                 null,

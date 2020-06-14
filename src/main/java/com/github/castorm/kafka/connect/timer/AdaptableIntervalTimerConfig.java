@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.throttle;
+package com.github.castorm.kafka.connect.timer;
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.throttle;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,26 +27,26 @@ import org.apache.kafka.common.config.ConfigDef;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig.THROTTLE_INTERVAL_MILLIS;
+import static com.github.castorm.kafka.connect.timer.FixedIntervalTimerConfig.TIMER_INTERVAL_MILLIS;
 import static java.util.Collections.emptyMap;
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Type.LONG;
 
 @Getter
-public class AdaptableIntervalThrottlerConfig extends AbstractConfig {
+public class AdaptableIntervalTimerConfig extends AbstractConfig {
 
-    private static final String TAIL_INTERVAL_MILLIS = "http.throttler.interval.millis";
-    private static final String CATCHUP_INTERVAL_MILLIS = "http.throttler.catchup.interval.millis";
+    private static final String TAIL_INTERVAL_MILLIS = "http.timer.interval.millis";
+    private static final String CATCHUP_INTERVAL_MILLIS = "http.timer.catchup.interval.millis";
 
-    private final FixedIntervalThrottler tailThrottler;
-    private final FixedIntervalThrottler catchupThrottler;
+    private final FixedIntervalTimer tailTimer;
+    private final FixedIntervalTimer catchupTimer;
 
-    public AdaptableIntervalThrottlerConfig(Map<String, ?> originals) {
+    public AdaptableIntervalTimerConfig(Map<String, ?> originals) {
         super(config(), originals);
-        tailThrottler = new FixedIntervalThrottler(__ -> new FixedIntervalThrottlerConfig(mapOf(THROTTLE_INTERVAL_MILLIS, getLong(TAIL_INTERVAL_MILLIS))));
-        tailThrottler.configure(emptyMap());
-        catchupThrottler = new FixedIntervalThrottler(__ -> new FixedIntervalThrottlerConfig(mapOf(THROTTLE_INTERVAL_MILLIS, getLong(CATCHUP_INTERVAL_MILLIS))));
-        catchupThrottler.configure(emptyMap());
+        tailTimer = new FixedIntervalTimer(__ -> new FixedIntervalTimerConfig(mapOf(TIMER_INTERVAL_MILLIS, getLong(TAIL_INTERVAL_MILLIS))));
+        tailTimer.configure(emptyMap());
+        catchupTimer = new FixedIntervalTimer(__ -> new FixedIntervalTimerConfig(mapOf(TIMER_INTERVAL_MILLIS, getLong(CATCHUP_INTERVAL_MILLIS))));
+        catchupTimer.configure(emptyMap());
     }
 
     private static Map<String, ?> mapOf(String key, Long value) {
@@ -57,7 +57,7 @@ public class AdaptableIntervalThrottlerConfig extends AbstractConfig {
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(TAIL_INTERVAL_MILLIS, LONG, 60000L, HIGH, "Throttle Tail Interval Millis")
-                .define(CATCHUP_INTERVAL_MILLIS, LONG, 30000L, HIGH, "Throttle Catchup Interval Millis");
+                .define(TAIL_INTERVAL_MILLIS, LONG, 60000L, HIGH, "Timer Tail Interval Millis")
+                .define(CATCHUP_INTERVAL_MILLIS, LONG, 30000L, HIGH, "Timer Catchup Interval Millis");
     }
 }

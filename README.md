@@ -60,91 +60,140 @@ More details on how to [Install Connectors](https://docs.confluent.io/current/co
 ### Extension points
 The connector can be easily extended by implementing your own version of any of the components below.
 
-These are better understood by looking at the source task implementation:
+These are better understood by looking at the source task partition implementation:
 ```java
-public List<SourceRecord> poll() throws InterruptedException {
+Long getRemainingMillis() {
+    return timer.getRemainingMillis();
+}
 
-    throttler.throttle(offset);
+List<SourceRecord> poll() {
 
-    HttpRequest request = requestFactory.createRequest(offset);
+    timer.reset(offset.getTimestamp().orElse(now()));
+
+    HttpRequest request = requestFactory.createRequest(partition, offset);
 
     HttpResponse response = requestExecutor.execute(request);
 
-    List<SourceRecord> records = responseParser.parse(response);
+    List<SourceRecord> records = responseParser.parse(response, partition);
 
     return recordSorter.sort(records).stream()
             .filter(recordFilterFactory.create(offset))
             .collect(toList());
 }
 
-public void commitRecord(SourceRecord record) {
-    offset = Offset.of(record.sourceOffset(), record.timestamp());
+void commit(Offset offset) {
+    this.offset = offset;
 }
 ```
 
 ---
+<a name="timer"/>
+
+### Timer: Throttling HttpRequests
+Controls the rate at which HTTP requests are executed by informing the task, how long until the next execution is due.
+
+> #### `http.timer`
+> ```java
+> public interface Timer extends Configurable {
+> 
+>     Long getRemainingMillis();
+> 
+>     default void reset(Instant lastZero) {
+>         // Do nothing
+>     }
+> }
+> ```
+> *   Type: `Class`
+> *   Default: `com.github.castorm.kafka.connect.timer.AdaptableIntervalTimer`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.timer.FixedIntervalTimer`
+>     *   `com.github.castorm.kafka.connect.timer.AdaptableIntervalTimer`
+
+#### Throttling HttpRequests with FixedIntervalThrottler
+
+Throttles rate of requests based on a fixed interval. 
+
+> ##### `http.timer.interval.millis`
+> Interval in between requests
+> *   Type: `Long`
+> *   Default: `60000`
+
+#### Throttling HttpRequests with AdaptableIntervalThrottler
+
+Throttles rate of requests based on a fixed interval. However, it has two modes of operation, with two different 
+intervals:
+*   Up to date: No new records, or they have been created since last poll 
+*   Catching up: There were new records in last poll but they were created long ago (longer than interval)
+
+> ##### `http.timer.interval.millis`
+> Interval in between requests when up-to-date
+> 
+> *   Type: `Long`
+> *   Default: `60000`
+> 
+> ##### `http.timer.catchup.interval.millis`
+> Interval in between requests when catching up
+> *   Type: `Long`
+> *   Default: `30000`
+
+
+---
 <a name="request"/>
 
-### HttpRequestFactory: Preparing a HttpRequest
-The first thing our connector will need to do is preparing a `HttpRequest`
+### HttpRequestFactory: Creating a HttpRequest
+The first thing our connector will need to do is creating a `HttpRequest`.
+
+When preparing a request, the `HttpRequestFactory` will have access to:
+*   `Partition` properties // TODO: See Partition
+*   `Offset` properties // TODO: See Offset
 
 > #### `http.request.factory`
 > ```java
 > public interface HttpRequestFactory extends Configurable {
 > 
->     HttpRequest createRequest(Offset offset);
+>     HttpRequest createRequest(Partition partition, Offset offset);
 > }
 > ```
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
 >
 > #### `http.offset.initial`
-> Initial offset, comma separated list of pairs
+> Initial offset, comma separated list of pairs.
 > *   Example: `property1=value1, property2=value2`
-> *   Type: String
-> *   Default: ""
+> *   Type: `String`
+> *   Default: `""`
 
-#### Preparing a HttpRequest with TemplateHttpRequestFactory
-This `HttpRequestFactory` is based on template resolution using the `Offset` of the last seen record.
+#### Creating a HttpRequest with TemplateHttpRequestFactory
+This `HttpRequestFactory` is based on template resolution.
 
-`Offset` is nothing but a set of key-value pairs of the last acknowledged item. This information is extracted from the
-item when parsing from the HTTP response. 
-You can reference these properties from the templates.
-In addition to your custom properties, `Offset` will contain these reserved properties:
-*   `key`: record's key
-*   `timestamp`: record's timestamp in ISO 8601 format
-
-Templates can be provided for url, headers, query params and body.
-
-
-> ##### `http.request.url`
+> ##### `http.request.method`
 > Http method to use in the request.
-> *   Type: String
+> *   Type: `String`
 > *   Default: `GET`
 > 
-> ##### `http.request.method`
-> Http url to use in the request, it can contain a `Template`
-> *   Required
-> *   Type: String
+> ##### `http.request.url`
+> Http url to use in the request.
+> *   **Required**
+> *   Type: `String`
 > 
 > ##### `http.request.headers`
-> Http headers to use in the request, comma separated list of pairs.
-> *   Example: `Name: Value, Name2 = Value2`
-> *   Type: String
-> *   Default: ""
+> Http headers to use in the request, `,` separated list of `:` separated pairs.
+> *   Example: `Name: Value, Name2: Value2`
+> *   Type: `String`
+> *   Default: `""`
 > 
 > ##### `http.request.params`
-> Http query parameters to use in the request, ampersand separated list of pairs.
-> *   Example: `name=value&name2=value2`
-> *   Type: String
-> *   Default: ""
+> Http query parameters to use in the request, `&` separated list of `=` separated pairs.
+> *   Example: `name=value & name2=value2`
+> *   Type: `String`
+> *   Default: `""`
 > 
 > ##### `http.request.body`
 > Http body to use in the request.
-> *   Type: String
-> *   Default: ""
+> *   Type: `String`
+> *   Default: `""`
 > 
 > ##### `http.request.template.factory`
 > ```java
@@ -155,16 +204,33 @@ Templates can be provided for url, headers, query params and body.
 > 
 > public interface Template {
 > 
->     String apply(Offset offset);
+>     String apply(Partition partition, Offset offset);
 > }
 > ```
 > Class responsible for creating the templates that will be used on every request.
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
           Implementation based on [FreeMarker](https://freemarker.apache.org/)
 >     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
+
+##### Creating a HttpRequest with FreeMarkerTemplateFactory
+FreeMarker templates will have the following data model available:
+*   partition
+    *   name
+    *   ... _(custom partition properties)_
+*   offset
+    *   key
+    *   timestamp
+    *   ... _(custom offset properties)_
+
+Accessing any of the above withing a template can be achieved like this:
+```properties
+http.request.params=entity=${partition.entity}&after=${offset.timestamp}
+```
+For a complete understanding of the features provided by FreeMarker, please, refer to the 
+[User Manual](https://freemarker.apache.org/docs/index.html)
 
 ---
 <a name="client"/>
@@ -180,7 +246,7 @@ Once our HttpRequest is ready, we have to execute it to get some results out of 
 >     HttpResponse execute(HttpRequest request) throws IOException;
 > }
 > ```
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
@@ -190,30 +256,30 @@ Uses a [OkHttp](https://square.github.io/okhttp/) client.
 
 > ##### `http.client.connection.timeout.millis`
 > Timeout for opening a connection
-> *   Type: Long
-> *   Default: 2000
+> *   Type: `Long`
+> *   Default: `2000`
 > 
 > ##### `http.client.read.timeout.millis`
 > Timeout for reading a response
-> *   Type: Long
-> *   Default: 2000
+> *   Type: `Long`
+> *   Default: `2000`
 > 
 > ##### `http.client.connection.ttl.millis`
 > Time to live for the connection
-> *   Type: Long
-> *   Default: 300000
+> *   Type: `Long`
+> *   Default: `300000`
 > 
 > ##### `http.client.max-idle`
 > Maximum number of idle connections in the connection pool
-> *   Type: Integer
-> *   Default: 1
+> *   Type: `Integer`
+> *   Default: `1`
 
 ---
 <a name="response"/>
 
 ### HttpResponseParser: Parsing a HttpResponse
 Once our `HttpRequest` has been executed, as a result we'll have to deal with a `HttpResponse` and translate it into 
-the list of `SourceRecord` that Kafka Connect is expecting. 
+the list of `SourceRecord`s expected by Kafka Connect. 
 
 > #### `http.response.parser`
 > ```java
@@ -222,7 +288,7 @@ the list of `SourceRecord` that Kafka Connect is expecting.
 >     List<SourceRecord> parse(HttpResponse response);
 > }
 > ```
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser`
@@ -246,13 +312,13 @@ When the decision is to process the response, this processing is delegated to a 
 >     }
 > }
 > ```
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.response.StatusCodeHttpResponsePolicy`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.response.StatusCodeHttpResponsePolicy`
 >
 > ##### `http.response.policy.parser`
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.response.KvHttpResponseParser`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.response.KvHttpResponseParser`
@@ -263,13 +329,13 @@ Does response vetting based on HTTP status codes in the response and the configu
 > ##### `http.response.policy.codes.process`
 > Comma separated list of code ranges that will result in the parser processing the response
 > *   Example: `200..205, 207..210`
-> *   Type: String
+> *   Type: `String`
 > *   Default: `200..299`
 >
 > ##### `http.response.policy.codes.skip`
 > Comma separated list of code ranges that will result in the parser skipping the response
 > *   Example: `300..305, 307..310`
-> *   Type: String
+> *   Type: `String`
 > *   Default: `300..399`
 
 #### Parsing a HttpResponse with KvHttpResponseParser
@@ -284,7 +350,7 @@ Parses the HTTP response into a key-value SourceRecord. This process is decompos
 >     List<KvRecord> parse(HttpResponse response);
 > }
 > ```
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParser`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.response.jackson.JacksonKvRecordHttpResponseParser`
@@ -296,7 +362,7 @@ Parses the HTTP response into a key-value SourceRecord. This process is decompos
 >     SourceRecord map(KvRecord record);
 > }
 > ```
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper` Maps **key** to a *Struct schema*
@@ -309,36 +375,36 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 
 > ##### `http.response.list.pointer`
 > [JsonPointer](https://tools.ietf.org/html/rfc6901) to the property in the response body containing an array of records 
-> *   Example: "/items"
-> *   Type: String
-> *   Default: "/"
+> *   Example: `/items`
+> *   Type: `String`
+> *   Default: `/`
 > 
 > ##### `http.response.record.pointer`
 > [JsonPointer](https://tools.ietf.org/html/rfc6901) to the individual record to be used as kafka record body. Useful
   when the object we are interested in is under a nested structure
-> *   Type: String
-> *   Default: "/"
+> *   Type: `String`
+> *   Default: `/`
 > 
 > ##### `http.response.record.key.pointer`
 > [JsonPointer](https://tools.ietf.org/html/rfc6901) to the comma separated list of properties that compound, uniquely 
   identify the individual record to be used as key in kafka 
   record key
 > This is especially important on partitioned topics
-> *   Example: "/id"
-> *   Type: String
-> *   Default: ""
+> *   Example: `/id`
+> *   Type: `String`
+> *   Default: `""`
 > 
 > ##### `http.response.record.timestamp.pointer`
 > [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual record to be used as kafka 
   record timestamp
   This is especially important to track progress, enable latency calculations, improved throttling and feedback to 
   `TemplateHttpRequestFactory` 
-> *   Type: String
-> *   Default: ""
+> *   Type: `String`
+> *   Default: `""`
 > 
 > ##### `http.response.record.timestamp.parser`
 > Class responsible for converting the timestamp property captured above into a `java.time.Instant`.  
-> *   Type: String
+> *   Type: `String`
 > *   Default: `com.github.castorm.kafka.connect.http.response.timestamp.EpochMillisOrDelegateTimestampParser`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.response.timestamp.EpochMillisTimestampParser` 
@@ -352,13 +418,13 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > 
 > ##### `http.response.record.timestamp.parser.pattern`
 > When using `DateTimeFormatterTimestampParser`, a custom pattern can be specified 
-> *   Type: String
+> *   Type: `String`
 > *   Default: `yyyy-MM-dd'T'HH:mm:ss[.SSS]X`
 > 
 > ##### `http.response.record.timestamp.parser.zone`
 > Timezone of the timestamp. Accepts [ZoneId](https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html) valid
   identifiers
-> *   Type: String
+> *   Type: `String`
 > *   Default: `UTC`
 > 
 > ##### `http.response.record.offset.pointer`
@@ -368,12 +434,12 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > receive this `Offset`.
 > 
 >  One of the roles of the offset, even if not required for preparing the next request, is helping in deduplication of
-> already seen items, by providing a sense of progress, assuming consistent ordering. (e.g. even if the response returns
-> the some repeated results in between requests because they have the same timestamp, anything prior to the last seen
+> already seen records, by providing a sense of progress, assuming consistent ordering. (e.g. even if the response returns
+> some repeated results in between requests because they have the same timestamp, anything prior to the last seen
 > offset will be ignored). see `OffsetFilterFactory`
 > *   Example: `id=/itemId`
-> *   Type: String
-> *   Default: ""
+> *   Type: `String`
+> *   Default: `""`
 
 ---
 <a name="mapper"/>
@@ -388,19 +454,19 @@ Here is also where we'll tell Kafka Connect to what topic and on what partition 
 
 > ##### `kafka.topic`
 > Name of the topic where the record will be sent to
-> *   Required
-> *   Type: String
-> *   Default: ""
+> *   **Required**
+> *   Type: `String`
+> *   Default: `""`
 >
 > ##### `http.record.schema.key.property.name`
 > Name of the key property in the key-value envelope
-> *   Type: String
-> *   Default: "key"
+> *   Type: `String`
+> *   Default: `key`
 >
 > ##### `http.record.schema.value.property.name`
 > Name of the value property in the key-value envelope
-> *   Type: String
-> *   Default: "value"
+> *   Type: `String`
+> *   Default: `value`
 
 ---
 <a name="sorter"/>
@@ -420,7 +486,7 @@ To enable de-duplication in cases like this, we can instruct the connector to as
 >     List<SourceRecord> sort(List<SourceRecord> records);
 > }
 > ```
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter`
@@ -443,7 +509,7 @@ There are cases when we'll be interested in filtering out certain records. One o
 >     Predicate<SourceRecord> create(Offset offset);
 > }
 > ```
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory`
@@ -469,52 +535,6 @@ Assumptions:
 *   Records are ordered by timestamp
 *   There is an `Offset` property that uniquely identify records (e.g. key)
 *   There won't be new items preceding already seen ones 
-
----
-<a name="throttler"/>
-
-### Throttler: Throttling HttpRequests
-Controls the rate at which HTTP requests are executed.
-
-> #### `http.throttler`
-> ```java
-> public interface Throttler extends Configurable {
-> 
->     void throttle(Offset offset) throws InterruptedException;
-> }
-> ```
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
-> *   Available implementations:
->     *   `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
->     *   `com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler`
-
-#### Throttling HttpRequests with FixedIntervalThrottler
-
-Throttles rate of requests based on a fixed interval. 
-
-> ##### `http.throttler.interval.millis`
-> Interval in between requests
-> *   Type: Long
-> *   Default: 10000
-
-#### Throttling HttpRequests with AdaptableIntervalThrottler
-
-Throttles rate of requests based on a fixed interval. However, it has two modes of operation, with two different 
-intervals:
-*   Up to date: No new records, or they have been created since last poll 
-*   Catching up: There were new record in last poll and they were created long ago
-
-> ##### `http.throttler.interval.millis`
-> Interval in between requests when up-to-date
-> 
-> *   Type: Long
-> *   Default: 10000
-> 
-> ##### `http.throttler.catchup.interval.millis`
-> Interval in between requests when catching up
-> *   Type: Long
-> *   Default: 1000
 
 ---
 ## Development

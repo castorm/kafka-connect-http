@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.response;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.spi.KvSourceRecordMapper;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.KvRecordHttpResponseParser;
@@ -54,9 +55,9 @@ public class KvHttpResponseParser implements HttpResponseParser {
     }
 
     @Override
-    public List<SourceRecord> parse(HttpResponse response) {
+    public List<SourceRecord> parse(HttpResponse response, Partition partition) {
         return recordParser.parse(response).stream()
-                .map(recordMapper::map)
+                .map(record -> recordMapper.map(record, partition))
                 .collect(toList());
     }
 }

@@ -27,6 +27,7 @@ import org.apache.kafka.common.Configurable;
 import java.util.List;
 import java.util.Map;
 
+@FunctionalInterface
 public interface KvRecordHttpResponseParser extends Configurable {
 
     List<KvRecord> parse(HttpResponse response);

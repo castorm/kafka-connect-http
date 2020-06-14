@@ -20,15 +20,17 @@ package com.github.castorm.kafka.connect.http.record.spi;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import org.apache.kafka.common.Configurable;
 import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.Map;
 
+@FunctionalInterface
 public interface KvSourceRecordMapper extends Configurable {
 
-    SourceRecord map(KvRecord record);
+    SourceRecord map(KvRecord record, Partition partition);
 
     default void configure(Map<String, ?> map) {
         // Do nothing

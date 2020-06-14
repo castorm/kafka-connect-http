@@ -53,8 +53,8 @@ And based on the results we would be updating the `updated` filter for subsequen
         "http.response.list.pointer": "/issues",
         "http.response.record.key.pointer": "/id",
         "http.response.record.timestamp.pointer": "/fields/updated",
-        "http.throttler.interval.millis": "30000",
-        "http.throttler.catchup.interval.millis": "1000",
+        "http.timer.interval.millis": "30000",
+        "http.timer.catchup.interval.millis": "1000",
         "kafka.topic": "topic"
     }
 }

@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.throttle;
+package com.github.castorm.kafka.connect.timer.spi;
 
 /*-
  * #%L
@@ -20,21 +20,22 @@ package com.github.castorm.kafka.connect.throttle;
  * #L%
  */
 
-import com.google.common.collect.ImmutableMap;
-import org.junit.jupiter.api.Test;
+import org.apache.kafka.common.Configurable;
 
-import static java.util.Collections.emptyMap;
-import static org.assertj.core.api.Assertions.assertThat;
+import java.time.Instant;
+import java.util.Map;
 
-class FixedIntervalThrottlerConfigTest {
+@FunctionalInterface
+public interface Timer extends Configurable {
 
-    @Test
-    void whenPollIntervalMillis_thenDefault() {
-        assertThat(new FixedIntervalThrottlerConfig(emptyMap()).getPollIntervalMillis()).isEqualTo(10000L);
+    Long getRemainingMillis();
+
+    default void reset(Instant lastZero) {
+        // Do nothing
     }
 
-    @Test
-    void whenPollIntervalMillis_thenInitialized() {
-        assertThat(new FixedIntervalThrottlerConfig(ImmutableMap.of("http.throttler.interval.millis", "42")).getPollIntervalMillis()).isEqualTo(42L);
+    @Override
+    default void configure(Map<String, ?> configs) {
+        // Do nothing
     }
 }
