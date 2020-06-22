@@ -205,8 +205,11 @@ This `HttpRequestFactory` is based on template resolution.
 > ```
 > Class responsible for creating the templates that will be used on every request.
 > *   Type: `Class`
-> *   Default: `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
+> *   Default: `com.github.castorm.kafka.connect.http.request.template.freemarker.BackwardsCompatibleFreeMarkerTemplateFactory`
 > *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.BackwardsCompatibleFreeMarkerTemplateFactory`
+          Implementation based on [FreeMarker](https://freemarker.apache.org/) which accepts offset properties without 
+          `offset` namespace _(Deprecated)_
 >     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
           Implementation based on [FreeMarker](https://freemarker.apache.org/)
 >     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
