@@ -21,12 +21,9 @@ package com.github.castorm.kafka.connect.http;
  */
 
 import com.github.castorm.kafka.connect.http.model.Partition;
-import com.github.castorm.kafka.connect.http.partition.spi.PartitionProvider;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +31,7 @@ import static com.github.castorm.kafka.connect.http.HttpSourceTaskConfigTest.Fix
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskConfigTest.Fixture.configWithout;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskConfigTest.Fixture.defaultMap;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskConfigTest.Fixture.partition;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskConfigTest.Fixture.partitionName;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,20 +39,17 @@ class HttpSourceTaskConfigTest {
 
     @Test
     void whenNoPartitionProviderAndNoPartition_thenDefault() {
-        assertThat(configWithout("http.partitions.provider").getPartitions()).isEmpty();
+        assertThat(configWithout("http.partitions").getPartitions()).isEmpty();
     }
 
     @Test
     void whenTestPartitionProvider_thenPartitionKey() {
-        assertThat(config(ImmutableMap.of("http.partitions.provider", TestPartitionProvider.class.getName())).getPartitions()).containsKeys(partition);
-    }
-
-    public static class TestPartitionProvider implements PartitionProvider {
-        public Collection<Partition> getPartitions() { return ImmutableList.of(partition); }
+        assertThat(config(ImmutableMap.of("http.partitions", partitionName)).getPartitions()).containsKeys(partition);
     }
 
     interface Fixture {
-        Partition partition = Partition.of("test", emptyMap());
+        String partitionName = "test";
+        Partition partition = Partition.of(partitionName, emptyMap());
 
         static Map<String, String> defaultMap() {
             return new HashMap<String, String>() {{

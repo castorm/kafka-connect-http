@@ -41,7 +41,6 @@ import org.apache.kafka.common.config.ConfigDef;
 import java.util.Map;
 
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
-import static com.github.castorm.kafka.connect.common.ConfigUtils.replaceKey;
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Importance.LOW;
 import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
@@ -50,6 +49,7 @@ import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 @Getter
 public class HttpSourceTaskPartitionConfig extends AbstractConfig {
 
+    private static final String PARTITION_PROPERTIES = "http.partition";
     private static final String TIMER = "http.timer";
     private static final String CLIENT = "http.client";
     private static final String INITIAL_OFFSET = "http.offset.initial";
@@ -67,9 +67,9 @@ public class HttpSourceTaskPartitionConfig extends AbstractConfig {
     private final SourceRecordSorter recordSorter;
     private final Offset initialOffset;
 
-    HttpSourceTaskPartitionConfig(Partition partition, Map<String, ?> originals) {
-        super(config(), getPartitionOverrides(partition.getName(), originals));
-        this.partition = partition;
+    HttpSourceTaskPartitionConfig(String partitionName, Map<String, ?> originals) {
+        super(config(), originals);
+        partition = Partition.of(partitionName, breakDownMap(getString(PARTITION_PROPERTIES)));
         timer = getConfiguredInstance(TIMER, Timer.class);
         requestFactory = getConfiguredInstance(REQUEST_FACTORY, HttpRequestFactory.class);
         client = getConfiguredInstance(CLIENT, HttpClient.class);
@@ -79,12 +79,9 @@ public class HttpSourceTaskPartitionConfig extends AbstractConfig {
         initialOffset = Offset.of(breakDownMap(getString(INITIAL_OFFSET)));
     }
 
-    private static Map<String, ?> getPartitionOverrides(String name, Map<String, ?> originals) {
-        return replaceKey("partitions." + name, "", originals);
-    }
-
     public static ConfigDef config() {
         return new ConfigDef()
+                .define(PARTITION_PROPERTIES, STRING, "", LOW, "Partition Properties")
                 .define(TIMER, CLASS, AdaptableIntervalTimer.class, HIGH, "Poll Timer Class")
                 .define(CLIENT, CLASS, OkHttpClient.class, HIGH, "Request Client Class")
                 .define(REQUEST_FACTORY, CLASS, TemplateHttpRequestFactory.class, HIGH, "Request Factory Class")

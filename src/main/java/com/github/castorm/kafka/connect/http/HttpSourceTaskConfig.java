@@ -21,8 +21,6 @@ package com.github.castorm.kafka.connect.http;
  */
 
 import com.github.castorm.kafka.connect.http.model.Partition;
-import com.github.castorm.kafka.connect.http.partition.ConfiguredPartitionProvider;
-import com.github.castorm.kafka.connect.http.partition.spi.PartitionProvider;
 import com.github.castorm.kafka.connect.timer.CompositeTimer;
 import com.github.castorm.kafka.connect.timer.TimerThrottler;
 import com.github.castorm.kafka.connect.timer.spi.ManagedThrottler;
@@ -33,17 +31,21 @@ import org.apache.kafka.common.config.ConfigDef;
 
 import java.util.Map;
 
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownList;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.replaceKey;
 import static java.util.Collections.emptyMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.common.config.ConfigDef.Importance.LOW;
-import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
+import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 
 @Getter
 class HttpSourceTaskConfig extends AbstractConfig {
 
-    private static final String PARTITION_PROVIDER = "http.partitions.provider";
+    static final String PARTITION_NAMES = "http.partitions";
+    private static final String PARTITION_NAMESPACE = "http.partitions.%s";
+    private static final String HTTP_NAMESPACE = "http";
 
     private final Map<Partition, HttpSourceTaskPartition> partitions;
     private final ManagedThrottler throttler;
@@ -51,10 +53,8 @@ class HttpSourceTaskConfig extends AbstractConfig {
     HttpSourceTaskConfig(Map<String, ?> originals) {
         super(config(), originals);
 
-        PartitionProvider partitionProvider = getConfiguredInstance(PARTITION_PROVIDER, PartitionProvider.class);
-
-        partitions = partitionProvider.getPartitions().stream()
-                .map(partition -> createTaskPartition(originals, partition))
+        partitions = breakDownList(getString(PARTITION_NAMES)).stream()
+                .map(partitionName -> createTaskPartition(originals, partitionName))
                 .collect(toMap(HttpSourceTaskPartition::getPartition, identity()));
 
         throttler = new TimerThrottler(new CompositeTimer(partitions.values().stream()
@@ -62,16 +62,20 @@ class HttpSourceTaskConfig extends AbstractConfig {
                 .collect(toList())));
     }
 
-    private static HttpSourceTaskPartition createTaskPartition(Map<String, ?> originals, Partition partition) {
-        HttpSourceTaskPartitionConfig config = new HttpSourceTaskPartitionConfig(partition, originals);
+    private static HttpSourceTaskPartition createTaskPartition(Map<String, ?> originals, String partitionName) {
+        HttpSourceTaskPartitionConfig config = new HttpSourceTaskPartitionConfig(partitionName, getPartitionOverrides(partitionName, originals));
         HttpSourceTaskPartition taskPartition = new HttpSourceTaskPartition(__ -> config);
         taskPartition.configure(emptyMap());
         return taskPartition;
     }
 
+    private static Map<String, ?> getPartitionOverrides(String name, Map<String, ?> originals) {
+        return replaceKey(String.format(PARTITION_NAMESPACE, name), HTTP_NAMESPACE, originals);
+    }
+
     public static ConfigDef config() {
         ConfigDef config = new ConfigDef()
-                .define(PARTITION_PROVIDER, CLASS, ConfiguredPartitionProvider.class, LOW, "Task Partition Provider");
+                .define(PARTITION_NAMES, STRING, "", LOW, "Task Partition Names");
         config.embed("", "", 0, HttpSourceTaskPartitionConfig.config());
         return config;
     }

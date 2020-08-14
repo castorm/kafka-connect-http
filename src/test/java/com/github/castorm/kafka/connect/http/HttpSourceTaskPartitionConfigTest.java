@@ -128,7 +128,8 @@ class HttpSourceTaskPartitionConfigTest {
     }
 
     interface Fixture {
-        Partition partition = Partition.of("test", emptyMap());
+        String partitionName = "test";
+        Partition partition = Partition.of(partitionName, emptyMap());
 
         static Map<String, String> defaultMap() {
             return new HashMap<String, String>() {{
@@ -141,13 +142,13 @@ class HttpSourceTaskPartitionConfigTest {
         static HttpSourceTaskPartitionConfig config(String key, String value) {
             Map<String, String> customMap = defaultMap();
             customMap.put(key, value);
-            return new HttpSourceTaskPartitionConfig(partition, customMap);
+            return new HttpSourceTaskPartitionConfig(partitionName, customMap);
         }
 
         static HttpSourceTaskPartitionConfig configWithout(String key) {
             Map<String, String> customMap = defaultMap();
             customMap.remove(key);
-            return new HttpSourceTaskPartitionConfig(partition, customMap);
+            return new HttpSourceTaskPartitionConfig(partitionName, customMap);
         }
     }
 }
