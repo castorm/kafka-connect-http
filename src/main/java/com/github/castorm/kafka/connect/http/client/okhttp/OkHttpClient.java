@@ -23,6 +23,7 @@ package com.github.castorm.kafka.connect.http.client.okhttp;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
 import okhttp3.ConnectionPool;
@@ -75,7 +76,8 @@ public class OkHttpClient implements HttpClient {
     }
 
     @Override
-    public HttpResponse execute(HttpRequest httpRequest) throws IOException {
+    @SneakyThrows(IOException.class)
+    public HttpResponse execute(HttpRequest httpRequest) {
 
         Request request = mapHttpRequest(httpRequest);
 
