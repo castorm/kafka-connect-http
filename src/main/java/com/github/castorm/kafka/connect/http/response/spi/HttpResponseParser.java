@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.response.spi;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import org.apache.kafka.common.Configurable;
 import org.apache.kafka.connect.source.SourceRecord;
 
@@ -30,7 +31,7 @@ import java.util.Map;
 @FunctionalInterface
 public interface HttpResponseParser extends Configurable {
 
-    List<SourceRecord> parse(HttpResponse response);
+    List<SourceRecord> parse(HttpResponse response, Partition partition);
 
     default void configure(Map<String, ?> map) {
         // Do nothing

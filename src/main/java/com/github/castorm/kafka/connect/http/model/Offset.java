@@ -72,4 +72,8 @@ public class Offset {
     public Optional<Instant> getTimestamp() {
         return ofNullable((String) properties.get(TIMESTAMP_KEY)).map(Instant::parse);
     }
+
+    public boolean isEmpty() {
+        return properties.values().stream().noneMatch(it -> it != null && !"".equals(it));
+    }
 }

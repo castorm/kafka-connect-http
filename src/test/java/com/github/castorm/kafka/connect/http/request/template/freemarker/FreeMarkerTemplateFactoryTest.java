@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.request.template.freemarker;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
@@ -33,11 +34,13 @@ class FreeMarkerTemplateFactoryTest {
 
     @Test
     void givenTemplate_whenApplyEmpty_thenAsIs() {
-        assertThat(factory.create("template").apply(Offset.of(emptyMap()))).isEqualTo("template");
+        assertThat(factory.create("template").apply(Partition.of(emptyMap()), Offset.of(emptyMap()))).isEqualTo("template");
     }
 
     @Test
     void givenTemplate_whenApplyValue_thenReplaced() {
-        assertThat(factory.create("template ${key}").apply(Offset.of(ImmutableMap.of("key", "value")))).isEqualTo("template value");
+        Partition partition = Partition.of(ImmutableMap.of("key", "partition1"));
+        Offset offset = Offset.of(ImmutableMap.of("key", "offset1"));
+        assertThat(factory.create("template ${partition.key} ${offset.key}").apply(partition, offset)).isEqualTo("template partition1 offset1");
     }
 }

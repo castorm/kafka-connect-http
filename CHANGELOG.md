@@ -4,6 +4,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ---
 
+## v0.8 (BETA)
+
+### v0.8.0 (TBD)
+-   Support for partitioned tasks, where a single connector can perform multiple different requests
+
 ## v0.7
 
 ### v0.7.7 (TBD)

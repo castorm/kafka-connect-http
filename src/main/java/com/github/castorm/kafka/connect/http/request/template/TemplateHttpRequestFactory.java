@@ -21,10 +21,12 @@ package com.github.castorm.kafka.connect.http.request.template;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
+import com.github.castorm.kafka.connect.http.model.HttpRequest.HttpMethod;
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.model.Partition;
+import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.spi.Template;
 import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
-import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 
 import java.util.Map;
 
@@ -56,13 +58,13 @@ public class TemplateHttpRequestFactory implements HttpRequestFactory {
     }
 
     @Override
-    public HttpRequest createRequest(Offset offset) {
+    public HttpRequest createRequest(Partition partition, Offset offset) {
         return HttpRequest.builder()
-                .method(HttpRequest.HttpMethod.valueOf(method))
-                .url(urlTpl.apply(offset))
-                .headers(breakDownHeaders(headersTpl.apply(offset)))
-                .queryParams(breakDownQueryParams(queryParamsTpl.apply(offset)))
-                .body(bodyTpl.apply(offset).getBytes())
+                .method(HttpMethod.valueOf(method))
+                .url(urlTpl.apply(partition, offset))
+                .headers(breakDownHeaders(headersTpl.apply(partition, offset)))
+                .queryParams(breakDownQueryParams(queryParamsTpl.apply(partition, offset)))
+                .body(bodyTpl.apply(partition, offset).getBytes())
                 .build();
     }
 }

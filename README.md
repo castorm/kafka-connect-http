@@ -60,27 +60,82 @@ More details on how to [Install Connectors](https://docs.confluent.io/current/co
 ### Extension points
 The connector can be easily extended by implementing your own version of any of the components below.
 
-These are better understood by looking at the source task implementation:
+These are better understood by looking at the source task partition implementation:
 ```java
-public List<SourceRecord> poll() throws InterruptedException {
+Long getRemainingMillis() {
+    return timer.getRemainingMillis();
+}
 
-    throttler.throttle(offset);
+List<SourceRecord> poll() {
 
-    HttpRequest request = requestFactory.createRequest(offset);
+    timer.reset(offset.getTimestamp().orElse(now()));
+
+    HttpRequest request = requestFactory.createRequest(partition, offset);
 
     HttpResponse response = requestExecutor.execute(request);
 
-    List<SourceRecord> records = responseParser.parse(response);
+    List<SourceRecord> records = responseParser.parse(response, partition);
 
     return recordSorter.sort(records).stream()
             .filter(recordFilterFactory.create(offset))
             .collect(toList());
 }
 
-public void commitRecord(SourceRecord record) {
-    offset = Offset.of(record.sourceOffset(), record.timestamp());
+void commit(Offset offset) {
+    this.offset = offset;
 }
 ```
+
+---
+<a name="timer"/>
+
+### Timer: Throttling HttpRequests
+Controls the rate at which HTTP requests are executed by informing the task, how long until the next execution is due.
+
+> #### `http.timer`
+> ```java
+> public interface Timer extends Configurable {
+> 
+>     Long getRemainingMillis();
+> 
+>     default void reset(Instant lastZero) {
+>         // Do nothing
+>     }
+> }
+> ```
+> *   Type: `Class`
+> *   Default: `com.github.castorm.kafka.connect.timer.AdaptableIntervalTimer`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.timer.FixedIntervalTimer`
+>     *   `com.github.castorm.kafka.connect.timer.AdaptableIntervalTimer`
+
+#### Throttling HttpRequests with FixedIntervalThrottler
+
+Throttles rate of requests based on a fixed interval. 
+
+> ##### `http.timer.interval.millis`
+> Interval in between requests
+> *   Type: `Long`
+> *   Default: `60000`
+
+#### Throttling HttpRequests with AdaptableIntervalThrottler
+
+Throttles rate of requests based on a fixed interval. However, it has two modes of operation, with two different 
+intervals:
+*   Up to date: No new records, or they have been created since last poll 
+*   Catching up: There were new records in last poll but they were created long ago (longer than interval)
+
+> ##### `http.timer.interval.millis`
+> Interval in between requests when up-to-date
+> 
+> *   Type: `Long`
+> *   Default: `60000`
+> 
+> ##### `http.timer.catchup.interval.millis`
+> Interval in between requests when catching up
+> *   Type: `Long`
+> *   Default: `30000`
+
 
 ---
 <a name="request"/>
@@ -92,10 +147,10 @@ The first thing our connector will need to do is creating a `HttpRequest`.
 > ```java
 > public interface HttpRequestFactory extends Configurable {
 > 
->     HttpRequest createRequest(Offset offset);
+>     HttpRequest createRequest(Partition partition, Offset offset);
 > }
 > ```
-> *   Type: Class
+> *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory`
@@ -116,7 +171,7 @@ This `HttpRequestFactory` is based on template resolution.
 > 
 > ##### `http.request.url`
 > Http url to use in the request.
-> *   **Required**
+> *   __Required__
 > *   Type: `String`
 > 
 > ##### `http.request.headers`
@@ -145,26 +200,33 @@ This `HttpRequestFactory` is based on template resolution.
 > 
 > public interface Template {
 > 
->     String apply(Offset offset);
+>     String apply(Partition partition, Offset offset);
 > }
 > ```
 > Class responsible for creating the templates that will be used on every request.
 > *   Type: `Class`
-> *   Default: `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
+> *   Default: `com.github.castorm.kafka.connect.http.request.template.freemarker.BackwardsCompatibleFreeMarkerTemplateFactory`
 > *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.BackwardsCompatibleFreeMarkerTemplateFactory`
+          Implementation based on [FreeMarker](https://freemarker.apache.org/) which accepts offset properties without 
+          `offset` namespace _(Deprecated)_
 >     *   `com.github.castorm.kafka.connect.http.request.template.freemarker.FreeMarkerTemplateFactory`
           Implementation based on [FreeMarker](https://freemarker.apache.org/)
 >     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
 
 ##### Creating a HttpRequest with FreeMarkerTemplateFactory
 FreeMarker templates will have the following data model available:
-*   key
-*   timestamp
-*   ... _(custom offset properties)_
+*   partition
+    *   name
+    *   ... _(custom partition properties)_
+*   offset
+    *   key
+    *   timestamp
+    *   ... _(custom offset properties)_
 
 Accessing any of the above withing a template can be achieved like this:
 ```properties
-http.request.params=after=${timestamp}
+http.request.params=entity=${partition.entity}&after=${offset.timestamp}
 ```
 For a complete understanding of the features provided by FreeMarker, please, refer to the 
 [User Manual](https://freemarker.apache.org/docs/index.html)
@@ -222,7 +284,7 @@ the list of `SourceRecord`s expected by Kafka Connect.
 > ```java
 > public interface HttpResponseParser extends Configurable {
 > 
->     List<SourceRecord> parse(HttpResponse response);
+>     List<SourceRecord> parse(HttpResponse response, Partition partition);
 > }
 > ```
 > *   Type: `Class`
@@ -296,15 +358,15 @@ Parses the HTTP response into a key-value SourceRecord. This process is decompos
 > ```java
 > public interface KvSourceRecordMapper extends Configurable {
 > 
->     SourceRecord map(KvRecord record);
+>     SourceRecord map(KvRecord record, Partition partition);
 > }
 > ```
 > *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper`
 > *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper` Maps **key** to a *Struct schema*
->         with a single property `key`, and **value** to a *Struct schema* with a single property `value`
->     *   `com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapper` Maps both **key** and **value** to 
+>     *   `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper` Maps __key__ to a *Struct schema*
+>         with a single property `key`, and __value__ to a *Struct schema* with a single property `value`
+>     *   `com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapper` Maps both __key__ and __value__ to 
 >         a `String` schema
 
 ##### Parsing a HttpResponse with JacksonKvRecordHttpResponseParser
@@ -391,7 +453,7 @@ Here is also where we'll tell Kafka Connect to what topic and on what partition 
 
 > ##### `kafka.topic`
 > Name of the topic where the record will be sent to
-> *   **Required**
+> *   __Required__
 > *   Type: `String`
 > *   Default: `""`
 >
@@ -474,52 +536,6 @@ Assumptions:
 *   There won't be new items preceding already seen ones 
 
 ---
-<a name="throttler"/>
-
-### Throttler: Throttling HttpRequests
-Controls the rate at which HTTP requests are executed.
-
-> #### `http.throttler`
-> ```java
-> public interface Throttler extends Configurable {
-> 
->     void throttle(Offset offset) throws InterruptedException;
-> }
-> ```
-> *   Type: Class
-> *   Default: `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
-> *   Available implementations:
->     *   `com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler`
->     *   `com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler`
-
-#### Throttling HttpRequests with FixedIntervalThrottler
-
-Throttles rate of requests based on a fixed interval. 
-
-> ##### `http.throttler.interval.millis`
-> Interval in between requests
-> *   Type: Long
-> *   Default: 10000
-
-#### Throttling HttpRequests with AdaptableIntervalThrottler
-
-Throttles rate of requests based on a fixed interval. However, it has two modes of operation, with two different 
-intervals:
-*   Up to date: No new records, or they have been created since last poll 
-*   Catching up: There were new record in last poll and they were created long ago
-
-> ##### `http.throttler.interval.millis`
-> Interval in between requests when up-to-date
-> 
-> *   Type: Long
-> *   Default: 10000
-> 
-> ##### `http.throttler.catchup.interval.millis`
-> Interval in between requests when catching up
-> *   Type: Long
-> *   Default: 1000
-
----
 ## Development
 
 ### Building
@@ -544,7 +560,7 @@ We use [SemVer](http://semver.org/) for versioning.
 
 ## Authors
 
-*   **Cástor Rodríguez** - Only contributor so far - [castorm](https://github.com/castorm)
+*   __Cástor Rodríguez__ - Only contributor so far - [castorm](https://github.com/castorm)
 
 ## License
 
