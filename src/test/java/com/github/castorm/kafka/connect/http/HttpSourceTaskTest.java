@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,14 +20,20 @@ package com.github.castorm.kafka.connect.http;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
+import com.github.castorm.kafka.connect.http.model.HttpRequest;
+import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.model.Partition;
-import com.github.castorm.kafka.connect.timer.spi.ManagedThrottler;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
+import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
+import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.github.castorm.kafka.connect.throttle.spi.Throttler;
 import com.google.common.collect.ImmutableMap;
+import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTaskContext;
 import org.apache.kafka.connect.storage.OffsetStorageReader;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,19 +44,23 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offset1;
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offset2;
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.partition1;
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.partition2;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offset;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offsetInitialMap;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offsetMap;
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.record;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.request;
+import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.response;
 import static java.time.Instant.now;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class HttpSourceTaskTest {
@@ -58,126 +68,225 @@ class HttpSourceTaskTest {
     HttpSourceTask task;
 
     @Mock
-    HttpSourceTaskConfig config;
+    HttpSourceConnectorConfig config;
 
     @Mock
-    ManagedThrottler throttler;
+    Throttler throttler;
 
     @Mock
-    HttpSourceTaskPartition taskPartition1;
+    HttpRequestFactory requestFactory;
 
     @Mock
-    HttpSourceTaskPartition taskPartition2;
+    HttpClient client;
 
     @Mock
-    SourceTaskContext context;
+    HttpResponseParser responseParser;
 
     @Mock
-    OffsetStorageReader offsetStorageReader;
+    SourceRecordSorter recordSorter;
+
+    @Mock
+    SourceRecordFilterFactory recordFilterFactory;
 
     @BeforeEach
     void setUp() {
-        given(config.getThrottler()).willReturn(throttler);
-        given(config.getPartitions()).willReturn(ImmutableMap.of(partition1, taskPartition1, partition2, taskPartition2));
-        given(context.offsetStorageReader()).willReturn(offsetStorageReader);
-        given(taskPartition1.getPartition()).willReturn(partition1);
-        given(taskPartition2.getPartition()).willReturn(partition2);
-        given(offsetStorageReader.offset(partition1.toMap())).willReturn((Map<String, Object>) offset1.toMap());
-        given(offsetStorageReader.offset(partition2.toMap())).willReturn((Map<String, Object>) offset2.toMap());
         task = new HttpSourceTask(__ -> config);
-        task.initialize(context);
+    }
+
+    private void givenTaskConfiguration() {
+        given(config.getThrottler()).willReturn(throttler);
+        given(config.getRequestFactory()).willReturn(requestFactory);
+        given(config.getClient()).willReturn(client);
+        given(config.getResponseParser()).willReturn(responseParser);
+        given(config.getRecordSorter()).willReturn(recordSorter);
+        given(config.getRecordFilterFactory()).willReturn(recordFilterFactory);
+    }
+
+    private static SourceTaskContext getContext(Map<String, Object> offset) {
+        SourceTaskContext context = mock(SourceTaskContext.class);
+        OffsetStorageReader offsetStorageReader = mock(OffsetStorageReader.class);
+        given(context.offsetStorageReader()).willReturn(offsetStorageReader);
+        given(offsetStorageReader.offset(any())).willReturn(offset);
+        return context;
+    }
+
+    @Test
+    void givenTaskInitializedWithRestoredOffset_whenStart_thenLastOffsetIsRestored() {
+
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+
         task.start(emptyMap());
-        reset(taskPartition1, taskPartition2);
+
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap));
     }
 
     @Test
-    void whenPoll_thenThrottlerShouldSleep() throws InterruptedException {
+    void givenTaskInitializedWithoutRestoredOffsetButWithInitialOffset_whenStart_thenLastOffsetIsInitial() {
+
+        givenTaskConfiguration();
+        given(config.getInitialOffset()).willReturn(offsetInitialMap);
+        task.initialize(getContext(emptyMap()));
+
+        task.start(emptyMap());
+
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetInitialMap));
+    }
+
+    @Test
+    void givenTaskInitialized_whenStart_thenGetPollIntervalMillis() {
+
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+
+        task.start(emptyMap());
+
+        then(config).should().getThrottler();
+    }
+
+    @Test
+    void givenTaskInitialized_whenStart_thenGetRequestFactory() {
+
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+
+        task.start(emptyMap());
+
+        then(config).should().getRequestFactory();
+    }
+
+    @Test
+    void givenTaskInitialized_whenStart_thenGetClient() {
+
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+
+        task.start(emptyMap());
+
+        then(config).should().getClient();
+    }
+
+    @Test
+    void givenTaskInitialized_whenStart_thenGetResponseParser() {
+
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+
+        task.start(emptyMap());
+
+        then(config).should().getResponseParser();
+    }
+
+    @Test
+    void givenTaskStarted_whenCommitRecord_thenOffsetUpdated() {
+
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+        task.start(emptyMap());
+        reset(requestFactory);
+
+        task.commitRecord(record(offsetMap));
+
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap));
+    }
+
+    @Test
+    void givenTaskStarted_whenPoll_thenThrottled() throws InterruptedException, IOException {
+
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+        task.start(emptyMap());
+        given(requestFactory.createRequest(offset)).willReturn(request);
+        given(client.execute(request)).willReturn(response);
+        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(recordFilterFactory.create(offset)).willReturn(__ -> true);
 
         task.poll();
 
-        then(throttler).should().sleep();
+        then(throttler).should().throttle(offset);
     }
 
     @Test
-    void whenPoll_thenCheckPartitionReady() throws InterruptedException {
+    void givenTaskStarted_whenPoll_thenResultsReturned() throws InterruptedException, IOException {
 
-        task.poll();
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+        task.start(emptyMap());
+        given(requestFactory.createRequest(offset)).willReturn(request);
+        given(client.execute(request)).willReturn(response);
+        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(recordSorter.sort(asList(record(offsetMap)))).willReturn(asList(record(offsetMap)));
+        given(recordFilterFactory.create(offset)).willReturn(__ -> true);
 
-        then(taskPartition1).should().isReady();
+        assertThat(task.poll()).containsExactly(record(offsetMap));
     }
 
     @Test
-    void givenPartitionsNotReady_whenPoll_thenPartitionsNotPolled() throws InterruptedException, IOException {
+    void givenTaskStarted_whenPoll_thenResultsSorted() throws InterruptedException, IOException {
 
-        given(taskPartition1.isReady()).willReturn(false);
-        given(taskPartition2.isReady()).willReturn(false);
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+        task.start(emptyMap());
+        given(requestFactory.createRequest(offset)).willReturn(request);
+        given(client.execute(request)).willReturn(response);
+        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(recordSorter.sort(asList(record(offsetMap)))).willReturn(asList(record(offsetMap), record(offsetMap)));
+        given(recordFilterFactory.create(offset)).willReturn(__ -> true);
 
-        task.poll();
-
-        then(taskPartition1).should(never()).poll();
-        then(taskPartition2).should(never()).poll();
+        assertThat(task.poll()).containsExactly(record(offsetMap), record(offsetMap));
     }
 
     @Test
-    void givenPartitionReady_whenPoll_thenPartitionIsPolled() throws InterruptedException, IOException {
+    void givenTaskStarted_whenPoll_thenFilterFilters() throws InterruptedException, IOException {
 
-        given(taskPartition1.isReady()).willReturn(true);
-        given(taskPartition2.isReady()).willReturn(false);
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+        task.start(emptyMap());
+        given(requestFactory.createRequest(offset)).willReturn(request);
+        given(client.execute(request)).willReturn(response);
+        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(recordFilterFactory.create(offset)).willReturn(__ -> false);
 
-        task.poll();
-
-        then(taskPartition1).should().poll();
+        assertThat(task.poll()).isEmpty();
     }
 
     @Test
-    void givenPartitionReadyAndPollReturnsRecord_whenPoll_thenRecord() throws InterruptedException, IOException {
+    void givenTaskStartedAndExecuteFails_whenPoll_thenRetriableException() throws IOException {
 
-        given(taskPartition1.isReady()).willReturn(true);
-        given(taskPartition2.isReady()).willReturn(false);
-        given(taskPartition1.poll()).willReturn(singletonList(record(partition1, offset1)));
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+        task.start(emptyMap());
+        given(requestFactory.createRequest(offset)).willReturn(request);
+        given(client.execute(request)).willThrow(new IOException());
 
-        assertThat(task.poll()).containsExactly(record(partition1, offset1));
+        assertThat(catchThrowable(() -> task.poll())).isInstanceOf(RetriableException.class);
     }
 
     @Test
-    void givenTwoPartitionsReadyAndPollReturnsRecords_whenPoll_thenRecordsCombined() throws InterruptedException, IOException {
+    void whenGetVersion_thenNotEmpty() {
 
-        given(taskPartition1.isReady()).willReturn(true);
-        given(taskPartition2.isReady()).willReturn(true);
-        given(taskPartition1.poll()).willReturn(singletonList(record(partition1, offset1)));
-        given(taskPartition2.poll()).willReturn(singletonList(record(partition2, offset2)));
-
-        assertThat(task.poll()).containsExactly(record(partition1, offset1), record(partition2, offset2));
+        assertThat(task.version()).isNotEmpty();
     }
 
     @Test
-    void givenPartitionReadyAndPollFailed_whenPoll_thenFailed() throws IOException {
+    void whenStop_thenNothingHappens() {
 
-        given(taskPartition1.isReady()).willReturn(true);
-        given(taskPartition2.isReady()).willReturn(false);
-        given(taskPartition1.poll()).willThrow(new IllegalStateException());
+        task.stop();
 
-        assertThat(Assertions.catchThrowable(() -> task.poll())).hasCauseInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void whenCommitRecord_thenShouldSetOffsetInPartition() {
-
-        task.commitRecord(record(partition1, offset1));
-
-        then(taskPartition1).should().commit(offset1);
+        verifyNoInteractions(throttler, requestFactory, responseParser, recordFilterFactory);
     }
 
     interface Fixture {
         Instant now = now();
         String key = "customKey";
-        Partition partition1 = Partition.of(ImmutableMap.of("k", "v1"));
-        Partition partition2 = Partition.of(ImmutableMap.of("k", "v2"));
-        Offset offset1 = Offset.of(ImmutableMap.of("custom", "value1", "key", "customKey", "timestamp", now.toString()));
-        Offset offset2 = Offset.of(ImmutableMap.of("custom", "value2", "key", "customKey", "timestamp", now.toString()));
+        Map<String, Object> offsetMap = ImmutableMap.of("custom", "value", "key", key, "timestamp", now.toString());
+        Map<String, String> offsetInitialMap = ImmutableMap.of("k2", "v2");
+        Offset offset = Offset.of(offsetMap);
+        HttpRequest request = HttpRequest.builder().build();
+        HttpResponse response = HttpResponse.builder().build();
 
-        static SourceRecord record(Partition partition, Offset offset) {
-            return new SourceRecord(partition.toMap(), offset.toMap(), null, null, null, null, null, null, now.toEpochMilli());
+        static SourceRecord record(Map<String, Object> offset) {
+            return new SourceRecord(emptyMap(), offset, null, null, null, null, null, null, now.toEpochMilli());
         }
     }
 }

@@ -23,7 +23,6 @@ package com.github.castorm.kafka.connect.common;
 import lombok.experimental.UtilityClass;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -54,27 +54,24 @@ public class ConfigUtils {
         return breakDownPairs(mapString, ",", "=");
     }
 
-    public static List<Map<String, String>> breakDownMapList(String mapList) {
-        return breakDownList(mapList, ";")
-                .map(ConfigUtils::breakDownMap)
-                .collect(toList());
-    }
-
     private static Map<String, String> breakDownPairs(String itemLine, String itemSplitter, String pairSplitter) {
         return breakDownPairs(itemLine, itemSplitter, pairSplitter, toMap(Entry::getKey, Entry::getValue));
+    }
+
+    private static <T> Map<String, T> breakDownPairs(String itemLine, String itemSplitter, String pairSplitter, Collector<Entry<String, String>, ?, Map<String, T>> collector) {
+        if (itemLine == null || itemLine.length() == 0) {
+            return emptyMap();
+        }
+        return Stream.of(itemLine.split(itemSplitter))
+                .map(headerLine -> toPair(headerLine, pairSplitter))
+                .collect(collector);
     }
 
     private static Map<String, List<String>> breakDownMultiValuePairs(String itemLine, String itemSplitter, String pairSplitter) {
         return breakDownPairs(itemLine, itemSplitter, pairSplitter, groupingBy(Entry::getKey, mapping(Entry::getValue, toList())));
     }
 
-    private static <T> Map<String, T> breakDownPairs(String itemList, String itemSplitter, String pairSplitter, Collector<Entry<String, String>, ?, Map<String, T>> collector) {
-        return breakDownList(itemList, itemSplitter)
-                .map(headerLine -> breakDownPair(headerLine, pairSplitter))
-                .collect(collector);
-    }
-
-    private static Entry<String, String> breakDownPair(String pairLine, String pairSplitter) {
+    private static Entry<String, String> toPair(String pairLine, String pairSplitter) {
         String[] parts = pairLine.split(pairSplitter, 2);
         if (parts.length < 2) {
             throw new IllegalStateException("Incomplete pair: " + pairLine);
@@ -82,28 +79,22 @@ public class ConfigUtils {
         return new SimpleEntry<>(parts[0].trim(), parts[1].trim());
     }
 
-    public static List<String> breakDownList(String itemList) {
-        return breakDownList(itemList, ",")
-                .collect(toList());
-    }
-
-    private static Stream<String> breakDownList(String itemList, String splitter) {
-        if (itemList == null || itemList.length() == 0) {
-            return Stream.empty();
-        }
-        return Stream.of(itemList.split(splitter))
-                .map(String::trim)
-                .filter(it -> !it.isEmpty());
-    }
-
     public static Set<Integer> parseIntegerRangedList(String rangedList) {
-        return breakDownList(rangedList, ",")
-                .map(ConfigUtils::parseIntegerRange)
+        return Stream.of(rangedList.split(","))
+                .map(String::trim)
+                .map(ConfigUtils::parseIntegerRanged)
                 .flatMap(Set::stream)
                 .collect(toSet());
     }
 
-    private static Set<Integer> parseIntegerRange(String range) {
+    public static List<String> breakDownList(String itemList) {
+        return Stream.of(itemList.split(","))
+                .map(String::trim)
+                .filter(it -> !it.isEmpty())
+                .collect(toList());
+    }
+
+    private static Set<Integer> parseIntegerRanged(String range) {
         String[] rangeString = range.split("\\.\\.");
         if (rangeString.length == 0 || rangeString[0].length() == 0) {
             return emptySet();
@@ -119,15 +110,5 @@ public class ConfigUtils {
 
     private static Set<Integer> asSet(Integer... values) {
         return Stream.of(values).collect(toSet());
-    }
-
-    public static Map<String, ?> replaceKey(String keyRegex, String replacement, Map<String, ?> original) {
-        Map<String, Object> properties = new HashMap<>(original);
-        Map<String, Object> overrides = original.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(keyRegex))
-                .map(entry -> new SimpleEntry<>(entry.getKey().replaceAll(keyRegex, replacement), entry.getValue()))
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-        properties.putAll(overrides);
-        return properties;
     }
 }

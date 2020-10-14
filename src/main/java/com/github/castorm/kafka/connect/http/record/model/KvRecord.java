@@ -23,10 +23,10 @@ package com.github.castorm.kafka.connect.http.record.model;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import lombok.Builder;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
+@With
 @Value
-@Wither
 @Builder
 public class KvRecord {
 

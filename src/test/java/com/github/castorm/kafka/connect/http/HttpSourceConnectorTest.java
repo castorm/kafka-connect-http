@@ -23,7 +23,6 @@ package com.github.castorm.kafka.connect.http;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,56 +48,19 @@ class HttpSourceConnectorTest {
     @Test
     void whenSeveralTaskConfigs_thenAllWithConnectorConfig() {
 
-        ImmutableMap<String, String> settings = ImmutableMap.of("key", "value");
+        ImmutableMap<String, String> myMap = ImmutableMap.of("key", "value");
 
-        connector.start(settings);
+        connector.start(myMap);
 
-        assertThat(connector.taskConfigs(3)).containsExactly(settings, settings, settings);
+        assertThat(connector.taskConfigs(3)).containsExactly(myMap, myMap, myMap);
     }
 
     @Test
-    void whenAsManyTasksAsPartitions_thenTheyAreEquallyDistributed() {
-
-        ImmutableMap<String, String> settings = ImmutableMap.of("key", "value", "http.partitions", "a, b, c");
-        ImmutableMap<String, String> settingsA = ImmutableMap.of("key", "value", "http.partitions", "a");
-        ImmutableMap<String, String> settingsB = ImmutableMap.of("key", "value", "http.partitions", "b");
-        ImmutableMap<String, String> settingsC = ImmutableMap.of("key", "value", "http.partitions", "c");
-
-        connector.start(settings);
-
-        assertThat(connector.taskConfigs(3)).containsExactly(settingsA, settingsB, settingsC);
-    }
-
-    @Test
-    void whenMoreTasksThanPartitions_thenTaskCountEqualPartitions() {
-
-        ImmutableMap<String, String> settings = ImmutableMap.of("key", "value", "http.partitions", "a, b");
-        ImmutableMap<String, String> settingsA = ImmutableMap.of("key", "value", "http.partitions", "a");
-        ImmutableMap<String, String> settingsB = ImmutableMap.of("key", "value", "http.partitions", "b");
-
-        connector.start(settings);
-
-        assertThat(connector.taskConfigs(3)).containsExactly(settingsA, settingsB);
-    }
-
-    @Test
-    void whenLessTasksThanPartitions_thenTasksUnbalanced() {
-
-        ImmutableMap<String, String> settings = ImmutableMap.of("key", "value", "http.partitions", "a, b, c");
-        ImmutableMap<String, String> settingsA = ImmutableMap.of("key", "value", "http.partitions", "a,c");
-        ImmutableMap<String, String> settingsB = ImmutableMap.of("key", "value", "http.partitions", "b");
-
-        connector.start(settings);
-
-        assertThat(connector.taskConfigs(2)).containsExactly(settingsA, settingsB);
-    }
-
-    @Test
-    void whenStop_thenSettingsEmpty() {
+    void whenStop_thenSettingsNull() {
 
         connector.stop();
 
-        assertThat(connector.taskConfigs(1)).isEqualTo(singletonList(emptyMap()));
+        assertThat(connector.taskConfigs(1)).isEqualTo(singletonList(null));
     }
 
     @Test

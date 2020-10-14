@@ -22,7 +22,6 @@ package com.github.castorm.kafka.connect.http.request.spi;
 
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.model.Partition;
 import org.apache.kafka.common.Configurable;
 
 import java.util.Map;
@@ -30,7 +29,7 @@ import java.util.Map;
 @FunctionalInterface
 public interface HttpRequestFactory extends Configurable {
 
-    HttpRequest createRequest(Partition partition, Offset offset);
+    HttpRequest createRequest(Offset offset);
 
     default void configure(Map<String, ?> map) {
         // Do nothing

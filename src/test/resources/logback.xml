@@ -26,11 +26,7 @@
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
-    <logger name="com.github.castorm.kafka.connect.http.HttpSourceTaskConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.http.HttpSourceTaskPartition" level="DEBUG"/>
-    <logger name="com.github.castorm.kafka.connect.http.HttpSourceTaskPartitionConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.HttpSourceConnectorConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.http.partition.ConfiguredPartitionProviderConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient" level="DEBUG"/>
     <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClientConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfig" level="WARN"/>
@@ -44,7 +40,7 @@
     <logger name="com.github.castorm.kafka.connect.http.response.KvHttpResponseParserConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorterConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.record.SourceRecordMapperConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.timer.FixedIntervalTimerConfig" level="WARN"/>
-    <logger name="com.github.castorm.kafka.connect.timer.AdaptableIntervalTimerConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.throttle.FixedIntervalThrottlerConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottlerConfig" level="WARN"/>
     <logger name="com.joestelmach.natty" level="WARN"/>
 </configuration>

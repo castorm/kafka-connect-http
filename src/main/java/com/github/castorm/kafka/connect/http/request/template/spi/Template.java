@@ -21,10 +21,9 @@ package com.github.castorm.kafka.connect.http.request.template.spi;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.model.Partition;
 
 @FunctionalInterface
 public interface Template {
 
-    String apply(Partition partition, Offset offset);
+    String apply(Offset offset);
 }

@@ -20,8 +20,6 @@ package com.github.castorm.kafka.connect.common;
  * #L%
  */
 
-import com.google.common.collect.ImmutableMap;
-import edu.emory.mathcs.backport.java.util.AbstractMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -29,12 +27,9 @@ import java.util.AbstractMap.SimpleEntry;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownHeaders;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownList;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
-import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMapList;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownQueryParams;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.parseIntegerRangedList;
-import static com.github.castorm.kafka.connect.common.ConfigUtils.replaceKey;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -140,43 +135,6 @@ class ConfigUtilsTest {
     }
 
     @Test
-    void whenBreakDownNullMapList_thenEmpty() {
-        assertThat(breakDownMapList(null)).isEmpty();
-    }
-
-    @Test
-    void whenBreakDownEmptyStringMapList_thenEmptyMap() {
-        assertThat(breakDownMapList("")).isEmpty();
-    }
-
-    @Test
-    void whenBreakDownIncompleteMapList_thenIllegalState() {
-        assertThat(catchThrowable(() -> breakDownMapList("name"))).isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void whenBreakDownMapList_thenBrokenDown() {
-        assertThat(breakDownMapList("name=value")).containsExactly(ImmutableMap.of("name", "value"));
-    }
-
-    @Test
-    void whenBreakDownMapListWithSpaces_thenBrokenDown() {
-        assertThat(breakDownMapList("  name  =  value  ")).containsExactly(ImmutableMap.of("name", "value"));
-    }
-
-    @Test
-    void whenBreakDownTwoFoldMapList_thenBrokenDown() {
-        assertThat(breakDownMapList("name1=value1,name2=value2"))
-                .contains(ImmutableMap.of("name1", "value1","name2", "value2"));
-    }
-
-    @Test
-    void whenBreakDownTwoFoldMapsList_thenBrokenDown() {
-        assertThat(breakDownMapList("name1=value1;name2=value2"))
-                .contains(ImmutableMap.of("name1", "value1"), ImmutableMap.of("name2", "value2"));
-    }
-
-    @Test
     void givenEmpty_whenParsed_thenEmpty() {
         assertThat(parseIntegerRangedList("")).isEmpty();
     }
@@ -209,20 +167,5 @@ class ConfigUtilsTest {
     @Test
     void whenBreakDownListEmpty_thenEmpty() {
         assertThat(breakDownList("")).isEmpty();
-    }
-
-    @Test
-    void whenReplaceKeyOnEmptyMap_thenEmptymap() {
-        assertThat(replaceKey("a.b", "d", emptyMap())).isEmpty();
-    }
-
-    @Test
-    void whenReplaceKey_thenKeyReplaced() {
-        assertThat(replaceKey("a.b", "d", ImmutableMap.of("a.b.c", "value"))).contains(new AbstractMap.SimpleEntry("d.c", "value"));
-    }
-
-    @Test
-    void whenReplaceKey_thenOriginalKeyRemains() {
-        assertThat(replaceKey("a.b", "d", ImmutableMap.of("a.b.c", "value"))).contains(new AbstractMap.SimpleEntry("a.b.c", "value"));
     }
 }

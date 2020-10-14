@@ -20,19 +20,18 @@ package com.github.castorm.kafka.connect.http.request.template.freemarker;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.request.template.spi.Template;
 import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
 import lombok.SneakyThrows;
-import lombok.Value;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Map;
 
 import static java.util.UUID.randomUUID;
 
@@ -42,7 +41,7 @@ public class FreeMarkerTemplateFactory implements TemplateFactory {
 
     @Override
     public Template create(String template) {
-        return (partition, offset) -> apply(createTemplate(template), new TemplateModel(partition.toMap(), offset.toMap()));
+        return offset -> apply(createTemplate(template), offset);
     }
 
     @SneakyThrows(IOException.class)
@@ -51,17 +50,9 @@ public class FreeMarkerTemplateFactory implements TemplateFactory {
     }
 
     @SneakyThrows({TemplateException.class, IOException.class})
-    private String apply(freemarker.template.Template template, TemplateModel model) {
+    private String apply(freemarker.template.Template template, Offset offset) {
         Writer writer = new StringWriter();
-        template.process(model, writer);
+        template.process(offset.toMap(), writer);
         return writer.toString();
-    }
-
-    @Value
-    public static class TemplateModel {
-
-        Map<String, ?> partition;
-
-        Map<String, ?> offset;
     }
 }
