@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.8
 
-### v0.8.0 (TBD)
+### v0.8.0 (11/07/2020)
 -   Provided different log levels for `OkHttpClient`.`TRACE`: `BODY`, `DEBUG`: `BASIC`, `*`: `NONE`
 -   Refactored throttler adding the notion of timer
 -   Support for authentication extension. Initial implementations for None and Basic authentication types
