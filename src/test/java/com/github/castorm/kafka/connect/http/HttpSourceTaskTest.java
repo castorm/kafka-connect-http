@@ -28,7 +28,7 @@ import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactor
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
-import com.github.castorm.kafka.connect.throttle.spi.Throttler;
+import com.github.castorm.kafka.connect.timer.TimerThrottler;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
@@ -71,7 +71,7 @@ class HttpSourceTaskTest {
     HttpSourceConnectorConfig config;
 
     @Mock
-    Throttler throttler;
+    TimerThrottler throttler;
 
     @Mock
     HttpRequestFactory requestFactory;
@@ -203,7 +203,7 @@ class HttpSourceTaskTest {
 
         task.poll();
 
-        then(throttler).should().throttle(offset);
+        then(throttler).should().throttle(offset.getTimestamp().get());
     }
 
     @Test

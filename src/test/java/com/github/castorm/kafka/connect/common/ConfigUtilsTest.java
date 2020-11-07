@@ -20,6 +20,7 @@ package com.github.castorm.kafka.connect.common;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -27,6 +28,7 @@ import java.util.AbstractMap.SimpleEntry;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownHeaders;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownList;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
+import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMapList;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownQueryParams;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.parseIntegerRangedList;
 import static java.util.Arrays.asList;
@@ -132,6 +134,43 @@ class ConfigUtilsTest {
     void whenBreakDownTwoFoldMap_thenBrokenDown() {
         assertThat(breakDownMap("name1=value1,name2=value2"))
                 .contains(new SimpleEntry<>("name1", "value1"), new SimpleEntry<>("name2", "value2"));
+    }
+
+    @Test
+    void whenBreakDownNullMapList_thenEmpty() {
+        assertThat(breakDownMapList(null)).isEmpty();
+    }
+
+    @Test
+    void whenBreakDownEmptyStringMapList_thenEmptyMap() {
+        assertThat(breakDownMapList("")).isEmpty();
+    }
+
+    @Test
+    void whenBreakDownIncompleteMapList_thenIllegalState() {
+        assertThat(catchThrowable(() -> breakDownMapList("name"))).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void whenBreakDownMapList_thenBrokenDown() {
+        assertThat(breakDownMapList("name=value")).containsExactly(ImmutableMap.of("name", "value"));
+    }
+
+    @Test
+    void whenBreakDownMapListWithSpaces_thenBrokenDown() {
+        assertThat(breakDownMapList("  name  =  value  ")).containsExactly(ImmutableMap.of("name", "value"));
+    }
+
+    @Test
+    void whenBreakDownTwoFoldMapList_thenBrokenDown() {
+        assertThat(breakDownMapList("name1=value1,name2=value2"))
+                .contains(ImmutableMap.of("name1", "value1","name2", "value2"));
+    }
+
+    @Test
+    void whenBreakDownTwoFoldMapsList_thenBrokenDown() {
+        assertThat(breakDownMapList("name1=value1;name2=value2"))
+                .contains(ImmutableMap.of("name1", "value1"), ImmutableMap.of("name2", "value2"));
     }
 
     @Test

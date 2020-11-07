@@ -49,12 +49,12 @@ And based on the results we would be updating the `updated` filter for subsequen
         "http.offset.initial": "timestamp=2020-05-08T07:55:44Z",
         "http.request.url": "https://your-host-here/rest/api/2/search",
         "http.request.headers": "Authorization: Basic TBD, Accept: application/json",
-        "http.request.params": "jql=updated>=\"${timestamp?datetime.iso?string['yyyy/MM/dd HH:mm']}\" ORDER BY updated ASC&maxResults=100",
+        "http.request.params": "jql=updated>=\"${offset.timestamp?datetime.iso?string['yyyy/MM/dd HH:mm']}\" ORDER BY updated ASC&maxResults=100",
         "http.response.list.pointer": "/issues",
         "http.response.record.key.pointer": "/id",
-        "http.response.record.timestamp.pointer": "/fields/updated",
-        "http.throttler.interval.millis": "30000",
-        "http.throttler.catchup.interval.millis": "1000",
+        "http.response.record.offset.pointer": "timestamp=/fields/updated",
+        "http.timer.interval.millis": "30000",
+        "http.timer.catchup.interval.millis": "1000",
         "kafka.topic": "topic"
     }
 }

@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,7 @@ import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactor
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
-import com.github.castorm.kafka.connect.throttle.spi.Throttler;
+import com.github.castorm.kafka.connect.timer.TimerThrottler;
 import edu.emory.mathcs.backport.java.util.Collections;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +37,7 @@ import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -51,7 +52,7 @@ public class HttpSourceTask extends SourceTask {
 
     private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
 
-    private Throttler throttler;
+    private TimerThrottler throttler;
 
     private HttpRequestFactory requestFactory;
 
@@ -81,18 +82,19 @@ public class HttpSourceTask extends SourceTask {
 
         throttler = config.getThrottler();
         requestFactory = config.getRequestFactory();
-        Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
-        offset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset());
         requestExecutor = config.getClient();
         responseParser = config.getResponseParser();
         recordSorter = config.getRecordSorter();
         recordFilterFactory = config.getRecordFilterFactory();
+
+        Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
+        offset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset());
     }
 
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
 
-        throttler.throttle(offset);
+        throttler.throttle(offset.getTimestamp().orElseGet(Instant::now));
 
         HttpRequest request = requestFactory.createRequest(offset);
 
@@ -100,13 +102,14 @@ public class HttpSourceTask extends SourceTask {
 
         List<SourceRecord> records = responseParser.parse(response);
 
-        List<SourceRecord> filteredRecords = recordSorter.sort(records).stream()
+        return log(records, recordSorter.sort(records).stream()
                 .filter(recordFilterFactory.create(offset))
-                .collect(toList());
+                .collect(toList()));
+    }
 
-        log.info("Request for offset {} yields {}/{} new records", offset.toMap(), filteredRecords.size(), records.size());
-
-        return filteredRecords;
+    private List<SourceRecord> log(List<SourceRecord> total, List<SourceRecord> filtered) {
+        log.info("Request for offset {} yields {}/{} new records", offset.toMap(), filtered.size(), total.size());
+        return filtered;
     }
 
     private HttpResponse execute(HttpRequest request) {

@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static java.util.Optional.ofNullable;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.stream.Collectors.toList;
 
@@ -66,9 +67,17 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
 
     private KvRecord map(JsonNode node) {
 
-        String key = recordParser.getKey(node).orElseGet(() -> generateConsistentKey(node));
-        Optional<Instant> timestamp = recordParser.getTimestamp(node).map(timestampParser::parse);
         Map<String, Object> offsets = recordParser.getOffsets(node);
+
+        String key = recordParser.getKey(node)
+                .map(Optional::of)
+                .orElseGet(() -> ofNullable(offsets.get("key")).map(String.class::cast))
+                .orElseGet(() -> generateConsistentKey(node));
+
+        Optional<Instant> timestamp = recordParser.getTimestamp(node)
+                .map(Optional::of)
+                .orElseGet(() -> ofNullable(offsets.get("timestamp")).map(String.class::cast))
+                .map(timestampParser::parse);
 
         Offset offset = timestamp
                 .map(ts -> Offset.of(offsets, key, ts))

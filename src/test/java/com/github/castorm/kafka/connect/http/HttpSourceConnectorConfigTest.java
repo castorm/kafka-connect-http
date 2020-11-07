@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,8 +33,8 @@ import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
-import com.github.castorm.kafka.connect.throttle.AdaptableIntervalThrottler;
-import com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler;
+import com.github.castorm.kafka.connect.timer.AdaptableIntervalTimer;
+import com.github.castorm.kafka.connect.timer.FixedIntervalTimer;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.Test;
@@ -51,13 +51,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HttpSourceConnectorConfigTest {
 
     @Test
-    void whenNoThrottler_thenDefault() {
-        assertThat(configWithout("http.throttler").getThrottler()).isInstanceOf(AdaptableIntervalThrottler.class);
+    void whenNoTimer_thenDefault() {
+        assertThat(configWithout("http.timer").getThrottler().getTimer()).isInstanceOf(AdaptableIntervalTimer.class);
     }
 
     @Test
-    void whenThrottler_thenInitialized() {
-        assertThat(config("http.throttler", "com.github.castorm.kafka.connect.throttle.FixedIntervalThrottler").getThrottler()).isInstanceOf(FixedIntervalThrottler.class);
+    void whenTimer_thenInitialized() {
+        assertThat(config("http.timer", "com.github.castorm.kafka.connect.timer.FixedIntervalTimer").getThrottler().getTimer()).isInstanceOf(FixedIntervalTimer.class);
     }
 
     @Test
@@ -121,19 +121,27 @@ class HttpSourceConnectorConfigTest {
     }
 
     public static class TestHttpClient implements HttpClient {
-        public HttpResponse execute(HttpRequest request) { return null; }
+        public HttpResponse execute(HttpRequest request) {
+            return null;
+        }
     }
 
     public static class TestRequestFactory implements HttpRequestFactory {
-        public HttpRequest createRequest(Offset offset) { return null; }
+        public HttpRequest createRequest(Offset offset) {
+            return null;
+        }
     }
 
     public static class TestResponseParser implements HttpResponseParser {
-        public List<SourceRecord> parse(HttpResponse response) { return null; }
+        public List<SourceRecord> parse(HttpResponse response) {
+            return null;
+        }
     }
 
     public static class TestRecordSorter implements SourceRecordSorter {
-        public List<SourceRecord> sort(List<SourceRecord> records) { return null; }
+        public List<SourceRecord> sort(List<SourceRecord> records) {
+            return null;
+        }
     }
 
     interface Fixture {
