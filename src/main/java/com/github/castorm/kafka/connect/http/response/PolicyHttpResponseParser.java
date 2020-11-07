@@ -21,7 +21,6 @@ package com.github.castorm.kafka.connect.http.response;
  */
 
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
-import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponsePolicy;
 import lombok.RequiredArgsConstructor;
@@ -55,10 +54,10 @@ public class PolicyHttpResponseParser implements HttpResponseParser {
     }
 
     @Override
-    public List<SourceRecord> parse(HttpResponse response, Partition partition) {
+    public List<SourceRecord> parse(HttpResponse response) {
         switch (policy.resolve(response)) {
             case PROCESS:
-                return delegate.parse(response, partition);
+                return delegate.parse(response);
             case SKIP:
                 return emptyList();
             case FAIL:

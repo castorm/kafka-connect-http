@@ -41,15 +41,15 @@ public class FixedIntervalTimerConfig extends AbstractConfig {
 
     public FixedIntervalTimerConfig(Map<String, ?> originals) {
         super(config(), originals);
-        pollIntervalMillis = getFromPropertyOrDeprecatedProperty(TIMER_INTERVAL_MILLIS, DEPRECATED_INTERVAL_MILLIS, DEFAULT_TAIL_INTERVAL_MILLIS);
+        pollIntervalMillis = resolvePollIntervalMillis();
     }
 
-    private Long getFromPropertyOrDeprecatedProperty(String property, String deprecatedProperty, Long defaultValue) {
-        Long value = getLong(property);
-        if (!value.equals(defaultValue)) {
+    private Long resolvePollIntervalMillis() {
+        Long value = getLong(TIMER_INTERVAL_MILLIS);
+        if (!value.equals(DEFAULT_TAIL_INTERVAL_MILLIS)) {
             return value;
         } else {
-            return getLong(deprecatedProperty);
+            return getLong(DEPRECATED_INTERVAL_MILLIS);
         }
     }
 

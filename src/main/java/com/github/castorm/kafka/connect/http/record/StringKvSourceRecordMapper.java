@@ -21,7 +21,6 @@ package com.github.castorm.kafka.connect.http.record;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.record.spi.KvSourceRecordMapper;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +31,14 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.function.Function;
 
+import static java.util.Collections.emptyMap;
 import static org.apache.kafka.connect.data.SchemaBuilder.string;
 
 @Deprecated
 @RequiredArgsConstructor
 public class StringKvSourceRecordMapper implements KvSourceRecordMapper {
+
+    private static Map<String, ?> sourcePartition = emptyMap();
 
     private static final Schema keySchema = string().build();
 
@@ -56,12 +58,12 @@ public class StringKvSourceRecordMapper implements KvSourceRecordMapper {
     }
 
     @Override
-    public SourceRecord map(KvRecord record, Partition partition) {
+    public SourceRecord map(KvRecord record) {
 
         Offset offset = record.getOffset();
 
         return new SourceRecord(
-                partition.toMap(),
+                sourcePartition,
                 offset.toMap(),
                 config.getTopic(),
                 null,

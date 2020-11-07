@@ -20,17 +20,8 @@ package com.github.castorm.kafka.connect.timer.spi;
  * #L%
  */
 
-import org.apache.kafka.common.Configurable;
-
-import java.util.Map;
-
 @FunctionalInterface
-public interface Throttler extends Configurable {
+public interface Throttler {
 
-    void sleep(Long milliseconds) throws InterruptedException;
-
-    @Override
-    default void configure(Map<String, ?> configs) {
-        // Do nothing
-    }
+    void throttle() throws InterruptedException;
 }

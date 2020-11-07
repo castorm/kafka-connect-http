@@ -21,7 +21,6 @@ package com.github.castorm.kafka.connect.common;
  */
 
 import com.google.common.collect.ImmutableMap;
-import edu.emory.mathcs.backport.java.util.AbstractMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -32,9 +31,7 @@ import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMapList;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownQueryParams;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.parseIntegerRangedList;
-import static com.github.castorm.kafka.connect.common.ConfigUtils.replaceKey;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -209,20 +206,5 @@ class ConfigUtilsTest {
     @Test
     void whenBreakDownListEmpty_thenEmpty() {
         assertThat(breakDownList("")).isEmpty();
-    }
-
-    @Test
-    void whenReplaceKeyOnEmptyMap_thenEmptymap() {
-        assertThat(replaceKey("a.b", "d", emptyMap())).isEmpty();
-    }
-
-    @Test
-    void whenReplaceKey_thenKeyReplaced() {
-        assertThat(replaceKey("a.b", "d", ImmutableMap.of("a.b.c", "value"))).contains(new AbstractMap.SimpleEntry("d.c", "value"));
-    }
-
-    @Test
-    void whenReplaceKey_thenOriginalKeyRemains() {
-        assertThat(replaceKey("a.b", "d", ImmutableMap.of("a.b.c", "value"))).contains(new AbstractMap.SimpleEntry("a.b.c", "value"));
     }
 }

@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.timer;
+package com.github.castorm.kafka.connect.http.auth;
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.timer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,48 +20,43 @@ package com.github.castorm.kafka.connect.timer;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.timer.spi.Sleeper;
-import com.github.castorm.kafka.connect.timer.spi.Timer;
+import com.github.castorm.kafka.connect.http.auth.spi.HttpAuthenticator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.any;
+import java.util.Optional;
+
+import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
-class TimerThrottlerTest {
-
-    @InjectMocks
-    TimerThrottler sleeper;
+class ConfigurableHttpAuthenticatorTest {
 
     @Mock
-    Timer timer;
+    ConfigurableHttpAuthenticatorConfig config;
 
     @Mock
-    Sleeper externalSleeper;
+    HttpAuthenticator delegate;
 
-    @Test
-    void givenTimerZero_whenSleep_thenDoNotSleep() throws InterruptedException {
+    ConfigurableHttpAuthenticator authenticator;
 
-        given(timer.getRemainingMillis()).willReturn(0L);
-
-        sleeper.throttle();
-
-        then(externalSleeper).should(never()).sleep(any());
+    @BeforeEach
+    void setUp() {
+        authenticator = new ConfigurableHttpAuthenticator(__ -> config);
     }
 
     @Test
-    void givenTimer_whenSleep_thenSleepForTime() throws InterruptedException {
+    void whenHeader_thenDelegated() {
 
-        given(timer.getRemainingMillis()).willReturn(42L);
+        given(config.getAuthenticator()).willReturn(delegate);
+        given(delegate.getAuthorizationHeader()).willReturn(Optional.of("header"));
 
-        sleeper.throttle();
+        authenticator.configure(emptyMap());
 
-        then(externalSleeper).should().sleep(42L);
+        assertThat(authenticator.getAuthorizationHeader()).contains("header");
     }
 }

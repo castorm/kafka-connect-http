@@ -20,67 +20,109 @@ package com.github.castorm.kafka.connect.http;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.common.CollectionUtils;
-import com.github.castorm.kafka.connect.common.control.Try;
+import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
+import com.github.castorm.kafka.connect.http.model.HttpRequest;
+import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.model.Partition;
-import com.github.castorm.kafka.connect.timer.spi.ManagedThrottler;
-import lombok.RequiredArgsConstructor;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactory;
+import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
+import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
+import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
+import com.github.castorm.kafka.connect.timer.TimerThrottler;
+import edu.emory.mathcs.backport.java.util.Collections;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
+import static java.util.Collections.emptyMap;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 
-@RequiredArgsConstructor
+@Slf4j
 public class HttpSourceTask extends SourceTask {
 
-    private final Function<Map<String, String>, HttpSourceTaskConfig> configFactory;
+    private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
 
-    private ManagedThrottler throttler;
+    private TimerThrottler throttler;
 
-    private Map<Partition, HttpSourceTaskPartition> taskPartitions;
+    private HttpRequestFactory requestFactory;
+
+    private HttpClient requestExecutor;
+
+    private HttpResponseParser responseParser;
+
+    private SourceRecordSorter recordSorter;
+
+    private SourceRecordFilterFactory recordFilterFactory;
+
+    @Getter
+    private Offset offset;
+
+    HttpSourceTask(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
+        this.configFactory = configFactory;
+    }
 
     public HttpSourceTask() {
-        this(HttpSourceTaskConfig::new);
+        this(HttpSourceConnectorConfig::new);
     }
 
     @Override
     public void start(Map<String, String> settings) {
-        HttpSourceTaskConfig config = configFactory.apply(settings);
-        throttler = config.getThrottler();
-        taskPartitions = config.getPartitions();
-        taskPartitions.values().forEach(this::initializeTaskPartition);
-    }
 
-    private void initializeTaskPartition(HttpSourceTaskPartition taskPartition) {
-        Offset offset = Offset.of(context.offsetStorageReader().offset(taskPartition.getPartition().toMap()));
-        if (!offset.isEmpty()) {
-            taskPartition.commit(offset);
-        }
+        HttpSourceConnectorConfig config = configFactory.apply(settings);
+
+        throttler = config.getThrottler();
+        requestFactory = config.getRequestFactory();
+        requestExecutor = config.getClient();
+        responseParser = config.getResponseParser();
+        recordSorter = config.getRecordSorter();
+        recordFilterFactory = config.getRecordFilterFactory();
+
+        Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
+        offset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset());
     }
 
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
 
-        throttler.sleep();
+        throttler.throttle(offset.getTimestamp().orElseGet(Instant::now));
 
-        return taskPartitions.values().stream()
-                .filter(HttpSourceTaskPartition::isReady)
-                .map(partition -> Try.of(partition::poll))
-                .reduce(Try.of(Collections::emptyList), Try.zip(CollectionUtils::concat))
-                .getOrFail();
+        HttpRequest request = requestFactory.createRequest(offset);
+
+        HttpResponse response = execute(request);
+
+        List<SourceRecord> records = responseParser.parse(response);
+
+        return log(records, recordSorter.sort(records).stream()
+                .filter(recordFilterFactory.create(offset))
+                .collect(toList()));
+    }
+
+    private List<SourceRecord> log(List<SourceRecord> total, List<SourceRecord> filtered) {
+        log.info("Request for offset {} yields {}/{} new records", offset.toMap(), filtered.size(), total.size());
+        return filtered;
+    }
+
+    private HttpResponse execute(HttpRequest request) {
+        try {
+            return requestExecutor.execute(request);
+        } catch (IOException e) {
+            throw new RetriableException(e);
+        }
     }
 
     @Override
     public void commitRecord(SourceRecord record) {
-        Offset offset = Offset.of(record.sourceOffset());
-        Partition partition = Partition.of(record.sourcePartition());
-        taskPartitions.get(partition).commit(offset);
+        offset = Offset.of(record.sourceOffset());
     }
 
     @Override

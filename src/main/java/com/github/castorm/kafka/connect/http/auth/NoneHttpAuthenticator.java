@@ -1,8 +1,8 @@
-package com.github.castorm.kafka.connect.http.record.model;
+package com.github.castorm.kafka.connect.http.auth;
 
 /*-
  * #%L
- * kafka-connect-http
+ * Kafka Connect HTTP
  * %%
  * Copyright (C) 2020 CastorM
  * %%
@@ -20,19 +20,14 @@ package com.github.castorm.kafka.connect.http.record.model;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.http.model.Offset;
-import lombok.Builder;
-import lombok.Value;
-import lombok.With;
+import com.github.castorm.kafka.connect.http.auth.spi.HttpAuthenticator;
 
-@With
-@Value
-@Builder
-public class KvRecord {
+import java.util.Optional;
 
-    String key;
+public class NoneHttpAuthenticator implements HttpAuthenticator {
 
-    String value;
-
-    Offset offset;
+    @Override
+    public Optional<String> getAuthorizationHeader() {
+        return Optional.empty();
+    }
 }

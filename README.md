@@ -60,29 +60,25 @@ More details on how to [Install Connectors](https://docs.confluent.io/current/co
 ### Extension points
 The connector can be easily extended by implementing your own version of any of the components below.
 
-These are better understood by looking at the source task partition implementation:
+These are better understood by looking at the source task implementation:
 ```java
-Long getRemainingMillis() {
-    return timer.getRemainingMillis();
-}
+public List<SourceRecord> poll() throws InterruptedException {
 
-List<SourceRecord> poll() {
+    throttler.throttle(offset.getTimestamp().orElseGet(Instant::now));
 
-    timer.reset(offset.getTimestamp().orElse(now()));
-
-    HttpRequest request = requestFactory.createRequest(partition, offset);
+    HttpRequest request = requestFactory.createRequest(offset);
 
     HttpResponse response = requestExecutor.execute(request);
 
-    List<SourceRecord> records = responseParser.parse(response, partition);
+    List<SourceRecord> records = responseParser.parse(response);
 
     return recordSorter.sort(records).stream()
             .filter(recordFilterFactory.create(offset))
             .collect(toList());
 }
 
-void commit(Offset offset) {
-    this.offset = offset;
+public void commitRecord(SourceRecord record) {
+    offset = Offset.of(record.sourceOffset(), record.timestamp());
 }
 ```
 
@@ -147,7 +143,7 @@ The first thing our connector will need to do is creating a `HttpRequest`.
 > ```java
 > public interface HttpRequestFactory extends Configurable {
 > 
->     HttpRequest createRequest(Partition partition, Offset offset);
+>     HttpRequest createRequest(Offset offset);
 > }
 > ```
 > *   Type: `Class`
@@ -200,7 +196,7 @@ This `HttpRequestFactory` is based on template resolution.
 > 
 > public interface Template {
 > 
->     String apply(Partition partition, Offset offset);
+>     String apply(Offset offset);
 > }
 > ```
 > Class responsible for creating the templates that will be used on every request.
@@ -216,9 +212,6 @@ This `HttpRequestFactory` is based on template resolution.
 
 ##### Creating a HttpRequest with FreeMarkerTemplateFactory
 FreeMarker templates will have the following data model available:
-*   partition
-    *   name
-    *   ... _(custom partition properties)_
 *   offset
     *   key
     *   timestamp
@@ -226,7 +219,7 @@ FreeMarker templates will have the following data model available:
 
 Accessing any of the above withing a template can be achieved like this:
 ```properties
-http.request.params=entity=${partition.entity}&after=${offset.timestamp}
+http.request.params=after=${offset.timestamp}
 ```
 For a complete understanding of the features provided by FreeMarker, please, refer to the 
 [User Manual](https://freemarker.apache.org/docs/index.html)
@@ -272,6 +265,49 @@ Uses a [OkHttp](https://square.github.io/okhttp/) client.
 > Maximum number of idle connections in the connection pool
 > *   Type: `Integer`
 > *   Default: `1`
+---
+<a name="auth"/>
+
+### HttpAuthenticator: Authenticating a HttpRequest
+When executing the request, authentication might be required. The HttpAuthenticator is responsible for resolving the authentication header
+to be included in the request 
+`HttpAuthenticator`
+
+> #### `http.auth`
+> ```java
+> public interface HttpAuthenticator extends Configurable {
+> 
+>     Optional<String> getAuthorizationHeader();
+> }
+> ```
+> *   Type: `Class`
+> *   Default: `com.github.castorm.kafka.connect.http.auth.ConfigurableHttpAuthenticator`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.auth.ConfigurableHttpAuthenticator`
+>     *   `com.github.castorm.kafka.connect.http.auth.NoneHttpAuthenticator`
+>     *   `com.github.castorm.kafka.connect.http.auth.BasicHttpAuthenticator`
+
+#### Authenticating a HttpRequest with ConfigurableHttpAuthenticator
+Allows selecting the athentication type via configuration property
+
+> ##### `http.auth.type`
+> Type of authentication
+> *   Type: `String`
+> *   Default: `None`
+> *   Available options:
+>     *   `None`
+>     *   `Basic`
+
+#### Authenticating a HttpRequest with BasicHttpAuthenticator
+Allows selecting the athentication type via configuration property
+
+> ##### `http.auth.user`
+> *   Type: `String`
+> *   Default: ``
+>
+> ##### `http.auth.password`
+> *   Type: `String`
+> *   Default: ``
 
 ---
 <a name="response"/>
@@ -284,7 +320,7 @@ the list of `SourceRecord`s expected by Kafka Connect.
 > ```java
 > public interface HttpResponseParser extends Configurable {
 > 
->     List<SourceRecord> parse(HttpResponse response, Partition partition);
+>     List<SourceRecord> parse(HttpResponse response);
 > }
 > ```
 > *   Type: `Class`
@@ -358,7 +394,7 @@ Parses the HTTP response into a key-value SourceRecord. This process is decompos
 > ```java
 > public interface KvSourceRecordMapper extends Configurable {
 > 
->     SourceRecord map(KvRecord record, Partition partition);
+>     SourceRecord map(KvRecord record);
 > }
 > ```
 > *   Type: `Class`
@@ -427,7 +463,7 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 > *   Default: `UTC`
 > 
 > ##### `http.response.record.offset.pointer`
-> Comma separated list of `key=/value` pairs where the key is the name of the property in the offset and the value is
+> Comma separated list of `key=/value` pairs where the key is the name of the property in the offset, and the value is
 > the [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value being used as offset for future requests
 > This is the mechanism that enables sharing state in between `HttpRequests`. `HttpRequestFactory` implementations 
 > receive this `Offset`.

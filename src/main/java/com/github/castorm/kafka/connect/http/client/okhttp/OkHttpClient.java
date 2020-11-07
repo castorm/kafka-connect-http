@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http.client.okhttp;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ package com.github.castorm.kafka.connect.http.client.okhttp;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.auth.spi.HttpAuthenticator;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
@@ -40,6 +41,7 @@ import java.util.Optional;
 
 import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static okhttp3.HttpUrl.parse;
 import static okhttp3.RequestBody.create;
 import static okhttp3.logging.HttpLoggingInterceptor.Level.BASIC;
@@ -51,18 +53,29 @@ public class OkHttpClient implements HttpClient {
 
     private okhttp3.OkHttpClient client;
 
+    private HttpAuthenticator authenticator;
+
     @Override
     public void configure(Map<String, ?> configs) {
 
         OkHttpClientConfig config = new OkHttpClientConfig(configs);
 
+        authenticator = config.getAuthenticator();
         client = new okhttp3.OkHttpClient.Builder()
                 .connectionPool(new ConnectionPool(config.getMaxIdleConnections(), config.getKeepAliveDuration(), MILLISECONDS))
                 .connectTimeout(config.getConnectionTimeoutMillis(), MILLISECONDS)
                 .readTimeout(config.getReadTimeoutMillis(), MILLISECONDS)
                 .retryOnConnectionFailure(true)
                 .addInterceptor(createLoggingInterceptor())
+                .addInterceptor(chain -> chain.proceed(authorize(chain.request())))
+                .authenticator((route, response) -> authorize(response.request()))
                 .build();
+    }
+
+    private Request authorize(Request request) {
+        return authenticator.getAuthorizationHeader()
+                .map(header -> request.newBuilder().header(AUTHORIZATION, header).build())
+                .orElse(request);
     }
 
     private static HttpLoggingInterceptor createLoggingInterceptor() {

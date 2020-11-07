@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.timer;
+package com.github.castorm.kafka.connect.http.auth.spi;
 
 /*-
  * #%L
@@ -20,27 +20,6 @@ package com.github.castorm.kafka.connect.timer;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.timer.spi.Timer;
-import lombok.RequiredArgsConstructor;
-
-import java.time.Instant;
-import java.util.Collection;
-
-@RequiredArgsConstructor
-public class CompositeTimer implements Timer {
-
-    private final Collection<Timer> timers;
-
-    @Override
-    public Long getRemainingMillis() {
-        return timers.stream()
-                .mapToLong(Timer::getRemainingMillis)
-                .min()
-                .orElse(0);
-    }
-
-    @Override
-    public void reset(Instant lastZero) {
-        timers.forEach(timer -> timer.reset(lastZero));
-    }
+public enum HttpAuthenticationType {
+    NONE, BASIC
 }

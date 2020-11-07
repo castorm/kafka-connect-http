@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http.client.okhttp;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,8 @@ package com.github.castorm.kafka.connect.http.client.okhttp;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.auth.BasicHttpAuthenticator;
+import com.github.castorm.kafka.connect.http.auth.ConfigurableHttpAuthenticator;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
@@ -68,6 +70,16 @@ class OkHttpClientConfigTest {
     @Test
     void whenMaxIdleConnections_thenInitialized() {
         assertThat(config(ImmutableMap.of("http.client.max-idle", "42")).getMaxIdleConnections()).isEqualTo(42L);
+    }
+
+    @Test
+    void whenAuthenticator_thenDefault() {
+        assertThat(config(emptyMap()).getAuthenticator()).isInstanceOf(ConfigurableHttpAuthenticator.class);
+    }
+
+    @Test
+    void whenAuthenticator_thenInitialized() {
+        assertThat(config(ImmutableMap.of("http.auth", "com.github.castorm.kafka.connect.http.auth.BasicHttpAuthenticator")).getAuthenticator()).isInstanceOf(BasicHttpAuthenticator.class);
     }
 
     private static OkHttpClientConfig config(Map<String, String> config) {

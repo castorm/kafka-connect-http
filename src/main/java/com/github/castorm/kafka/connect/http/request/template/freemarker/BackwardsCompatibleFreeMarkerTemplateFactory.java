@@ -21,7 +21,6 @@ package com.github.castorm.kafka.connect.http.request.template.freemarker;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.request.template.spi.Template;
 import com.github.castorm.kafka.connect.http.request.template.spi.TemplateFactory;
 import freemarker.template.Configuration;
@@ -45,7 +44,7 @@ public class BackwardsCompatibleFreeMarkerTemplateFactory implements TemplateFac
 
     @Override
     public Template create(String template) {
-        return (partition, offset) -> apply(createTemplate(template), createModel(partition, offset));
+        return offset -> apply(createTemplate(template), createModel(offset));
     }
 
     @SneakyThrows(IOException.class)
@@ -53,9 +52,8 @@ public class BackwardsCompatibleFreeMarkerTemplateFactory implements TemplateFac
         return new freemarker.template.Template(randomUUID().toString(), new StringReader(template), configuration);
     }
 
-    private static Map<String, Object> createModel(Partition partition, Offset offset) {
+    private static Map<String, Object> createModel(Offset offset) {
         Map<String, Object> model = new HashMap<>(offset.toMap());
-        model.put("partition", partition.toMap());
         model.put("offset", offset.toMap());
         return model;
     }

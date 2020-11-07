@@ -4,15 +4,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ---
 
-## v0.8 (BETA)
+## v0.8
 
-### v0.8.0 (TBD)
--   Support for partitioned tasks, where a single connector can perform multiple different requests
-
-## v0.7
-
-### v0.7.7 (TBD)
+### v0.8.0 (11/07/2020)
 -   Provided different log levels for `OkHttpClient`.`TRACE`: `BODY`, `DEBUG`: `BASIC`, `*`: `NONE`
+-   Refactored throttler adding the notion of timer
+-   Support for authentication extension. Initial implementations for None and Basic authentication types
 
 ### v0.7.6 (05/28/2020)
 -   Fix typo in `http.throttler.catchup.interval.millis` configuration property

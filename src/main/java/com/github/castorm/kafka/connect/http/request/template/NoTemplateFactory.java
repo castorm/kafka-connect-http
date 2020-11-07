@@ -27,6 +27,6 @@ public class NoTemplateFactory implements TemplateFactory {
 
     @Override
     public Template create(String template) {
-        return (partition, offset) -> template;
+        return offset -> template;
     }
 }

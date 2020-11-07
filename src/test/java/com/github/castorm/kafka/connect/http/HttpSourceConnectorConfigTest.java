@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,6 @@ import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
-import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.OffsetRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter;
 import com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory;
@@ -36,6 +35,7 @@ import com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.timer.AdaptableIntervalTimer;
 import com.github.castorm.kafka.connect.timer.FixedIntervalTimer;
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.Test;
 
@@ -43,22 +43,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskPartitionConfigTest.Fixture.config;
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskPartitionConfigTest.Fixture.configWithout;
-import static com.github.castorm.kafka.connect.http.HttpSourceTaskPartitionConfigTest.Fixture.defaultMap;
+import static com.github.castorm.kafka.connect.http.HttpSourceConnectorConfigTest.Fixture.config;
+import static com.github.castorm.kafka.connect.http.HttpSourceConnectorConfigTest.Fixture.configWithout;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HttpSourceTaskPartitionConfigTest {
+class HttpSourceConnectorConfigTest {
 
     @Test
     void whenNoTimer_thenDefault() {
-        assertThat(configWithout("http.timer").getTimer()).isInstanceOf(AdaptableIntervalTimer.class);
+        assertThat(configWithout("http.timer").getThrottler().getTimer()).isInstanceOf(AdaptableIntervalTimer.class);
     }
 
     @Test
     void whenTimer_thenInitialized() {
-        assertThat(config("http.timer", "com.github.castorm.kafka.connect.timer.FixedIntervalTimer").getTimer()).isInstanceOf(FixedIntervalTimer.class);
+        assertThat(config("http.timer", "com.github.castorm.kafka.connect.timer.FixedIntervalTimer").getThrottler().getTimer()).isInstanceOf(FixedIntervalTimer.class);
     }
 
     @Test
@@ -111,44 +110,59 @@ class HttpSourceTaskPartitionConfigTest {
         assertThat(config("http.record.filter.factory", "com.github.castorm.kafka.connect.http.record.PassthroughRecordFilterFactory").getRecordFilterFactory()).isInstanceOf(PassthroughRecordFilterFactory.class);
     }
 
+    @Test
+    void whenNoInitialOffset_thenDefault() {
+        assertThat(configWithout("http.offset.initial").getInitialOffset()).isEqualTo(emptyMap());
+    }
+
+    @Test
+    void whenInitialOffset_thenInitialized() {
+        assertThat(config("http.offset.initial", "k=v").getInitialOffset()).isEqualTo(ImmutableMap.of("k", "v"));
+    }
+
     public static class TestHttpClient implements HttpClient {
-        public HttpResponse execute(HttpRequest request) { return null; }
+        public HttpResponse execute(HttpRequest request) {
+            return null;
+        }
     }
 
     public static class TestRequestFactory implements HttpRequestFactory {
-        public HttpRequest createRequest(Partition partition, Offset offset) { return null; }
+        public HttpRequest createRequest(Offset offset) {
+            return null;
+        }
     }
 
     public static class TestResponseParser implements HttpResponseParser {
-        public List<SourceRecord> parse(HttpResponse response, Partition partition) { return null; }
+        public List<SourceRecord> parse(HttpResponse response) {
+            return null;
+        }
     }
 
     public static class TestRecordSorter implements SourceRecordSorter {
-        public List<SourceRecord> sort(List<SourceRecord> records) { return null; }
+        public List<SourceRecord> sort(List<SourceRecord> records) {
+            return null;
+        }
     }
 
     interface Fixture {
-        String partitionName = "test";
-        Partition partition = Partition.of(partitionName, emptyMap());
-
         static Map<String, String> defaultMap() {
             return new HashMap<String, String>() {{
                 put("kafka.topic", "topic");
                 put("http.request.url", "foo");
-                put("http.response.json.record.offset1.value.pointer", "/baz");
+                put("http.response.json.record.offset.value.pointer", "/baz");
             }};
         }
 
-        static HttpSourceTaskPartitionConfig config(String key, String value) {
+        static HttpSourceConnectorConfig config(String key, String value) {
             Map<String, String> customMap = defaultMap();
             customMap.put(key, value);
-            return new HttpSourceTaskPartitionConfig(partitionName, customMap);
+            return new HttpSourceConnectorConfig(customMap);
         }
 
-        static HttpSourceTaskPartitionConfig configWithout(String key) {
+        static HttpSourceConnectorConfig configWithout(String key) {
             Map<String, String> customMap = defaultMap();
             customMap.remove(key);
-            return new HttpSourceTaskPartitionConfig(partitionName, customMap);
+            return new HttpSourceConnectorConfig(customMap);
         }
     }
 }
