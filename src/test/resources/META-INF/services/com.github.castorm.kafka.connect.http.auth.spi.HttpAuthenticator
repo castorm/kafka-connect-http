@@ -1,0 +1,2 @@
+com.github.castorm.kafka.connect.http.auth.NoneHttpAuthenticator
+com.github.castorm.kafka.connect.http.auth.BasicHttpAuthenticator

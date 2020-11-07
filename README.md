@@ -265,6 +265,49 @@ Uses a [OkHttp](https://square.github.io/okhttp/) client.
 > Maximum number of idle connections in the connection pool
 > *   Type: `Integer`
 > *   Default: `1`
+---
+<a name="auth"/>
+
+### HttpAuthenticator: Authenticating a HttpRequest
+When executing the request, authentication might be required. The HttpAuthenticator is responsible for resolving the authentication header
+to be included in the request 
+`HttpAuthenticator`
+
+> #### `http.auth`
+> ```java
+> public interface HttpAuthenticator extends Configurable {
+> 
+>     Optional<String> getAuthorizationHeader();
+> }
+> ```
+> *   Type: `Class`
+> *   Default: `com.github.castorm.kafka.connect.http.auth.ConfigurableHttpAuthenticator`
+> *   Available implementations:
+>     *   `com.github.castorm.kafka.connect.http.auth.ConfigurableHttpAuthenticator`
+>     *   `com.github.castorm.kafka.connect.http.auth.NoneHttpAuthenticator`
+>     *   `com.github.castorm.kafka.connect.http.auth.BasicHttpAuthenticator`
+
+#### Authenticating a HttpRequest with ConfigurableHttpAuthenticator
+Allows selecting the athentication type via configuration property
+
+> ##### `http.auth.type`
+> Type of authentication
+> *   Type: `String`
+> *   Default: `None`
+> *   Available options:
+>     *   `None`
+>     *   `Basic`
+
+#### Authenticating a HttpRequest with BasicHttpAuthenticator
+Allows selecting the athentication type via configuration property
+
+> ##### `http.auth.user`
+> *   Type: `String`
+> *   Default: ``
+>
+> ##### `http.auth.password`
+> *   Type: `String`
+> *   Default: ``
 
 ---
 <a name="response"/>
