@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +15,7 @@
     <inceptionYear>2020</inceptionYear>
 
     <organization>
-        <name>CastorM</name>
+        <name>Cástor Rodríguez</name>
         <url>http://www.castorm.es</url>
     </organization>
 
@@ -72,6 +73,7 @@
         <junit.version>5.7.0</junit.version>
         <mockito.version>3.6.0</mockito.version>
         <assertj.version>3.17.0</assertj.version>
+        <wiremock.version>2.27.2</wiremock.version>
         <guava.version>29.0-jre</guava.version>
     </properties>
 
@@ -151,6 +153,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
+            <version>${wiremock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
@@ -182,6 +190,20 @@
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.22.2</version>
+                <configuration>
+                    <skipTests>false</skipTests>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -282,7 +304,8 @@
                                     <version>${project.version}</version>
                                     <supportProviderName>${project.organization.name}</supportProviderName>
                                     <supportSummary>CastorM supports the HTTP plugin alongside other contributors to
-                                        this open source project.</supportSummary>
+                                        this open source project.
+                                    </supportSummary>
                                     <supportUrl>${project.issueManagement.url}</supportUrl>
 
                                     <ownerUsername>castorm</ownerUsername>
@@ -327,6 +350,9 @@
                         <version>2.0.0</version>
                         <configuration>
                             <licenseName>apache_v2</licenseName>
+                            <excludes>
+                                <exclude>**/*.json</exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>

@@ -29,6 +29,7 @@
     <logger name="com.github.castorm.kafka.connect.http.HttpSourceTaskConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.HttpSourceConnectorConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.auth.BasicHttpAuthenticatorConfig" level="WARN"/>
+    <logger name="com.github.castorm.kafka.connect.http.auth.ConfigurableHttpAuthenticatorConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient" level="DEBUG"/>
     <logger name="com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClientConfig" level="WARN"/>
     <logger name="com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfig" level="WARN"/>

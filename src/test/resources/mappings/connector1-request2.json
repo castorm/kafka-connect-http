@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/rest/api\\\\?.*",
+    "queryParameters": {
+      "updated": {
+        "equalTo": "2020-01-01T00:00:03Z"
+      }
+    },
+    "headers": {
+      "Accept": {
+        "equalTo": "application/json"
+      },
+      "Authorization": {
+        "equalTo": "Basic dXNlcjpwYXNzd29yZA=="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "connector1-response2.json"
+  }
+}
