@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.common;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,10 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.Properties;
-
-import static java.nio.file.Files.newInputStream;
 
 @Slf4j
 @UtilityClass
@@ -37,12 +34,12 @@ public class VersionUtils {
     private static final String DEFAULT_VERSION = "0.0.0.0";
 
     public static String getVersion() {
-        try (InputStream input = newInputStream(Paths.get("version.properties"))) {
+        try (InputStream input = VersionUtils.class.getClassLoader().getResourceAsStream("version.properties")) {
             Properties properties = new Properties();
             properties.load(input);
             return properties.getProperty("version", DEFAULT_VERSION);
         } catch (IOException ex) {
-            log.error("Error loading version.properties");
+            log.warn("Error loading version.properties, default version will be used");
             return DEFAULT_VERSION;
         }
     }

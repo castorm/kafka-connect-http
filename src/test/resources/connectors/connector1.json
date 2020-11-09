@@ -1,0 +1,19 @@
+{
+  "name": "connector1",
+  "config": {
+    "connector.class": "com.github.castorm.kafka.connect.http.HttpSourceConnector",
+    "http.request.url": "http://${server.url}/rest/api",
+    "http.request.params": "updated=${offset.timestamp}",
+    "http.request.headers": "Accept: application/json",
+    "http.auth.type": "Basic",
+    "http.auth.user": "user",
+    "http.auth.password": "password",
+    "http.offset.initial": "key=TICKT-0001, timestamp=2020-01-01T00:00:01Z",
+    "http.response.list.pointer": "/issues",
+    "http.response.record.offset.pointer": "key=/key, timestamp=/fields/updated",
+    "kafka.topic": "topic-name",
+    "http.timer.interval.millis": "0",
+    "http.timer.catchup.interval.millis": "0",
+    "http.client.read.timeout.millis": "0"
+  }
+}

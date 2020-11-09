@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http;
+package com.github.castorm.kafka.connect;
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,11 @@ package com.github.castorm.kafka.connect.http;
  * #L%
  */
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.github.castorm.kafka.connect.http.HttpSourceConnector;
+import com.github.castorm.kafka.connect.http.HttpSourceTask;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.apache.kafka.connect.source.SourceRecord;
@@ -28,14 +33,12 @@ import org.apache.kafka.connect.storage.OffsetStorageReader;
 import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.AbstractMap;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
@@ -46,17 +49,26 @@ import static org.mockito.BDDMockito.given;
 @UtilityClass
 public class ConnectorUtils {
 
-    public static Map<String, String> processValues(HashMap<Object, Object> config, Function<String, String> valueProcessor) {
-        return config.entrySet().stream()
-                .map(entry -> new AbstractMap.SimpleEntry<>((String) entry.getKey(), valueProcessor.apply((String) entry.getValue())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private static final ObjectReader MAP_READER = OBJECT_MAPPER.readerFor(new TypeReference<Map<String, String>>() {
+    });
+
+    @SneakyThrows({IOException.class, URISyntaxException.class})
+    public static String readConnectorConfig(String connectorPathJson) {
+        return new String(Files.readAllBytes(Paths.get(ConnectorUtils.class.getClassLoader().getResource(connectorPathJson).toURI())));
     }
 
-    public static HashMap<Object, Object> loadConnectorConfig(String connector) throws IOException {
-        InputStream inputStream = ConnectorUtils.class.getClassLoader().getResourceAsStream("connectors/" + connector);
-        Properties properties = new Properties();
-        properties.load(inputStream);
-        return new HashMap<>(properties);
+    public static String replaceVariables(String content, Map<String, String> variables) {
+        for (Map.Entry<String, String> entry : variables.entrySet()) {
+            content = content.replaceAll("\\$\\{" + entry.getKey() + "\\}", entry.getValue());
+        }
+        return content;
+    }
+
+    @SneakyThrows(IOException.class)
+    public static Map<String, String> getConfigMap(String connectorConfigJson) {
+        return MAP_READER.readValue(OBJECT_MAPPER.readTree(connectorConfigJson).get("config"));
     }
 
     public static List<SourceRecord> readAllRecords(Map<String, String> config) {

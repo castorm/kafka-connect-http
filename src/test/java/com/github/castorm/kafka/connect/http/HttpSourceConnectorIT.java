@@ -26,14 +26,16 @@ import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.castorm.kafka.connect.http.ConnectorUtils.loadConnectorConfig;
-import static com.github.castorm.kafka.connect.http.ConnectorUtils.processValues;
-import static com.github.castorm.kafka.connect.http.ConnectorUtils.readAllRecords;
+import static com.github.castorm.kafka.connect.ConnectorUtils.getConfigMap;
+import static com.github.castorm.kafka.connect.ConnectorUtils.readAllRecords;
+import static com.github.castorm.kafka.connect.ConnectorUtils.readConnectorConfig;
+import static com.github.castorm.kafka.connect.ConnectorUtils.replaceVariables;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
@@ -41,10 +43,13 @@ class HttpSourceConnectorIT {
 
     WireMockServer wireMockServer;
 
+    ImmutableMap<String, String> properties;
+
     @BeforeEach
     public void setup() {
-        wireMockServer = new WireMockServer(8090);
+        wireMockServer = new WireMockServer();
         wireMockServer.start();
+        properties = ImmutableMap.of("server.url", "localhost:" + wireMockServer.port());
     }
 
     @AfterEach
@@ -55,16 +60,13 @@ class HttpSourceConnectorIT {
     @Test
     void validateConnector1() throws IOException {
 
-        Map<String, String> config = prepareConnectorConfig("connector1.properties");
+        Map<String, String> config = getConfigMap(replaceVariables(readConnectorConfig("connectors/connector1.json"), properties));
+
         List<SourceRecord> records = readAllRecords(config);
 
         assertThat(records).hasSize(2);
         assertThat(records).extracting(SourceRecord::topic).allMatch(config.get("kafka.topic")::equals);
         assertThat(records).extracting(record -> (String) record.sourceOffset().get("key")).containsExactly("TICKT-0002", "TICKT-0003");
         assertThat(records).extracting(record -> (String) record.sourceOffset().get("timestamp")).containsExactly("2020-01-01T00:00:02Z", "2020-01-01T00:00:03Z");
-    }
-
-    private Map<String, String> prepareConnectorConfig(String connector) throws IOException {
-        return processValues(loadConnectorConfig(connector), value -> value.replaceAll("\\$\\{server.url\\}", "localhost:" + wireMockServer.port()));
     }
 }
