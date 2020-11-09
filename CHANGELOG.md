@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.8
 
+### v0.8.1 (11/09/2020)
+-   Project restructured to enable integration testing
+
 ### v0.8.0 (11/07/2020)
 -   Provided different log levels for `OkHttpClient`.`TRACE`: `BODY`, `DEBUG`: `BASIC`, `*`: `NONE`
 -   Refactored throttler adding the notion of timer
