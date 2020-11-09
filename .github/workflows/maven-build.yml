@@ -30,7 +30,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build with Maven
-        run: mvn -B package -P package
+        run: mvn -B integration-test package -P package
 
       - name: Prepare staging
         run: mkdir staging && cp kafka-connect-http/target/*.jar staging && cp kafka-connect-http/target/*.tar.gz staging
