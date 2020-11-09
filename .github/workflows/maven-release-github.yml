@@ -48,19 +48,34 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Extract Release Artifact
-        id: extract_artifact_name
+      - name: Extract tar.gz name
+        id: extract_tar_name
         run: |
           ARTIFACT_NAME=$(ls staging | grep tar.gz)
           echo "::set-output name=artifact_name::$ARTIFACT_NAME"
-
-      - name: Upload Release Plugin
-        id: upload-release-plugin
+      - name: Upload tar.gz
+        id: upload_tar
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: staging/${{ steps.extract_artifact_name.outputs.artifact_name }}
-          asset_name: ${{ steps.extract_artifact_name.outputs.artifact_name }}
+          asset_path: staging/${{ steps.extract_tar_name.outputs.artifact_name }}
+          asset_name: ${{ steps.extract_tar_name.outputs.artifact_name }}
           asset_content_type: application/tar+gzip
+
+      - name: Extract zip name
+        id: extract_zip_name
+        run: |
+          ARTIFACT_NAME=$(ls staging | grep zip)
+          echo "::set-output name=artifact_name::$ARTIFACT_NAME"
+      - name: Upload zip
+        id: upload_zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: staging/${{ steps.extract_zip_name.outputs.artifact_name }}
+          asset_name: ${{ steps.extract_zip_name.outputs.artifact_name }}
+          asset_content_type: application/zip
