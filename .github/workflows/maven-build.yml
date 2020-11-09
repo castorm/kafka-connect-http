@@ -32,9 +32,9 @@ jobs:
       - name: Build with Maven
         run: mvn -B integration-test package -P package
 
-      - name: Prepare staging
+      - name: Prepare artifacts
         run: mkdir staging && cp kafka-connect-http/target/*.jar staging && cp kafka-connect-http/target/*.tar.gz staging
-      - name: Archive staging
+      - name: Archive artifacts
         uses: actions/upload-artifact@v1
         with:
           name: Package
