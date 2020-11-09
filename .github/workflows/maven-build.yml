@@ -33,7 +33,7 @@ jobs:
         run: mvn -B package -P package
 
       - name: Prepare staging
-        run: mkdir staging && cp target/*.jar staging && cp target/*.tar.gz staging
+        run: mkdir staging && cp kafka-connect-http/target/*.jar staging && cp kafka-connect-http/target/*.tar.gz staging
       - name: Archive staging
         uses: actions/upload-artifact@v1
         with:
@@ -41,7 +41,7 @@ jobs:
           path: staging
 
       - name: Prepare site
-        run: mkdir site && cp -r target/site/* site
+        run: mkdir site && cp -r kafka-connect-http/target/site/* site
       - name: Archive site
         uses: actions/upload-artifact@v1
         with:
@@ -52,5 +52,5 @@ jobs:
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: target/site/jacoco-ut/jacoco.xml
+          coverage-reports: kafka-connect-http/target/site/jacoco-ut/jacoco.xml
 
