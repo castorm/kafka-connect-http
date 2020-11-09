@@ -24,7 +24,7 @@ jobs:
         run: echo -e "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
 
       - name: Release
-        run: mvn -B deploy -P package,sign
+        run: mvn -pl kafka-connect-http -B deploy -P package,sign
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

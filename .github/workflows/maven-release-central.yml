@@ -26,7 +26,7 @@ jobs:
         run: echo -e "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
 
       - name: Release
-        run: mvn -B deploy -P package,sign,ossrh
+        run: mvn -pl kafka-connect-http -B deploy -P package,sign,ossrh
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
