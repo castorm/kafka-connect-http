@@ -4,9 +4,9 @@
 name: Release to GitHub
 
 on:
-  create:
+  push:
     tags:
-      - v*
+      - 'v*'
 
 jobs:
   build:
@@ -51,7 +51,7 @@ jobs:
       - name: Extract tar.gz name
         id: extract_tar_name
         run: |
-          ARTIFACT_NAME=$(ls staging | grep tar.gz)
+          ARTIFACT_NAME=$(basename staging/*.tar.gz)
           echo "::set-output name=artifact_name::$ARTIFACT_NAME"
       - name: Upload tar.gz
         id: upload_tar
@@ -67,7 +67,7 @@ jobs:
       - name: Extract zip name
         id: extract_zip_name
         run: |
-          ARTIFACT_NAME=$(ls staging | grep zip)
+          ARTIFACT_NAME=$(basename staging/*.zip)
           echo "::set-output name=artifact_name::$ARTIFACT_NAME"
       - name: Upload zip
         id: upload_zip

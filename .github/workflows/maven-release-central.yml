@@ -4,9 +4,9 @@
 name: Release to Maven Central
 
 on:
-  create:
+  push:
     tags:
-      - v*
+      - 'v*'
 
 jobs:
   build:
