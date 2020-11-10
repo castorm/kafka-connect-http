@@ -78,7 +78,7 @@
         <mockito.version>3.6.0</mockito.version>
         <assertj.version>3.18.0</assertj.version>
         <wiremock.version>2.27.2</wiremock.version>
-        <guava.version>29.0-jre</guava.version>
+        <guava.version>30.0-jre</guava.version>
         <testcontainers.version>1.15.0</testcontainers.version>
         <rxjava.version>3.0.7</rxjava.version>
     </properties>
