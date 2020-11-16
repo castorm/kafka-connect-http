@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.8
 
+### v0.8.2 (11/16/2020)
+-   Handle records committed out of order
+
 ### v0.8.1 (11/09/2020)
 -   Project restructured to enable integration testing
 
@@ -13,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 -   Provided different log levels for `OkHttpClient`.`TRACE`: `BODY`, `DEBUG`: `BASIC`, `*`: `NONE`
 -   Refactored throttler adding the notion of timer
 -   Support for authentication extension. Initial implementations for None and Basic authentication types
+
+## v0.7
 
 ### v0.7.6 (05/28/2020)
 -   Fix typo in `http.throttler.catchup.interval.millis` configuration property

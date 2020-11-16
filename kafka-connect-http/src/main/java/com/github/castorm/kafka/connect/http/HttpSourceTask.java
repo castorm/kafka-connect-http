@@ -32,16 +32,19 @@ import com.github.castorm.kafka.connect.timer.TimerThrottler;
 import edu.emory.mathcs.backport.java.util.Collections;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.github.castorm.kafka.connect.common.CollectorsUtils.toLinkedHashMap;
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
@@ -63,6 +66,8 @@ public class HttpSourceTask extends SourceTask {
     private SourceRecordSorter recordSorter;
 
     private SourceRecordFilterFactory recordFilterFactory;
+
+    private LinkedHashMap<Map<String, ?>, Boolean> committedOffsets;
 
     @Getter
     private Offset offset;
@@ -102,14 +107,16 @@ public class HttpSourceTask extends SourceTask {
 
         List<SourceRecord> records = responseParser.parse(response);
 
-        return log(records, recordSorter.sort(records).stream()
-                .filter(recordFilterFactory.create(offset))
-                .collect(toList()));
-    }
+        List<SourceRecord> recordsToSend = recordSorter.sort(records).stream()
+            .filter(recordFilterFactory.create(offset))
+            .collect(toList());
 
-    private List<SourceRecord> log(List<SourceRecord> total, List<SourceRecord> filtered) {
-        log.info("Request for offset {} yields {}/{} new records", offset.toMap(), filtered.size(), total.size());
-        return filtered;
+        log.info("Request for offset {} yields {}/{} new records", offset.toMap(), recordsToSend.size(), records.size());
+
+        committedOffsets = recordsToSend.stream()
+            .collect(toLinkedHashMap(SourceRecord::sourceOffset, __ -> false));
+
+        return recordsToSend;
     }
 
     private HttpResponse execute(HttpRequest request) {
@@ -121,8 +128,32 @@ public class HttpSourceTask extends SourceTask {
     }
 
     @Override
-    public void commitRecord(SourceRecord record) {
-        offset = Offset.of(record.sourceOffset());
+    public void commitRecord(SourceRecord record, RecordMetadata metadata) throws InterruptedException {
+        committedOffsets.replace(record.sourceOffset(), true);
+
+        log.debug("Committed offset {}", record.sourceOffset());
+    }
+
+    @Override
+    public void commit() throws InterruptedException {
+        Map<String, ?> newOffset = null;
+        for (Map.Entry<Map<String, ?>, Boolean> offsetEntry : committedOffsets.entrySet()) {
+            final Boolean offsetWasCommitted = offsetEntry.getValue();
+            final Map<String, ?> sourceOffset = offsetEntry.getKey();
+            if (offsetWasCommitted) {
+                newOffset = sourceOffset;
+            } else {
+                log.warn("Found uncommitted offset {}. Will resume polling from previous offset. This might result in a number of duplicated records.", sourceOffset);
+
+                break;
+            }
+        }
+
+        if (newOffset != null) {
+            offset = Offset.of(newOffset);
+        }
+
+        log.info("Offset set to {}", offset);
     }
 
     @Override
