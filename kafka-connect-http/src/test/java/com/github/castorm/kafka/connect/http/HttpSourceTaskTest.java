@@ -178,19 +178,6 @@ class HttpSourceTaskTest {
     }
 
     @Test
-    void givenTaskStarted_whenCommitRecord_thenOffsetUpdated() {
-
-        givenTaskConfiguration();
-        task.initialize(getContext(offsetMap));
-        task.start(emptyMap());
-        reset(requestFactory);
-
-        task.commitRecord(record(offsetMap));
-
-        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap));
-    }
-
-    @Test
     void givenTaskStarted_whenPoll_thenThrottled() throws InterruptedException, IOException {
 
         givenTaskConfiguration();
@@ -230,10 +217,10 @@ class HttpSourceTaskTest {
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
         given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
-        given(recordSorter.sort(asList(record(offsetMap)))).willReturn(asList(record(offsetMap), record(offsetMap)));
+        given(recordSorter.sort(asList(record(offsetMap)))).willReturn(asList(record(offsetMap(1)), record(offsetMap(2))));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
 
-        assertThat(task.poll()).containsExactly(record(offsetMap), record(offsetMap));
+        assertThat(task.poll()).containsExactly(record(offsetMap(1)), record(offsetMap(2)));
     }
 
     @Test
@@ -248,6 +235,28 @@ class HttpSourceTaskTest {
         given(recordFilterFactory.create(offset)).willReturn(__ -> false);
 
         assertThat(task.poll()).isEmpty();
+    }
+
+    @Test
+    void givenTaskStarted_whenPollAndCommitRecords_thenOffsetUpdated() throws InterruptedException, IOException {
+
+        givenTaskConfiguration();
+        task.initialize(getContext(offsetMap));
+        task.start(emptyMap());
+        given(requestFactory.createRequest(offset)).willReturn(request);
+        given(client.execute(request)).willReturn(response);
+        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(recordSorter.sort(asList(record(offsetMap))))
+            .willReturn(asList(record(offsetMap(1)), record(offsetMap(2)), record(offsetMap(3))));
+        given(recordFilterFactory.create(offset)).willReturn(__ -> true);
+        task.poll();
+
+        task.commitRecord(record(offsetMap(1)), null);
+        task.commitRecord(record(offsetMap(3)), null);
+        task.commitRecord(record(offsetMap(2)), null);
+        task.commit();
+
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap(3)));
     }
 
     @Test
@@ -284,6 +293,10 @@ class HttpSourceTaskTest {
         Offset offset = Offset.of(offsetMap);
         HttpRequest request = HttpRequest.builder().build();
         HttpResponse response = HttpResponse.builder().build();
+
+        static Map<String, Object> offsetMap(Object value) {
+            return ImmutableMap.of("custom", value, "key", key, "timestamp", now.toString());
+        }
 
         static SourceRecord record(Map<String, Object> offset) {
             return new SourceRecord(emptyMap(), offset, null, null, null, null, null, null, now.toEpochMilli());

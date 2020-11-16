@@ -94,7 +94,7 @@
                                     <finalName>${project.groupId}-${project.artifactId}-${project.version}</finalName>
                                     <appendAssemblyId>false</appendAssemblyId>
                                     <descriptors>
-                                        <descriptor>kafka-connect-http/src/assembly/package.xml</descriptor>
+                                        <descriptor>src/assembly/package.xml</descriptor>
                                     </descriptors>
                                 </configuration>
                             </execution>
@@ -110,7 +110,7 @@
                                     </formats>
                                     <tarLongFileMode>posix</tarLongFileMode>
                                     <descriptors>
-                                        <descriptor>kafka-connect-http/src/assembly/plugin.xml</descriptor>
+                                        <descriptor>src/assembly/plugin.xml</descriptor>
                                     </descriptors>
                                 </configuration>
                             </execution>
