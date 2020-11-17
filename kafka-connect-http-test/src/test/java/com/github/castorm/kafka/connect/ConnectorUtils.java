@@ -91,9 +91,7 @@ public class ConnectorUtils {
         List<SourceRecord> records;
         do {
             records = task.poll();
-            for (SourceRecord record : records) {
-                task.commitRecord(record, null);
-            }
+            records.forEach(record -> task.commitRecord(record, null));
             task.commit();
             allRecords.addAll(records);
         } while (!records.isEmpty());

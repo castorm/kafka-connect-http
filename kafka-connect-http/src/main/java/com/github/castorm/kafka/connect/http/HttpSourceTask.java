@@ -128,14 +128,14 @@ public class HttpSourceTask extends SourceTask {
     }
 
     @Override
-    public void commitRecord(SourceRecord record, RecordMetadata metadata) throws InterruptedException {
+    public void commitRecord(SourceRecord record, RecordMetadata metadata) {
         committedOffsets.replace(record.sourceOffset(), true);
 
         log.debug("Committed offset {}", record.sourceOffset());
     }
 
     @Override
-    public void commit() throws InterruptedException {
+    public void commit() {
         Map<String, ?> newOffset = null;
         for (Map.Entry<Map<String, ?>, Boolean> offsetEntry : committedOffsets.entrySet()) {
             final Boolean offsetWasCommitted = offsetEntry.getValue();
