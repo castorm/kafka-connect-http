@@ -39,12 +39,10 @@ import org.apache.kafka.connect.source.SourceTask;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.github.castorm.kafka.connect.common.CollectorsUtils.toLinkedHashMap;
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
@@ -67,7 +65,7 @@ public class HttpSourceTask extends SourceTask {
 
     private SourceRecordFilterFactory recordFilterFactory;
 
-    private LinkedHashMap<Map<String, ?>, Boolean> committedOffsets;
+    private ConfirmationWindow<Map<String, ?>> confirmationWindow;
 
     @Getter
     private Offset offset;
@@ -113,8 +111,11 @@ public class HttpSourceTask extends SourceTask {
 
         log.info("Request for offset {} yields {}/{} new records", offset.toMap(), recordsToSend.size(), records.size());
 
-        committedOffsets = recordsToSend.stream()
-            .collect(toLinkedHashMap(SourceRecord::sourceOffset, __ -> false));
+        List<Map<String, ?>> offsetsToConfirm = recordsToSend.stream()
+            .map(SourceRecord::sourceOffset)
+            .collect(toList());
+
+        confirmationWindow = new ConfirmationWindow<>(offsetsToConfirm);
 
         return recordsToSend;
     }
@@ -129,25 +130,12 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void commitRecord(SourceRecord record, RecordMetadata metadata) {
-        committedOffsets.replace(record.sourceOffset(), true);
-
-        log.debug("Committed offset {}", record.sourceOffset());
+        confirmationWindow.confirm(record.sourceOffset());
     }
 
     @Override
     public void commit() {
-        Map<String, ?> newOffset = null;
-        for (Map.Entry<Map<String, ?>, Boolean> offsetEntry : committedOffsets.entrySet()) {
-            final Boolean offsetWasCommitted = offsetEntry.getValue();
-            final Map<String, ?> sourceOffset = offsetEntry.getKey();
-            if (offsetWasCommitted) {
-                newOffset = sourceOffset;
-            } else {
-                log.warn("Found uncommitted offset {}. Will resume polling from previous offset. This might result in a number of duplicated records.", sourceOffset);
-
-                break;
-            }
-        }
+        Map<String, ?> newOffset = confirmationWindow.getLowWatermarkOffset();
 
         if (newOffset != null) {
             offset = Offset.of(newOffset);
