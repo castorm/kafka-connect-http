@@ -28,7 +28,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +57,7 @@ class HttpSourceConnectorIT {
     }
 
     @Test
-    void validateConnector1() throws IOException {
+    void validateConnector1() {
 
         Map<String, String> config = getConfigMap(replaceVariables(readConnectorConfig("connectors/connector1.json"), properties));
 

@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect.http;
+package com.github.castorm.kafka.connect.http.ack;
 
 /*-
  * #%L
@@ -25,9 +25,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Optional;
 
 import static com.github.castorm.kafka.connect.common.CollectorsUtils.toLinkedHashMap;
+import static java.util.function.Function.identity;
 
 @Slf4j
 public class ConfirmationWindow<T> {
@@ -36,7 +37,7 @@ public class ConfirmationWindow<T> {
 
     public ConfirmationWindow(List<T> offsets) {
         confirmedOffsets = offsets.stream()
-            .collect(toLinkedHashMap(Function.identity(), __ -> false));
+                .collect(toLinkedHashMap(identity(), __ -> false));
     }
 
     public void confirm(T offset) {
@@ -45,21 +46,20 @@ public class ConfirmationWindow<T> {
         log.debug("Confirmed offset {}", offset);
     }
 
-    public T getLowWatermarkOffset() {
+    public Optional<T> getLowWatermarkOffset() {
         T offset = null;
         for (Map.Entry<T, Boolean> offsetEntry : confirmedOffsets.entrySet()) {
-            final Boolean offsetWasConfirmed = offsetEntry.getValue();
-            final T sourceOffset = offsetEntry.getKey();
+            Boolean offsetWasConfirmed = offsetEntry.getValue();
+            T sourceOffset = offsetEntry.getKey();
             if (offsetWasConfirmed) {
                 offset = sourceOffset;
             } else {
                 log.warn("Found unconfirmed offset {}. Will resume polling from previous offset. " +
-                    "This might result in a number of duplicated records.", sourceOffset);
-
+                        "This might result in a number of duplicated records.", sourceOffset);
                 break;
             }
         }
 
-        return offset;
+        return Optional.ofNullable(offset);
     }
 }

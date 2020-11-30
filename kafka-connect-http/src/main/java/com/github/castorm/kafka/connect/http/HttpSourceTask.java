@@ -20,6 +20,7 @@ package com.github.castorm.kafka.connect.http;
  * #L%
  */
 
+import com.github.castorm.kafka.connect.http.ack.ConfirmationWindow;
 import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
@@ -106,14 +107,14 @@ public class HttpSourceTask extends SourceTask {
         List<SourceRecord> records = responseParser.parse(response);
 
         List<SourceRecord> recordsToSend = recordSorter.sort(records).stream()
-            .filter(recordFilterFactory.create(offset))
-            .collect(toList());
+                .filter(recordFilterFactory.create(offset))
+                .collect(toList());
 
         log.info("Request for offset {} yields {}/{} new records", offset.toMap(), recordsToSend.size(), records.size());
 
         List<Map<String, ?>> offsetsToConfirm = recordsToSend.stream()
-            .map(SourceRecord::sourceOffset)
-            .collect(toList());
+                .map(SourceRecord::sourceOffset)
+                .collect(toList());
 
         confirmationWindow = new ConfirmationWindow<>(offsetsToConfirm);
 
@@ -135,13 +136,11 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void commit() {
-        Map<String, ?> newOffset = confirmationWindow.getLowWatermarkOffset();
+        offset = confirmationWindow.getLowWatermarkOffset()
+                .map(Offset::of)
+                .orElse(offset);
 
-        if (newOffset != null) {
-            offset = Offset.of(newOffset);
-        }
-
-        log.info("Offset set to {}", offset);
+        log.debug("Offset set to {}", offset);
     }
 
     @Override
