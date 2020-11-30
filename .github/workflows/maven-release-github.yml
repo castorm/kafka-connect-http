@@ -30,7 +30,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Prepare artifacts
-        run: mkdir staging && cp kafka-connect-http/target/*.jar staging && cp kafka-connect-http/target/*.tar.gz staging
+        run: mkdir staging && cp kafka-connect-http/target/*.jar staging && cp kafka-connect-http/target/*.tar.gz staging && cp kafka-connect-http/target/*.zip staging
       - name: Archive artifacts
         uses: actions/upload-artifact@v1
         with:
