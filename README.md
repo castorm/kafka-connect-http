@@ -588,15 +588,11 @@ mvn test
 
 ## Contributing
 
-Contributions are welcome via pull requests, pending definition of code of conduct.
+Contributions are welcome via pull requests, pending definition of code of conduct, please just follow existing conventions.
 
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning. 
-
-## Authors
-
-*   __Cástor Rodríguez__ - Only contributor so far - [castorm](https://github.com/castorm)
 
 ## License
 
