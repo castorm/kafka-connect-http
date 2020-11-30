@@ -25,7 +25,8 @@
     <formats>
         <format>zip</format>
     </formats>
-    <includeBaseDirectory>false</includeBaseDirectory>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <baseDirectory>${owner}-${project.artifactId}-${project.version}</baseDirectory>
     <fileSets>
         <fileSet>
             <directory>${project.parent.basedir}</directory>
@@ -37,7 +38,7 @@
                 <include>licenses.html</include>
                 <include>licenses</include>
                 <include>notices</include>
-                <include>docs</include>
+                <include>docs/*</include>
             </includes>
         </fileSet>
         <fileSet>

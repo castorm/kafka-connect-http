@@ -91,7 +91,7 @@
                                     <goal>single</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>${project.groupId}-${project.artifactId}-${project.version}</finalName>
+                                    <finalName>${owner}-${project.artifactId}-${project.version}</finalName>
                                     <appendAssemblyId>false</appendAssemblyId>
                                     <descriptors>
                                         <descriptor>src/assembly/package.xml</descriptor>
@@ -129,6 +129,7 @@
                                 <configuration>
                                     <title>${project.name}</title>
                                     <name>${project.artifactId}</name>
+                                    <sourceUrl>${project.parent.url}</sourceUrl>
                                     <documentationUrl>${project.parent.url}</documentationUrl>
                                     <description>${project.parent.description}</description>
                                     <version>${project.version}</version>

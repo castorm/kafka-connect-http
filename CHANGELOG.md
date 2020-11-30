@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.8
 
+### v0.8.6 (11/30/2020)
+-   Fix ConfluentHub package
+
 ### v0.8.5 (11/30/2020)
 -   Handle records committed out of order
 
