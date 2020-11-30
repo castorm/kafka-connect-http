@@ -584,7 +584,10 @@ mvn test
 ```
 ### Releasing
 *   Update [CHANGELOG.md](CHANGELOG.md) and [README.md](README.md) files.
-*   Prepare release: `mvn release:clean release:prepare`
+*   Prepare release:
+```bash
+mvn release:clean release:prepare
+```
 
 ## Contributing
 
