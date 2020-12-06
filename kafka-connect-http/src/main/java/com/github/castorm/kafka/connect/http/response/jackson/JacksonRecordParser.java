@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -71,6 +71,10 @@ public class JacksonRecordParser implements Configurable {
         return propertyResolver.getArrayAt(deserialize(body), recordsPointer);
     }
 
+    @Deprecated
+    /*
+      Replaced by Offset
+     */
     Optional<String> getKey(JsonNode node) {
         String key = keyPointer.stream()
                 .map(pointer -> propertyResolver.getObjectAt(node, pointer).asText())
@@ -79,6 +83,10 @@ public class JacksonRecordParser implements Configurable {
         return key.isEmpty() ? Optional.empty() : Optional.of(key);
     }
 
+    @Deprecated
+    /*
+      Replaced by Offset
+     */
     Optional<String> getTimestamp(JsonNode node) {
         return timestampPointer.map(pointer -> propertyResolver.getObjectAt(node, pointer).asText());
     }

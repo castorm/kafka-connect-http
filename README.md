@@ -423,24 +423,25 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
   when the object we are interested in is under a nested structure
 > *   Type: `String`
 > *   Default: `/`
+>
+> ##### `http.response.record.offset.pointer`
+> Comma separated list of `key=/value` pairs where the key is the name of the property in the offset, and the value is
+> the [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value being used as offset for future requests.
+> This is the mechanism that enables sharing state in between `HttpRequests`. `HttpRequestFactory` implementations 
+> receive this `Offset`.
+>
+> Special properties:
+> - `key` is used as record's identifier, used for *de-duplication* and topic *partition routing*
+> - `timestamp` is used as record's timestamp, used for *de-duplication* and *ordering*
 > 
-> ##### `http.response.record.key.pointer`
-> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the comma separated list of properties that compound, uniquely 
-  identify the individual record to be used as key in kafka 
-  record key
-> This is especially important on partitioned topics
-> *   Example: `/id`
+> One of the roles of the offset, even if not required for preparing the next request, is helping in deduplication of
+> already seen records, by providing a sense of progress, assuming consistent ordering. (e.g. even if the response returns
+> some repeated results in between requests because they have the same timestamp, anything prior to the last seen
+> offset will be ignored). see `OffsetFilterFactory`
+> *   Example: `id=/itemId`
 > *   Type: `String`
 > *   Default: `""`
-> 
-> ##### `http.response.record.timestamp.pointer`
-> [JsonPointer](https://tools.ietf.org/html/rfc6901) to the timestamp of the individual record to be used as kafka 
-  record timestamp
-  This is especially important to track progress, enable latency calculations, improved throttling and feedback to 
-  `TemplateHttpRequestFactory` 
-> *   Type: `String`
-> *   Default: `""`
-> 
+>
 > ##### `http.response.record.timestamp.parser`
 > Class responsible for converting the timestamp property captured above into a `java.time.Instant`.  
 > *   Type: `String`
@@ -465,20 +466,6 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
   identifiers
 > *   Type: `String`
 > *   Default: `UTC`
-> 
-> ##### `http.response.record.offset.pointer`
-> Comma separated list of `key=/value` pairs where the key is the name of the property in the offset, and the value is
-> the [JsonPointer](https://tools.ietf.org/html/rfc6901) to the value being used as offset for future requests
-> This is the mechanism that enables sharing state in between `HttpRequests`. `HttpRequestFactory` implementations 
-> receive this `Offset`.
-> 
->  One of the roles of the offset, even if not required for preparing the next request, is helping in deduplication of
-> already seen records, by providing a sense of progress, assuming consistent ordering. (e.g. even if the response returns
-> some repeated results in between requests because they have the same timestamp, anything prior to the last seen
-> offset will be ignored). see `OffsetFilterFactory`
-> *   Example: `id=/itemId`
-> *   Type: `String`
-> *   Default: `""`
 
 ---
 <a name="mapper"/>
