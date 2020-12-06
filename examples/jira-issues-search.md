@@ -54,8 +54,7 @@ And based on the results we would be updating the `updated` filter for subsequen
         "http.auth.user": "username",
         "http.auth.password": "password",
         "http.response.list.pointer": "/issues",
-        "http.response.record.key.pointer": "/id",
-        "http.response.record.offset.pointer": "timestamp=/fields/updated",
+        "http.response.record.offset.pointer": "key=/id, timestamp=/fields/updated",
         "http.timer.interval.millis": "30000",
         "http.timer.catchup.interval.millis": "1000",
         "kafka.topic": "topic"

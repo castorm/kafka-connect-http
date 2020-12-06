@@ -64,8 +64,7 @@ queries.
         "http.request.body": "{\"size\": 100, \"sort\": [{\"@timestamp\": \"asc\"}], \"search_after\": [${offset.timestamp?datetime.iso?long}]}",
         "http.response.list.pointer": "/hits/hits",
         "http.response.record.pointer": "/_source",
-        "http.response.record.key.pointer": "/_id",
-        "http.response.record.offset.pointer": "timestamp=/sort/0",
+        "http.response.record.offset.pointer": "key=/_id, timestamp=/sort/0",
         "http.timer.interval.millis": "30000",
         "http.timer.catchup.interval.millis": "1000",
         "kafka.topic": "topic"
