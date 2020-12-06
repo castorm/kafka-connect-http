@@ -214,12 +214,16 @@ This `HttpRequestFactory` is based on template resolution.
 FreeMarker templates will have the following data model available:
 *   offset
     *   key
-    *   timestamp
+    *   timestamp (as ISO8601 string, e.g.: `2020-01-01T00:00:00Z`)
     *   ... _(custom offset properties)_
 
 Accessing any of the above withing a template can be achieved like this:
 ```properties
 http.request.params=after=${offset.timestamp}
+```
+For an Epoch representation of the same string, FreeMarker built-ins should be used:
+```properties
+http.request.params=after=${offset.timestamp?datetime.iso?long}
 ```
 For a complete understanding of the features provided by FreeMarker, please, refer to the 
 [User Manual](https://freemarker.apache.org/docs/index.html)

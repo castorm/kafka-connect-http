@@ -57,11 +57,11 @@ queries.
     "config": {
         "connector.class": "com.github.castorm.kafka.connect.http.HttpSourceConnector",
         "tasks.max": "1",
-        "http.offset.initial": "timestamp=1589500805994",
+        "http.offset.initial": "timestamp=2020-01-01T00:00:00Z",
         "http.request.url": "http://domain/index_name/_search",
         "http.request.method": "POST",
         "http.request.headers": "Content-Type: application/json",
-        "http.request.body": "{\"size\": 100, \"sort\": [{\"@timestamp\": \"asc\"}], \"search_after\": [${offset.timestamp}]}",
+        "http.request.body": "{\"size\": 100, \"sort\": [{\"@timestamp\": \"asc\"}], \"search_after\": [${offset.timestamp?datetime.iso?long}]}",
         "http.response.list.pointer": "/hits/hits",
         "http.response.record.pointer": "/_source",
         "http.response.record.key.pointer": "/_id",

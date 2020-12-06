@@ -38,7 +38,9 @@ import static java.util.UUID.randomUUID;
 
 public class FreeMarkerTemplateFactory implements TemplateFactory {
 
-    private final Configuration configuration = new Configuration(new Version(2, 3, 30));
+    private final Configuration configuration = new Configuration(new Version(2, 3, 30)) {{
+        setNumberFormat("computer");
+    }};
 
     @Override
     public Template create(String template) {
