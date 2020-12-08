@@ -90,9 +90,12 @@ public class HttpSourceTask extends SourceTask {
         responseParser = config.getResponseParser();
         recordSorter = config.getRecordSorter();
         recordFilterFactory = config.getRecordFilterFactory();
+        offset = loadOffset(config.getInitialOffset());
+    }
 
+    private Offset loadOffset(Map<String, String> initialOffset) {
         Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
-        offset = Offset.of(!restoredOffset.isEmpty() ? restoredOffset : config.getInitialOffset());
+        return Offset.of(!restoredOffset.isEmpty() ? restoredOffset : initialOffset);
     }
 
     @Override
@@ -106,19 +109,15 @@ public class HttpSourceTask extends SourceTask {
 
         List<SourceRecord> records = responseParser.parse(response);
 
-        List<SourceRecord> recordsToSend = recordSorter.sort(records).stream()
+        List<SourceRecord> unseenRecords = recordSorter.sort(records).stream()
                 .filter(recordFilterFactory.create(offset))
                 .collect(toList());
 
-        log.info("Request for offset {} yields {}/{} new records", offset.toMap(), recordsToSend.size(), records.size());
+        log.info("Request for offset {} yields {}/{} new records", offset.toMap(), unseenRecords.size(), records.size());
 
-        List<Map<String, ?>> offsetsToConfirm = recordsToSend.stream()
-                .map(SourceRecord::sourceOffset)
-                .collect(toList());
+        confirmationWindow = new ConfirmationWindow<>(extractOffsets(unseenRecords));
 
-        confirmationWindow = new ConfirmationWindow<>(offsetsToConfirm);
-
-        return recordsToSend;
+        return unseenRecords;
     }
 
     private HttpResponse execute(HttpRequest request) {
@@ -127,6 +126,12 @@ public class HttpSourceTask extends SourceTask {
         } catch (IOException e) {
             throw new RetriableException(e);
         }
+    }
+
+    private static List<Map<String, ?>> extractOffsets(List<SourceRecord> recordsToSend) {
+        return recordsToSend.stream()
+                .map(SourceRecord::sourceOffset)
+                .collect(toList());
     }
 
     @Override

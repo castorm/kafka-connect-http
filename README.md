@@ -72,21 +72,31 @@ public List<SourceRecord> poll() throws InterruptedException {
 
     List<SourceRecord> records = responseParser.parse(response);
 
-    return recordSorter.sort(records).stream()
+    List<SourceRecord> unseenRecords = recordSorter.sort(records).stream()
             .filter(recordFilterFactory.create(offset))
             .collect(toList());
+
+    confirmationWindow = new ConfirmationWindow<>(extractOffsets(unseenRecords));
+
+    return unseenRecords;
 }
 
-public void commitRecord(SourceRecord record) {
-    offset = Offset.of(record.sourceOffset(), record.timestamp());
+public void commitRecord(SourceRecord record, RecordMetadata metadata) {
+    confirmationWindow.confirm(record.sourceOffset());
+}
+
+public void commit() {
+    offset = confirmationWindow.getLowWatermarkOffset()
+            .map(Offset::of)
+            .orElse(offset);
 }
 ```
 
 ---
 <a name="timer"/>
 
-### Timer: Throttling HttpRequests
-Controls the rate at which HTTP requests are executed by informing the task, how long until the next execution is due.
+### `Timer`: Throttling `HttpRequest`
+Controls the rate at which HTTP requests are performed by informing the task, how long until the next execution is due.
 
 > #### `http.timer`
 > ```java
@@ -105,7 +115,7 @@ Controls the rate at which HTTP requests are executed by informing the task, how
 >     *   `com.github.castorm.kafka.connect.timer.FixedIntervalTimer`
 >     *   `com.github.castorm.kafka.connect.timer.AdaptableIntervalTimer`
 
-#### Throttling HttpRequests with FixedIntervalThrottler
+#### Throttling `HttpRequest` with `FixedIntervalThrottler`
 
 Throttles rate of requests based on a fixed interval. 
 
@@ -114,12 +124,12 @@ Throttles rate of requests based on a fixed interval.
 > *   Type: `Long`
 > *   Default: `60000`
 
-#### Throttling HttpRequests with AdaptableIntervalThrottler
+#### Throttling HttpRequests with `AdaptableIntervalThrottler`
 
-Throttles rate of requests based on a fixed interval. However, it has two modes of operation, with two different 
-intervals:
-*   Up to date: No new records, or they have been created since last poll 
-*   Catching up: There were new records in last poll but they were created long ago (longer than interval)
+Throttles rate of requests based on a fixed interval.
+It has, however, two modes of operation, with two different  intervals:
+*   **Up to date** No new records in last poll, or there were new records, but "recently" created (shorter than interval) 
+*   **Catching up** There were new records in last poll, but they were created "long ago" (longer than interval)
 
 > ##### `http.timer.interval.millis`
 > Interval in between requests when up-to-date
@@ -136,7 +146,7 @@ intervals:
 ---
 <a name="request"/>
 
-### HttpRequestFactory: Creating a HttpRequest
+### `HttpRequestFactory`: Creating a `HttpRequest`
 The first thing our connector will need to do is creating a `HttpRequest`.
 
 > #### `http.request.factory`
@@ -157,7 +167,7 @@ The first thing our connector will need to do is creating a `HttpRequest`.
 > *   Type: `String`
 > *   Default: `""`
 
-#### Creating a HttpRequest with TemplateHttpRequestFactory
+#### Creating a `HttpRequest` with `TemplateHttpRequestFactory`
 This `HttpRequestFactory` is based on template resolution.
 
 > ##### `http.request.method`
@@ -210,11 +220,11 @@ This `HttpRequestFactory` is based on template resolution.
           Implementation based on [FreeMarker](https://freemarker.apache.org/)
 >     *   `com.github.castorm.kafka.connect.http.request.template.NoTemplateFactory`
 
-##### Creating a HttpRequest with FreeMarkerTemplateFactory
+##### Creating a `HttpRequest` with `FreeMarkerTemplateFactory`
 FreeMarker templates will have the following data model available:
-*   offset
-    *   key
-    *   timestamp (as ISO8601 string, e.g.: `2020-01-01T00:00:00Z`)
+*   `offset`
+    *   `key`
+    *   `timestamp` (as ISO8601 string, e.g.: `2020-01-01T00:00:00Z`)
     *   ... _(custom offset properties)_
 
 Accessing any of the above withing a template can be achieved like this:
@@ -231,7 +241,7 @@ For a complete understanding of the features provided by FreeMarker, please, ref
 ---
 <a name="client"/>
 
-### HttpClient: Executing a HttpRequest
+### `HttpClient`: Executing a `HttpRequest`
 Once our HttpRequest is ready, we have to execute it to get some results out of it. That's the purpose of the 
 `HttpClient`
 
@@ -247,7 +257,7 @@ Once our HttpRequest is ready, we have to execute it to get some results out of 
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.client.okhttp.OkHttpClient`
 
-#### Executing a HttpRequest with OkHttpClient
+#### Executing a `HttpRequest` with `OkHttpClient`
 Uses a [OkHttp](https://square.github.io/okhttp/) client. 
 
 > ##### `http.client.connection.timeout.millis`
@@ -264,18 +274,12 @@ Uses a [OkHttp](https://square.github.io/okhttp/) client.
 > Time to live for the connection
 > *   Type: `Long`
 > *   Default: `300000`
-> 
-> ##### `http.client.max-idle`
-> Maximum number of idle connections in the connection pool
-> *   Type: `Integer`
-> *   Default: `1`
 ---
 <a name="auth"/>
 
-### HttpAuthenticator: Authenticating a HttpRequest
-When executing the request, authentication might be required. The HttpAuthenticator is responsible for resolving the authentication header
-to be included in the request 
-`HttpAuthenticator`
+### `HttpAuthenticator`: Authenticating a `HttpRequest`
+When executing the request, authentication might be required. The `HttpAuthenticator` is responsible for resolving the `Authorization` header
+to be included in the `HttpRequest`.
 
 > #### `http.auth`
 > ```java
@@ -291,32 +295,29 @@ to be included in the request
 >     *   `com.github.castorm.kafka.connect.http.auth.NoneHttpAuthenticator`
 >     *   `com.github.castorm.kafka.connect.http.auth.BasicHttpAuthenticator`
 
-#### Authenticating a HttpRequest with ConfigurableHttpAuthenticator
+#### Authenticating with `ConfigurableHttpAuthenticator`
 Allows selecting the athentication type via configuration property
 
 > ##### `http.auth.type`
 > Type of authentication
-> *   Type: `String`
+> *   Type: `Enum { None, Basic }`
 > *   Default: `None`
-> *   Available options:
->     *   `None`
->     *   `Basic`
 
-#### Authenticating a HttpRequest with BasicHttpAuthenticator
+#### Authenticating with `BasicHttpAuthenticator`
 Allows selecting the athentication type via configuration property
 
 > ##### `http.auth.user`
 > *   Type: `String`
-> *   Default: ``
+> *   Default: `""`
 >
 > ##### `http.auth.password`
 > *   Type: `String`
-> *   Default: ``
+> *   Default: `"""`
 
 ---
 <a name="response"/>
 
-### HttpResponseParser: Parsing a HttpResponse
+### `HttpResponseParser`: Parsing a `HttpResponse`
 Once our `HttpRequest` has been executed, as a result we'll have to deal with a `HttpResponse` and translate it into 
 the list of `SourceRecord`s expected by Kafka Connect. 
 
@@ -333,12 +334,12 @@ the list of `SourceRecord`s expected by Kafka Connect.
 >     *   `com.github.castorm.kafka.connect.http.response.PolicyHttpResponseParser`
 >     *   `com.github.castorm.kafka.connect.http.response.KvHttpResponseParser`
 
-#### Parsing a HttpResponse with PolicyHttpResponseParser
+#### Parsing with `PolicyHttpResponseParser`
 Vets the HTTP response deciding whether the response should be processed, skipped or failed. This decision is delegated
 to a `HttpResponsePolicy`. 
 When the decision is to process the response, this processing is delegated to a secondary `HttpResponseParser`.
 
-##### HttpResponsePolicy: Vetting a HttpResponse
+##### `HttpResponsePolicy`: Vetting a `HttpResponse`
 
 > ##### `http.response.policy`
 > ```java
@@ -362,7 +363,7 @@ When the decision is to process the response, this processing is delegated to a 
 > *   Available implementations:
 >     *   `com.github.castorm.kafka.connect.http.response.KvHttpResponseParser`
 
-###### Vetting a HttpResponse with StatusCodeHttpResponsePolicy
+###### Vetting with `StatusCodeHttpResponsePolicy`
 Does response vetting based on HTTP status codes in the response and the configuration below.
 
 > ##### `http.response.policy.codes.process`
@@ -377,7 +378,7 @@ Does response vetting based on HTTP status codes in the response and the configu
 > *   Type: `String`
 > *   Default: `300..399`
 
-#### Parsing a HttpResponse with KvHttpResponseParser
+#### Parsing with `KvHttpResponseParser`
 Parses the HTTP response into a key-value SourceRecord. This process is decomposed in two steps:
 *   Parsing the `HttpResponse` into a `KvRecord`
 *   Mapping the `KvRecord` into a `SourceRecord`
@@ -404,12 +405,12 @@ Parses the HTTP response into a key-value SourceRecord. This process is decompos
 > *   Type: `Class`
 > *   Default: `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper`
 > *   Available implementations:
->     *   `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper` Maps __key__ to a *Struct schema*
->         with a single property `key`, and __value__ to a *Struct schema* with a single property `value`
->     *   `com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapper` Maps both __key__ and __value__ to 
->         a `String` schema
+>     *   `com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapper`
+>         Maps __key__ to a *Struct schema* with a single property `key`, and __value__ to a *Struct schema* with a single property `value`
+>     *   `com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapper`
+>         Maps both __key__ and __value__ to a `String` schema
 
-##### Parsing a HttpResponse with JacksonKvRecordHttpResponseParser
+##### Parsing with `JacksonKvRecordHttpResponseParser`
 Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in the response.
 
 > ##### `http.response.list.pointer`
@@ -470,7 +471,7 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
 ---
 <a name="mapper"/>
 
-### Mapping a KvRecord into SourceRecord with SimpleKvSourceRecordMapper
+### Mapping a `KvRecord` into `SourceRecord` with `SimpleKvSourceRecordMapper`
 Once we have our `KvRecord` we have to translate it into what Kafka Connect is expecting: `SourceRecord`s
 
 Embeds the record properties into a common simple envelope to enable schema evolution. This envelope simply contains
