@@ -80,7 +80,7 @@
         <assertj.version>3.18.1</assertj.version>
         <wiremock.version>2.27.2</wiremock.version>
         <guava.version>30.0-jre</guava.version>
-        <testcontainers.version>1.15.0</testcontainers.version>
+        <testcontainers.version>1.15.1</testcontainers.version>
         <rxjava.version>3.0.8</rxjava.version>
     </properties>
 
