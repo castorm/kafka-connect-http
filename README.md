@@ -456,7 +456,9 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
            Implementation based on based on a `DateTimeFormatter`
 >     *   `com.github.castorm.kafka.connect.http.response.timestamp.NattyTimestampParser`
            Implementation based on [Natty](http://natty.joestelmach.com/) parser
-> 
+>     *   `com.github.castorm.kafka.connect.http.response.timestamp.RegexTimestampParser`
+          Implementation that extracts substring from timestamp column and parse it 
+
 > ##### `http.response.record.timestamp.parser.pattern`
 > When using `DateTimeFormatterTimestampParser`, a custom pattern can be specified 
 > *   Type: `String`
@@ -467,6 +469,16 @@ Uses [Jackson](https://github.com/FasterXML/jackson) to look for the records in 
   identifiers
 > *   Type: `String`
 > *   Default: `UTC`
+>
+> ##### `http.response.record.timestamp.parser.regex`
+> When using `RegexTimestampParser`, a custom regex pattern can be specified 
+> *   Type: `String`
+> *   Default: `.*`
+>
+##### `http.response.record.timestamp.parser.regex.delegate`
+> When using `RegexTimestampParser`, a delegate class to parse timestamp 
+> *   Type: `Class`
+> *   Default: `DateTimeFormatterTimestampParser`
 
 ---
 <a name="mapper"/>
