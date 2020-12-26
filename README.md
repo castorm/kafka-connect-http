@@ -296,7 +296,7 @@ to be included in the `HttpRequest`.
 >     *   `com.github.castorm.kafka.connect.http.auth.BasicHttpAuthenticator`
 
 #### Authenticating with `ConfigurableHttpAuthenticator`
-Allows selecting the athentication type via configuration property
+Allows selecting the authentication type via configuration property
 
 > ##### `http.auth.type`
 > Type of authentication
@@ -304,7 +304,7 @@ Allows selecting the athentication type via configuration property
 > *   Default: `None`
 
 #### Authenticating with `BasicHttpAuthenticator`
-Allows selecting the athentication type via configuration property
+Allows selecting the authentication type via configuration property
 
 > ##### `http.auth.user`
 > *   Type: `String`
@@ -570,6 +570,34 @@ Assumptions:
 ```bash
 mvn package
 ```
+### Debugging
+
+_These instructions are phrased in terms of the steps needed when using IntelliJ,
+but other integrated development environments are likely to be similar._
+
+Point the Kafka stand-alone **plugin.path** at the module compile **Output path**.
+Assuming you are using the default Maven project import,
+this is the **./target** directory, so the **config/connect-standalone.properties** file would contain the line
+```bash
+plugin.path=<directory where git clone was executed>/kafka-connect-http/kafka-connect-http/target
+```
+In the **Run/Debug Configurations** dialog, create a new **Remote JVM Debug** configuration with the mode **Attach to remote JVM**.
+When remote debugging, some Java parameters need to be specified when the program is executed.
+Fortunately there are hooks in the Kafka shell scripts to accommodate this.
+The **Remote JVM Debug** configuration specifies the needed **Command line arguments for remote JVM**.
+In the terminal console where you execute the connect command line, define **KAFKA_DEBUG** and **JAVA_DEBUG_OPTS** as:
+```bash
+export KAFKA_DEBUG=true
+export JAVA_DEBUG_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+```
+Place a suitable breakpoint in the kafka-connect-http code, e.g. in `HttpSourceTask.start()`, and launch the standalone connect program:
+```bash
+bin/connect-standalone.sh config/connect-standalone.properties plugins/<kafka-connect-http properties file>
+```
+Click the Debug icon in IntelliJ and ensure
+the debugger console says `Connected to the target VM, address: 'localhost:5005', transport: 'socket'`
+and the breakpoint you placed becomes checked.
+The program should now break when the breakpoint is hit.
 ### Running the tests
 ```bash
 mvn test
