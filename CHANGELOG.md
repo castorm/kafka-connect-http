@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.8
 
+### v0.8.8 (12/25/2020)
+-   Bugfix #82: NPE when commit before ever polling. Happening on long initial polls. 
+
 ### v0.8.7 (12/06/2020)
 -   FreeMarker number representation as "computer" by default, offset.timestamp explicitly documented as ISO8601 format, elasticsearch
     example updated accordingly 
