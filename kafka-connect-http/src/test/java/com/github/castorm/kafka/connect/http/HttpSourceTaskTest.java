@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -108,6 +108,16 @@ class HttpSourceTaskTest {
         given(context.offsetStorageReader()).willReturn(offsetStorageReader);
         given(offsetStorageReader.offset(any())).willReturn(offset);
         return context;
+    }
+
+    @Test
+    void givenTaskNotPolled_whenCommit_thenNoException() {
+
+        givenTaskConfiguration();
+        task.initialize(getContext(emptyMap()));
+        task.start(emptyMap());
+
+        task.commit();
     }
 
     @Test
@@ -247,7 +257,7 @@ class HttpSourceTaskTest {
         given(client.execute(request)).willReturn(response);
         given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
         given(recordSorter.sort(asList(record(offsetMap))))
-            .willReturn(asList(record(offsetMap(1)), record(offsetMap(2)), record(offsetMap(3))));
+                .willReturn(asList(record(offsetMap(1)), record(offsetMap(2)), record(offsetMap(3))));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
         task.poll();
 
