@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -66,7 +67,7 @@ public class HttpSourceTask extends SourceTask {
 
     private SourceRecordFilterFactory recordFilterFactory;
 
-    private ConfirmationWindow<Map<String, ?>> confirmationWindow;
+    private ConfirmationWindow<Map<String, ?>> confirmationWindow = new ConfirmationWindow<>(emptyList());
 
     @Getter
     private Offset offset;
@@ -141,8 +142,6 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void commit() {
-        if (null == confirmationWindow)
-            return;
         offset = confirmationWindow.getLowWatermarkOffset()
                 .map(Offset::of)
                 .orElse(offset);

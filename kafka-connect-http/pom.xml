@@ -11,10 +11,6 @@
     <artifactId>kafka-connect-http</artifactId>
     <name>Kafka Connect HTTP</name>
 
-    <properties>
-        <env.GPG_PASSPHRASE>bogus</env.GPG_PASSPHRASE>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
