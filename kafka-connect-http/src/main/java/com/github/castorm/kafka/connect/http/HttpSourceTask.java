@@ -141,6 +141,8 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void commit() {
+        if (null == confirmationWindow)
+            return;
         offset = confirmationWindow.getLowWatermarkOffset()
                 .map(Offset::of)
                 .orElse(offset);
