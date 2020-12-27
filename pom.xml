@@ -180,6 +180,12 @@
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
                 <version>${testcontainers.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>junit</groupId>
+                        <artifactId>junit4</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
