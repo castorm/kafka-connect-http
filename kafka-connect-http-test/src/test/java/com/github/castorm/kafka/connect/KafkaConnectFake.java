@@ -20,9 +20,6 @@ package com.github.castorm.kafka.connect;
  * #L%
  */
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.github.castorm.kafka.connect.http.HttpSourceConnector;
 import com.github.castorm.kafka.connect.http.HttpSourceTask;
 import lombok.SneakyThrows;
@@ -30,46 +27,18 @@ import lombok.experimental.UtilityClass;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTaskContext;
 import org.apache.kafka.connect.storage.OffsetStorageReader;
-import org.mockito.Mockito;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 import static java.util.Collections.emptyMap;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 
 @UtilityClass
-public class ConnectorUtils {
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private static final ObjectReader MAP_READER = OBJECT_MAPPER.readerFor(new TypeReference<Map<String, String>>() {
-    });
-
-    @SneakyThrows({IOException.class, URISyntaxException.class})
-    public static String readConnectorConfig(String connectorPathJson) {
-        return new String(Files.readAllBytes(Paths.get(ConnectorUtils.class.getClassLoader().getResource(connectorPathJson).toURI())));
-    }
-
-    public static String replaceVariables(String content, Map<String, String> variables) {
-        for (Map.Entry<String, String> entry : variables.entrySet()) {
-            content = content.replaceAll("\\$\\{" + entry.getKey() + "\\}", entry.getValue());
-        }
-        return content;
-    }
-
-    @SneakyThrows(IOException.class)
-    public static Map<String, String> getConfigMap(String connectorConfigJson) {
-        return MAP_READER.readValue(OBJECT_MAPPER.readTree(connectorConfigJson).get("config"));
-    }
+public class KafkaConnectFake {
 
     public static List<SourceRecord> readAllRecords(Map<String, String> config) {
         HttpSourceConnector connector = new HttpSourceConnector();
@@ -85,7 +54,7 @@ public class ConnectorUtils {
     @SneakyThrows
     private static List<SourceRecord> runTaskUntilExhaust(Map<String, String> config) {
         HttpSourceTask task = new HttpSourceTask();
-        task.initialize(givenContextWithEmptyOffset());
+        task.initialize(emptyContext());
         task.start(config);
         List<SourceRecord> allRecords = new ArrayList<>();
         List<SourceRecord> records;
@@ -99,11 +68,29 @@ public class ConnectorUtils {
         return allRecords;
     }
 
-    private static SourceTaskContext givenContextWithEmptyOffset() {
-        SourceTaskContext context = Mockito.mock(SourceTaskContext.class);
-        OffsetStorageReader offsetReader = Mockito.mock(OffsetStorageReader.class);
-        given(context.offsetStorageReader()).willReturn(offsetReader);
-        given(offsetReader.offset(any())).willReturn(emptyMap());
-        return context;
+    private static SourceTaskContext emptyContext() {
+        return new SourceTaskContext() {
+
+            @Override
+            public Map<String, String> configs() {
+                return emptyMap();
+            }
+
+            @Override
+            public OffsetStorageReader offsetStorageReader() {
+                return new OffsetStorageReader() {
+
+                    @Override
+                    public <T> Map<String, Object> offset(Map<String, T> map) {
+                        return emptyMap();
+                    }
+
+                    @Override
+                    public <T> Map<Map<String, T>, Map<String, Object>> offsets(Collection<Map<String, T>> collection) {
+                        return emptyMap();
+                    }
+                };
+            }
+        };
     }
 }

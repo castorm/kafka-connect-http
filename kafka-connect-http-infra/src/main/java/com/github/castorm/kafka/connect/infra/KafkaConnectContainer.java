@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect;
+package com.github.castorm.kafka.connect.infra;
 
 /*-
  * #%L
@@ -30,12 +30,14 @@ public class KafkaConnectContainer extends GenericContainer<KafkaConnectContaine
     @Getter
     private final Integer restPort = 8083;
 
-    private final Integer jmxPort = 5555;
+    @Getter
+    private final Integer debugPort = 5005;
 
     public KafkaConnectContainer(DockerImageName dockerImageName) {
         super(dockerImageName);
-        withEnv("KAFKA_JMX_PORT", jmxPort.toString());
         withEnv("CONNECT_REST_PORT", restPort.toString());
+        withEnv("KAFKA_DEBUG", "y");
+        withEnv("JAVA_DEBUG_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:" + debugPort);
         withEnv("CONNECT_GROUP_ID", "test");
         withEnv("CONNECT_CONFIG_STORAGE_TOPIC", "test-config");
         withEnv("CONNECT_OFFSET_STORAGE_TOPIC", "test-offsets");
@@ -50,7 +52,7 @@ public class KafkaConnectContainer extends GenericContainer<KafkaConnectContaine
         withEnv("CONNECT_VALUE_CONVERTER", "org.apache.kafka.connect.storage.StringConverter");
         withEnv("CONNECT_INTERNAL_KEY_CONVERTER", "org.apache.kafka.connect.json.JsonConverter");
         withEnv("CONNECT_INTERNAL_VALUE_CONVERTER", "org.apache.kafka.connect.json.JsonConverter");
-        withExposedPorts(restPort, jmxPort);
+        withExposedPorts(restPort, debugPort);
     }
 
     public KafkaConnectContainer withBootstrapServers(String bootstrapServers) {

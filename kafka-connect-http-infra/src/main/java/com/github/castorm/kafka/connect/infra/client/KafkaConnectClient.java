@@ -1,4 +1,4 @@
-package com.github.castorm.kafka.connect;
+package com.github.castorm.kafka.connect.infra.client;
 
 /*-
  * #%L

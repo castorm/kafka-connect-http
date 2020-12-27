@@ -32,9 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.github.castorm.kafka.connect.ConnectorUtils.getConfigMap;
-import static com.github.castorm.kafka.connect.ConnectorUtils.readAllRecords;
-import static com.github.castorm.kafka.connect.ConnectorUtils.readConnectorConfig;
+import static com.github.castorm.kafka.connect.ConnectorUtils.readFileFromClasspath;
 import static com.github.castorm.kafka.connect.ConnectorUtils.replaceVariables;
+import static com.github.castorm.kafka.connect.KafkaConnectFake.readAllRecords;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
@@ -59,7 +59,7 @@ class HttpSourceConnectorIT {
     @Test
     void validateConnector1() {
 
-        Map<String, String> config = getConfigMap(replaceVariables(readConnectorConfig("connectors/connector1.json"), properties));
+        Map<String, String> config = getConfigMap(replaceVariables(readFileFromClasspath("connectors/connector1.json"), properties));
 
         List<SourceRecord> records = readAllRecords(config);
 

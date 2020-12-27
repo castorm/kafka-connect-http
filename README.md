@@ -572,6 +572,26 @@ mvn package
 ```
 ### Debugging
 
+#### Using Pre-configured docker setup
+
+You can easily run a Kafka Connect cluster with kafka-connect-http pre-installed by executing:
+```bash
+mvn verify -Pdebug -DskipTests
+```
+It'll run dockerized versions of kafka and kafka-connect which you can access via REST API or attach debuggers to the url printed in
+console:
+```bash
+Kafka Connect testcontainers infra is ready
+  Rest API: http://localhost:33216
+  Debug agent: localhost:33217
+```
+Right after, it'll allow you to specify the file path to your connector's json configuration:
+```bash:
+Introduce the path to your connector JSON configuration file:
+```
+It'll subscribe to the corresponding kafka topic, printing every message going through the output topic of your connector.
+
+#### Using Kafka Connect standalone
 _These instructions are phrased in terms of the steps needed when using IntelliJ,
 but other integrated development environments are likely to be similar._
 

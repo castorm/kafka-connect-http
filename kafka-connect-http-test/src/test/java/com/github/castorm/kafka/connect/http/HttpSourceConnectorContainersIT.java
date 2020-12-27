@@ -20,13 +20,11 @@ package com.github.castorm.kafka.connect.http;
  * #L%
  */
 
-import com.github.castorm.kafka.connect.ConnectorUtils;
-import com.github.castorm.kafka.connect.Infrastructure;
-import com.github.castorm.kafka.connect.KafkaClient;
-import com.github.castorm.kafka.connect.KafkaConnectClient;
+import com.github.castorm.kafka.connect.infra.client.KafkaClient;
+import com.github.castorm.kafka.connect.infra.client.KafkaConnectClient;
+import com.github.castorm.kafka.connect.infra.KafkaConnectInfraExtension;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -34,13 +32,16 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
+import static com.github.castorm.kafka.connect.ConnectorUtils.readFileFromClasspath;
+import static com.github.castorm.kafka.connect.ConnectorUtils.replaceVariables;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 class HttpSourceConnectorContainersIT {
 
     @RegisterExtension
-    Infrastructure infra = new Infrastructure().start();
+    KafkaConnectInfraExtension infra = new KafkaConnectInfraExtension().start();
 
     KafkaConnectClient kafkaConnectClient = new KafkaConnectClient(infra.getKafkaConnectExternalUrl());
 
@@ -50,11 +51,11 @@ class HttpSourceConnectorContainersIT {
     @Timeout(60)
     void whenConnector1_thenRecordsInTopic() {
 
-        String configJson = ConnectorUtils.replaceVariables(ConnectorUtils.readConnectorConfig("connectors/connector1.json"), ImmutableMap.of("server.url", infra.getWiremockInternalUrl()));
+        String configJson = replaceVariables(readFileFromClasspath("connectors/connector1.json"), ImmutableMap.of("server.url", infra.getWiremockInternalUrl()));
 
         Map<String, String> config = kafkaConnectClient.createConnector(configJson);
 
-        Assertions.assertThat(kafkaClient.observeTopic(config.get("kafka.topic"))
+        assertThat(kafkaClient.observeTopic(config.get("kafka.topic"))
                 .take(2)
                 .doOnNext(record -> log.info("{} {} {}", record.timestamp(), record.key(), record.value()))
                 .collect(toList())
