@@ -59,7 +59,9 @@ public class KafkaConnectInfra {
         kafka.start();
         kafkaConnect.start();
         kafkaConnect.waitingUntilReady();
-        System.out.println("Kafka Connect testcontainers infra is ready\n  Rest API: http://" + getKafkaConnectExternalRestUrl() + "\n  Debug agent: " + getKafkaConnectExternalDebugUrl());
+        System.out.println("Kafka Connect cluster is ready" +
+                "\n  REST API: http://" + getKafkaConnectExternalRestUrl() +
+                "\n  Debug Agent: " + getKafkaConnectExternalDebugUrl());
         return this;
     }
 
