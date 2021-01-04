@@ -36,13 +36,16 @@ public class JacksonKvRecordHttpResponseParserConfig extends AbstractConfig {
 
     private static final String RECORD_TIMESTAMP_PARSER_CLASS = "http.response.record.timestamp.parser";
 
-    private final JacksonRecordParser recordParser;
+    private final JacksonResponseRecordParser responseParser;
     private final TimestampParser timestampParser;
 
     JacksonKvRecordHttpResponseParserConfig(Map<String, ?> originals) {
         super(config(), originals);
-        recordParser = new JacksonRecordParser();
+        JacksonSerializer serializer = new JacksonSerializer();
+        JacksonRecordParser recordParser = new JacksonRecordParser(serializer);
         recordParser.configure(originals);
+        responseParser = new JacksonResponseRecordParser(recordParser, serializer);
+        responseParser.configure(originals);
         timestampParser = getConfiguredInstance(RECORD_TIMESTAMP_PARSER_CLASS, TimestampParser.class);
     }
 

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.github.castorm.kafka.connect.common.CollectorsUtils.toLinkedHashMap;
+import static com.github.castorm.kafka.connect.common.CollectionUtils.toLinkedHashMap;
 import static java.util.function.Function.identity;
 
 @Slf4j

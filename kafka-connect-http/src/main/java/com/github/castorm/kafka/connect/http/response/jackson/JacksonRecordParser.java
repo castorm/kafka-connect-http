@@ -24,16 +24,13 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.apache.kafka.common.Configurable;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
@@ -43,73 +40,59 @@ public class JacksonRecordParser implements Configurable {
 
     private final Function<Map<String, ?>, JacksonRecordParserConfig> configFactory;
 
-    private final ObjectMapper objectMapper;
+    private final JacksonSerializer serializer;
 
-    private final JacksonPropertyResolver propertyResolver;
-
-    private JsonPointer recordsPointer;
     private List<JsonPointer> keyPointer;
     private Optional<JsonPointer> timestampPointer;
     private Map<String, JsonPointer> offsetPointers;
     private JsonPointer valuePointer;
 
     public JacksonRecordParser() {
-        this(JacksonRecordParserConfig::new, new ObjectMapper(), new JacksonPropertyResolver());
+        this(new JacksonSerializer(new ObjectMapper()));
+    }
+
+    public JacksonRecordParser(JacksonSerializer serializer) {
+        this(JacksonRecordParserConfig::new, serializer);
     }
 
     @Override
     public void configure(Map<String, ?> settings) {
         JacksonRecordParserConfig config = configFactory.apply(settings);
-        recordsPointer = config.getRecordsPointer();
         keyPointer = config.getKeyPointer();
         valuePointer = config.getValuePointer();
         offsetPointers = config.getOffsetPointers();
         timestampPointer = config.getTimestampPointer();
     }
 
-    Stream<JsonNode> getRecords(byte[] body) {
-        return propertyResolver.getArrayAt(deserialize(body), recordsPointer);
-    }
-
-    @Deprecated
-    /*
-      Replaced by Offset
+    /**
+     * @deprecated Replaced by Offset
      */
+    @Deprecated
     Optional<String> getKey(JsonNode node) {
         String key = keyPointer.stream()
-                .map(pointer -> propertyResolver.getObjectAt(node, pointer).asText())
+                .map(pointer -> serializer.getObjectAt(node, pointer).asText())
                 .filter(it -> !it.isEmpty())
                 .collect(joining("+"));
         return key.isEmpty() ? Optional.empty() : Optional.of(key);
     }
 
-    @Deprecated
-    /*
-      Replaced by Offset
+    /**
+     * @deprecated Replaced by Offset
      */
+    @Deprecated
     Optional<String> getTimestamp(JsonNode node) {
-        return timestampPointer.map(pointer -> propertyResolver.getObjectAt(node, pointer).asText());
+        return timestampPointer.map(pointer -> serializer.getObjectAt(node, pointer).asText());
     }
 
-    Map<String, Object> getOffsets(JsonNode node) {
+    Map<String, Object> getOffset(JsonNode node) {
         return offsetPointers.entrySet().stream()
-                .collect(toMap(Entry::getKey, entry -> propertyResolver.getObjectAt(node, entry.getValue()).asText()));
+                .collect(toMap(Entry::getKey, entry -> serializer.getObjectAt(node, entry.getValue()).asText()));
     }
 
     String getValue(JsonNode node) {
 
-        JsonNode value = propertyResolver.getObjectAt(node, valuePointer);
+        JsonNode value = serializer.getObjectAt(node, valuePointer);
 
-        return value.isObject() ? serialize(value) : value.asText();
-    }
-
-    @SneakyThrows(IOException.class)
-    private JsonNode deserialize(byte[] body) {
-        return objectMapper.readTree(body);
-    }
-
-    @SneakyThrows(IOException.class)
-    private String serialize(JsonNode node) {
-        return objectMapper.writeValueAsString(node);
+        return value.isObject() ? serializer.serialize(value) : value.asText();
     }
 }

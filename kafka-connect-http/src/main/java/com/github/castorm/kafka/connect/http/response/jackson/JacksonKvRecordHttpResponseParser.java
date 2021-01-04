@@ -20,10 +20,10 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  * #L%
  */
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
+import com.github.castorm.kafka.connect.http.response.jackson.model.JacksonRecord;
 import com.github.castorm.kafka.connect.http.response.spi.KvRecordHttpResponseParser;
 import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
 
     private final Function<Map<String, ?>, JacksonKvRecordHttpResponseParserConfig> configFactory;
 
-    private JacksonRecordParser recordParser;
+    private JacksonResponseRecordParser responseParser;
 
     private TimestampParser timestampParser;
 
@@ -54,27 +54,27 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
     @Override
     public void configure(Map<String, ?> configs) {
         JacksonKvRecordHttpResponseParserConfig config = configFactory.apply(configs);
-        recordParser = config.getRecordParser();
+        responseParser = config.getResponseParser();
         timestampParser = config.getTimestampParser();
     }
 
     @Override
     public List<KvRecord> parse(HttpResponse response) {
-        return recordParser.getRecords(response.getBody())
+        return responseParser.getRecords(response.getBody())
                 .map(this::map)
                 .collect(toList());
     }
 
-    private KvRecord map(JsonNode node) {
+    private KvRecord map(JacksonRecord record) {
 
-        Map<String, Object> offsets = recordParser.getOffsets(node);
+        Map<String, Object> offsets = record.getOffset();
 
-        String key = recordParser.getKey(node)
+        String key = ofNullable(record.getKey())
                 .map(Optional::of)
                 .orElseGet(() -> ofNullable(offsets.get("key")).map(String.class::cast))
-                .orElseGet(() -> generateConsistentKey(node));
+                .orElseGet(() -> generateConsistentKey(record.getBody()));
 
-        Optional<Instant> timestamp = recordParser.getTimestamp(node)
+        Optional<Instant> timestamp = ofNullable(record.getTimestamp())
                 .map(Optional::of)
                 .orElseGet(() -> ofNullable(offsets.get("timestamp")).map(String.class::cast))
                 .map(timestampParser::parse);
@@ -85,12 +85,12 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
 
         return KvRecord.builder()
                 .key(key)
-                .value(recordParser.getValue(node))
+                .value(record.getBody())
                 .offset(offset)
                 .build();
     }
 
-    private String generateConsistentKey(JsonNode node) {
-        return nameUUIDFromBytes(node.toString().getBytes()).toString();
+    private static String generateConsistentKey(String body) {
+        return nameUUIDFromBytes(body.getBytes()).toString();
     }
 }

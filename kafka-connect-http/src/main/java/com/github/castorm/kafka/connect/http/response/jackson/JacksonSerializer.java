@@ -9,9 +9,9 @@ package com.github.castorm.kafka.connect.http.response.jackson;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,15 +22,36 @@ package com.github.castorm.kafka.connect.http.response.jackson;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
+import java.io.IOException;
 import java.util.stream.Stream;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
 import static java.util.stream.StreamSupport.stream;
 
-class JacksonPropertyResolver {
+@RequiredArgsConstructor
+class JacksonSerializer {
 
     private static final JsonPointer JSON_ROOT = compile("/");
+
+    private final ObjectMapper objectMapper;
+
+    public JacksonSerializer() {
+        this(new ObjectMapper());
+    }
+
+    @SneakyThrows(IOException.class)
+    JsonNode deserialize(byte[] body) {
+        return objectMapper.readTree(body);
+    }
+
+    @SneakyThrows(IOException.class)
+    String serialize(JsonNode node) {
+        return objectMapper.writeValueAsString(node);
+    }
 
     JsonNode getObjectAt(JsonNode node, JsonPointer pointer) {
         return getRequiredAt(node, pointer);
