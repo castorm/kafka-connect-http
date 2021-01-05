@@ -28,6 +28,7 @@ import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
@@ -60,6 +61,19 @@ public class PolicyHttpResponseParser implements HttpResponseParser {
                 return delegate.parse(response);
             case SKIP:
                 return emptyList();
+            case FAIL:
+            default:
+                throw new IllegalStateException(String.format("Policy failed for response code: %s, body: %s", response.getCode(), ofNullable(response.getBody()).map(String::new).orElse("")));
+        }
+    }
+
+    @Override
+    public Optional<String> getNextPageUrl(HttpResponse response) {
+        switch (policy.resolve(response)) {
+            case PROCESS:
+                return delegate.getNextPageUrl(response);
+            case SKIP:
+                return Optional.empty();
             case FAIL:
             default:
                 throw new IllegalStateException(String.format("Policy failed for response code: %s, body: %s", response.getCode(), ofNullable(response.getBody()).map(String::new).orElse("")));

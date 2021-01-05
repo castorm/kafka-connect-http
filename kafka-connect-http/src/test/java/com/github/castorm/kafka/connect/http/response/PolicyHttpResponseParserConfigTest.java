@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,6 +62,11 @@ class PolicyHttpResponseParserConfigTest {
         @Override
         public List<SourceRecord> parse(HttpResponse response) {
             return null;
+        }
+
+        @Override
+        public Optional<String> getNextPageUrl(HttpResponse response) {
+            return Optional.empty();
         }
     }
 

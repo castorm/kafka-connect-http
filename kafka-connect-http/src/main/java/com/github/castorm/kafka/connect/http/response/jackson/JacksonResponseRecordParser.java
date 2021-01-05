@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.Configurable;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -45,6 +46,10 @@ public class JacksonResponseRecordParser implements Configurable {
 
     private JsonPointer recordsPointer;
 
+    private Optional<JsonPointer> nextPagePointer;
+
+    private JsonNode jsonBody;
+
     public JacksonResponseRecordParser() {
         this(new JacksonRecordParser(), new JacksonSerializer(new ObjectMapper()));
     }
@@ -61,12 +66,19 @@ public class JacksonResponseRecordParser implements Configurable {
 
     Stream<JacksonRecord> getRecords(byte[] body) {
 
-        JsonNode jsonBody = serializer.deserialize(body);
+        this.jsonBody = serializer.deserialize(body);
 
         Map<String, Object> responseOffset = getResponseOffset(jsonBody);
 
         return serializer.getArrayAt(jsonBody, recordsPointer)
                 .map(jsonRecord -> toJacksonRecord(jsonRecord, responseOffset));
+    }
+
+    Optional<String> getNextPageUrl(byte[] body) {
+        return nextPagePointer.map(pointer ->
+            serializer.checkIfNonNull(this.jsonBody, pointer)
+                ? serializer.getObjectAt(this.jsonBody, pointer).asText()
+                : null);
     }
 
     private Map<String, Object> getResponseOffset(JsonNode node) {

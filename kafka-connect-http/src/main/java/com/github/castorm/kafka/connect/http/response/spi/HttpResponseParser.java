@@ -26,8 +26,8 @@ import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-@FunctionalInterface
 public interface HttpResponseParser extends Configurable {
 
     List<SourceRecord> parse(HttpResponse response);
@@ -35,4 +35,6 @@ public interface HttpResponseParser extends Configurable {
     default void configure(Map<String, ?> map) {
         // Do nothing
     }
+
+    Optional<String> getNextPageUrl(HttpResponse response);
 }

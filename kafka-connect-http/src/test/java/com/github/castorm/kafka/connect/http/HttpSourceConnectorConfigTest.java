@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.github.castorm.kafka.connect.http.HttpSourceConnectorConfigTest.Fixture.config;
 import static com.github.castorm.kafka.connect.http.HttpSourceConnectorConfigTest.Fixture.configWithout;
@@ -135,6 +136,11 @@ class HttpSourceConnectorConfigTest {
     public static class TestResponseParser implements HttpResponseParser {
         public List<SourceRecord> parse(HttpResponse response) {
             return null;
+        }
+
+        @Override
+        public Optional<String> getNextPageUrl(HttpResponse response) {
+            return Optional.empty();
         }
     }
 

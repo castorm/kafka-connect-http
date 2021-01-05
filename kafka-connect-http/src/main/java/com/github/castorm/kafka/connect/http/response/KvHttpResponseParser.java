@@ -29,6 +29,7 @@ import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toList;
@@ -58,5 +59,9 @@ public class KvHttpResponseParser implements HttpResponseParser {
         return recordParser.parse(response).stream()
                 .map(recordMapper::map)
                 .collect(toList());
+    }
+
+    public Optional<String> getNextPageUrl(HttpResponse response) {
+        return recordParser.getNextPageUrl(response);
     }
 }

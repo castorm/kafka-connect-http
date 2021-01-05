@@ -65,6 +65,11 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
                 .collect(toList());
     }
 
+    @Override
+    public Optional<String> getNextPageUrl(HttpResponse response) {
+        return responseParser.getNextPageUrl(response.getBody());
+    }
+
     private KvRecord map(JacksonRecord record) {
 
         Map<String, Object> offsets = record.getOffset();
