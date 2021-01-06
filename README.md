@@ -491,6 +491,9 @@ a key and a value properties with customizable field names.
 
 Here is also where we'll tell Kafka Connect to what topic and on what partition do we want to send our record.
 
+** It's worth noticing there are projects out there that allow you to infer the schema from your json document.
+(e.g. [expandjsonsmt](https://github.com/RedHatInsights/expandjsonsmt))
+
 > ##### `kafka.topic`
 > Name of the topic where the record will be sent to
 > *   __Required__
