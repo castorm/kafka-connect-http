@@ -77,7 +77,7 @@
         <freemarker.version>2.3.30</freemarker.version>
         <natty.version>0.13</natty.version>
 
-        <junit.version>5.7.0</junit.version>
+        <junit.version>5.7.1</junit.version>
         <mockito.version>3.7.7</mockito.version>
         <assertj.version>3.19.0</assertj.version>
         <wiremock.version>2.27.2</wiremock.version>
