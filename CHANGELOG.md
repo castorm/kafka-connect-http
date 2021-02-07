@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.8
 
+### v0.8.10 (02/07/2021)
+-   Escaping headers' colons
+
 ### v0.8.9 (01/04/2021)
 -   Added implementation to parse substring as timestamp field 
 
