@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownHeaders;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownList;
@@ -62,6 +64,21 @@ class ConfigUtilsTest {
     void whenBreakDownHeadersWithSpaces_thenBrokenDown() {
         assertThat(breakDownHeaders(" Name : Value ")).containsExactly(new SimpleEntry<>("Name", singletonList("Value")));
     }
+
+    @Test
+    void whenBreakDownHeadersWithCommasInValues() {
+        assertThat(breakDownHeaders("Name1:Prefix1\\,Suffix1,Name2:Value2,Name3:Prefix3\\\\,Suffix3"))
+                .contains(new SimpleEntry<>("Name1", singletonList("Prefix1,Suffix1")),
+                        new SimpleEntry<>("Name2", singletonList("Value2")),
+                        new SimpleEntry<>("Name3", singletonList("Prefix3\\,Suffix3")));
+    }
+
+    @Test
+    void whenBreakDownMultiValueHeadersWithCommasInValues() {
+        assertThat(breakDownHeaders("Name1:Prefix1\\,Suffix1,Name1:Prefix2\\,Suffix2"))
+                .containsExactly(new SimpleEntry<>("Name1", asList("Prefix1,Suffix1", "Prefix2,Suffix2")));
+    }
+
 
     @Test
     void whenBreakDownTwoHeaders_thenBrokenDown() {
