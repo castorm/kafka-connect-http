@@ -74,7 +74,7 @@
         <kafka.version>2.7.0</kafka.version>
         <okhttp.version>4.9.1</okhttp.version>
         <jackson.version>2.12.1</jackson.version>
-        <freemarker.version>2.3.30</freemarker.version>
+        <freemarker.version>2.3.31</freemarker.version>
         <natty.version>0.13</natty.version>
 
         <junit.version>5.7.1</junit.version>
