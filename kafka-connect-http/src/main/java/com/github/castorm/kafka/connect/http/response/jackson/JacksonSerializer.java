@@ -59,7 +59,12 @@ class JacksonSerializer {
 
     Stream<JsonNode> getArrayAt(JsonNode node, JsonPointer pointer) {
         JsonNode array = getRequiredAt(node, pointer);
-        return array.isArray() ? stream(array.spliterator(), false) : Stream.of(array);
+        if (array.isArray()) {
+            return stream(array.spliterator(), false);
+        } else if (array.isNull()) {
+            return Stream.empty();
+        }
+        return Stream.of(array);
     }
 
     private static JsonNode getRequiredAt(JsonNode body, JsonPointer recordsPointer) {

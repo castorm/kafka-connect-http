@@ -33,12 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.array;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.deserialize;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.item1;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.item1Json;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.item2;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.itemArray;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
@@ -83,6 +78,11 @@ class JacksonSerializerTest {
     }
 
     @Test
+    void whenGetNullAtPointerItems_thenNoItem() {
+        assertThat(serializer.getArrayAt(deserialize(itemArrayNull), compile("/items"))).isEmpty();
+    }
+
+    @Test
     void whenGetObjectAtRoot_thenRoot() {
         assertThat(serializer.getObjectAt(deserialize(item1), compile("/"))).isEqualTo(deserialize(item1));
     }
@@ -99,6 +99,7 @@ class JacksonSerializerTest {
         String item2 = "{\"k2\":\"v2\"}";
         String array = "[" + item1 + "," + item2 + "]";
         String itemArray = "{\"items\":[" + item1 + "," + item2 + "]}";
+        String itemArrayNull = "{\"items\":null}";
 
         @SneakyThrows
         static JsonNode deserialize(String body) {
