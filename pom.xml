@@ -83,7 +83,7 @@
         <wiremock.version>2.27.2</wiremock.version>
         <guava.version>30.1-jre</guava.version>
         <testcontainers.version>1.15.2</testcontainers.version>
-        <rxjava.version>3.0.10</rxjava.version>
+        <rxjava.version>3.0.11</rxjava.version>
     </properties>
 
     <dependencyManagement>
