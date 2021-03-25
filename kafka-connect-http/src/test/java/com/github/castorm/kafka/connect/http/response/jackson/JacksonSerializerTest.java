@@ -33,7 +33,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 
 import static com.fasterxml.jackson.core.JsonPointer.compile;
-import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.*;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.array;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.deserialize;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.item1;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.item1Json;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.item2;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.itemArray;
+import static com.github.castorm.kafka.connect.http.response.jackson.JacksonSerializerTest.Fixture.itemArrayNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
