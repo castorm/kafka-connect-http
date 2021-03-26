@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.8
 
+### v0.8.11 (03/26/2021)
+-   Support for null item lists, courtesy of @ueisele
+
 ### v0.8.10 (02/07/2021)
 -   Escaping headers' colons
 
