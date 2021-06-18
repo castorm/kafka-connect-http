@@ -35,13 +35,13 @@ import static org.mockito.BDDMockito.given;
 class TokenEndpointAuthenticatorTest {
 
     @Mock
-    BasicHttpAuthenticatorConfig config;
+    TokenEndpointAuthenticatorConfig config;
 
-    BasicHttpAuthenticator authenticator;
+    TokenEndpointAuthenticator authenticator;
 
     @BeforeEach
     void setUp() {
-        authenticator = new BasicHttpAuthenticator(__ -> config);
+        authenticator = new TokenEndpointAuthenticator(__ -> config);
     }
 
     @Test
