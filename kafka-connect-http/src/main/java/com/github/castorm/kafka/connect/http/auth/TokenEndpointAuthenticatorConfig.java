@@ -12,25 +12,26 @@ import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 
 @Getter
 public class TokenEndpointAuthenticatorConfig extends AbstractConfig {
-    private static final String AUTH_ENDPOINT = "http.auth.uri";
-    private static final String USER = "http.auth.user";
-    private static final String PASSWORD = "http.auth.password";
+    private static final String AUTH_URI = "http.auth.uri";
+    private static final String PAYLOAD = "http.auth.payload";
+    private static final String TOKEN_KEY_PATH = "http.auth.tokenkeypath";
 
-    private final String user;
-    private final Password password;
-    private final String authEndpoint;
+    private final String authUri;
+    private final Password authPayload;
+    private final String tokenKeyPath;
 
     public TokenEndpointAuthenticatorConfig(Map<?, ?> originals) {
         super(config(), originals);
-        user = getString(USER);
-        password = getPassword(PASSWORD);
-        authEndpoint = getString(AUTH_ENDPOINT);
+        authUri = getString(AUTH_URI);
+        authPayload = getPassword(PAYLOAD);
+        tokenKeyPath = getString(TOKEN_KEY_PATH);
+
     }
 
     public static ConfigDef config() {
-        return new ConfigDef().define(USER, STRING, "", HIGH, "Username")
-                .define(PASSWORD, ConfigDef.Type.PASSWORD, "", HIGH, "Password")
-                .define(AUTH_ENDPOINT, STRING, "/auth", HIGH, "Auth endpoint");
+        return new ConfigDef().define(PAYLOAD, ConfigDef.Type.PASSWORD, "", HIGH, "Auth payload JSON")
+                .define(TOKEN_KEY_PATH, STRING, "/access_token", HIGH, "Auth request response token key")
+                .define(AUTH_URI, STRING, "", HIGH, "Auth endpoint");
     }
 
 }

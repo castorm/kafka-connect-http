@@ -32,34 +32,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TokenEndpointAuthenticatorConfigTest {
 
     @Test
-    void whenNoUser_thenDefault() {
-        assertThat(config(emptyMap()).getUser()).isEmpty();
+    void whenNoPayload_thenDefault() {
+        assertThat(config(emptyMap()).getAuthPayload()).isEqualTo(new Password(""));
     }
 
     @Test
-    void whenUser_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.auth.user", "user")).getUser()).isEqualTo("user");
+    void whenPayload_thenInitialized() {
+        assertThat(config(ImmutableMap.of("http.auth.payload", "{\"foo\": \"bar\"}")).getAuthPayload())
+                .isEqualTo(new Password("password"));
     }
 
     @Test
     void whenAuthEndpoint_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.auth.uri", "/login")).getAuthEndpoint()).isEqualTo("/login");
+        assertThat(config(ImmutableMap.of("http.auth.uri", "http://lol/login")).getAuthUri())
+                .isEqualTo("http://lol/login");
     }
 
     @Test
     void whenNoAuthEndpoint_thenDefault() {
-        assertThat(config(emptyMap()).getAuthEndpoint()).isEqualTo("/auth");
+        assertThat(config(emptyMap()).getAuthUri()).isEmpty();
     }
 
     @Test
-    void whenNoPassword_thenDefault() {
-        assertThat(config(emptyMap()).getPassword()).isEqualTo(new Password(""));
+    void whenTokenKeyPath_thenInitialized() {
+        assertThat(config(ImmutableMap.of("http.auth.tokenkeypath", "/token")).getTokenKeyPath()).isEqualTo("/token");
     }
 
     @Test
-    void whenPassword_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.auth.password", "password")).getPassword())
-                .isEqualTo(new Password("password"));
+    void whenNoTokenKeyPath_thenDefault() {
+        assertThat(config(emptyMap()).getTokenKeyPath()).isEqualTo("/access_token");
     }
 
     private static TokenEndpointAuthenticatorConfig config(Map<String, String> config) {

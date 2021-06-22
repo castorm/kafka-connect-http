@@ -29,7 +29,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+
+import java.net.ConnectException;
 
 @ExtendWith(MockitoExtension.class)
 class TokenEndpointAuthenticatorTest {
@@ -47,22 +50,26 @@ class TokenEndpointAuthenticatorTest {
     @Test
     void whenCredentials_thenHeader() {
 
-        given(config.getUser()).willReturn("user");
-        given(config.getPassword()).willReturn(new Password("password"));
+        given(config.getAuthUri()).willReturn("http://dkcph-pmstapp1:9001/Auth");
+        given(config.getTokenKeyPath()).willReturn("/accessToken");
+        given(config.getAuthPayload())
+                .willReturn(new Password("{  \"login\": \"mamor\",  \"password\": \"Something Secret\"}"));
 
         authenticator.configure(emptyMap());
 
-        assertThat(authenticator.getAuthorizationHeader()).contains("Basic dXNlcjpwYXNzd29yZA==");
+        assertThat(authenticator.getAuthorizationHeader()).contains("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.");
     }
 
     @Test
     void whenNoCredentials_thenHeaderEmpty() {
 
-        given(config.getUser()).willReturn("");
-        given(config.getPassword()).willReturn(new Password(""));
+        given(config.getAuthUri()).willReturn("");
+        given(config.getTokenKeyPath()).willReturn("");
+        given(config.getAuthPayload()).willReturn(new Password(""));
 
         authenticator.configure(emptyMap());
 
-        assertThat(authenticator.getAuthorizationHeader()).isEmpty();
+        assertThatThrownBy(() -> authenticator.getAuthorizationHeader()).isInstanceOf(ConnectException.class);
+
     }
 }
