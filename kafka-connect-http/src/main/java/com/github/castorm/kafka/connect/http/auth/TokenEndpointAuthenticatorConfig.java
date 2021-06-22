@@ -30,7 +30,7 @@ public class TokenEndpointAuthenticatorConfig extends AbstractConfig {
 
     public static ConfigDef config() {
         return new ConfigDef().define(PAYLOAD, ConfigDef.Type.PASSWORD, "", HIGH, "Auth payload JSON")
-                .define(TOKEN_KEY_PATH, STRING, "/access_token", HIGH, "Auth request response token key")
+                .define(TOKEN_KEY_PATH, STRING, "access_token", HIGH, "Auth request response token key")
                 .define(AUTH_URI, STRING, "", HIGH, "Auth endpoint");
     }
 

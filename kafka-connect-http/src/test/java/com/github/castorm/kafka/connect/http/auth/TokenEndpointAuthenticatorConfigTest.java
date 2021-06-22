@@ -39,7 +39,7 @@ class TokenEndpointAuthenticatorConfigTest {
     @Test
     void whenPayload_thenInitialized() {
         assertThat(config(ImmutableMap.of("http.auth.payload", "{\"foo\": \"bar\"}")).getAuthPayload())
-                .isEqualTo(new Password("password"));
+                .isEqualTo(new Password("{\"foo\": \"bar\"}"));
     }
 
     @Test
@@ -55,12 +55,13 @@ class TokenEndpointAuthenticatorConfigTest {
 
     @Test
     void whenTokenKeyPath_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.auth.tokenkeypath", "/token")).getTokenKeyPath()).isEqualTo("/token");
+        assertThat(config(ImmutableMap.of("http.auth.tokenkeypath", "path.to.token")).getTokenKeyPath())
+                .isEqualTo("path.to.token");
     }
 
     @Test
     void whenNoTokenKeyPath_thenDefault() {
-        assertThat(config(emptyMap()).getTokenKeyPath()).isEqualTo("/access_token");
+        assertThat(config(emptyMap()).getTokenKeyPath()).isEqualTo("access_token");
     }
 
     private static TokenEndpointAuthenticatorConfig config(Map<String, String> config) {

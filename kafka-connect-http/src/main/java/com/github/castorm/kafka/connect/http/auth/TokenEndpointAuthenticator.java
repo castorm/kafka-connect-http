@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.castorm.kafka.connect.http.auth.spi.HttpAuthenticator;
 
 import org.apache.kafka.connect.errors.RetriableException;
+
 import org.apache.kafka.connect.errors.ConnectException;
 
 import okhttp3.MediaType;
@@ -45,16 +46,14 @@ public class TokenEndpointAuthenticator implements HttpAuthenticator {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        // TODO: Should be anonymous type to make it generic. but how does that work in
-        // java? regex?
-        TokenEndpointResponse responseParsed;
+        String accessToken;
         try {
-            responseParsed = objectMapper.readValue(response, TokenEndpointResponse.class);
+            accessToken = objectMapper.readTree(response).path(config.getTokenKeyPath()).asText();
         } catch (JsonProcessingException e) {
             throw new ConnectException("Error: " + e.getMessage(), e);
         }
 
-        return Optional.of("Bearer " + responseParsed.accessToken);
+        return Optional.of("Bearer " + accessToken);
     }
 
     private String execute(Request request) {
