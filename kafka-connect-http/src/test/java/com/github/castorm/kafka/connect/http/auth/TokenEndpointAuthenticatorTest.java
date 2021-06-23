@@ -21,51 +21,72 @@ package com.github.castorm.kafka.connect.http.auth;
  */
 
 import org.apache.kafka.common.config.types.Password;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-
-import java.net.ConnectException;
 
 @ExtendWith(MockitoExtension.class)
 class TokenEndpointAuthenticatorTest {
 
     @Mock
     TokenEndpointAuthenticatorConfig config;
-
     TokenEndpointAuthenticator authenticator;
+    MockWebServer webServer;
+    MockResponse response;
 
     @BeforeEach
     void setUp() {
         authenticator = new TokenEndpointAuthenticator(__ -> config);
+        webServer = new MockWebServer();
+        response = new MockResponse().addHeader("Content-Type", "application/json; charset=utf-8").setBody(
+                "{\"accessToken\":\"someRandomJwtTokenHeader.someLongTokenIThatProbablyDoesntLookLikeThisAtAll\",\"expiresIn\":123456}");
     }
 
     @Test
-    void whenCredentials_thenHeader() {
+    void whenCredentials_thenAccessToken() {
 
-        given(config.getAuthUri()).willReturn("http://dkcph-pmstapp1:9001/Auth");
-        given(config.getTokenKeyPath()).willReturn("/accessToken");
+        webServer.enqueue(response);
+
+        given(config.getAuthUri()).willReturn(webServer.url("/Auth").toString());
+        given(config.getTokenKeyPath()).willReturn("accessToken");
         given(config.getAuthPayload())
-                .willReturn(new Password("{  \"login\": \"mamor\",  \"password\": \"Something Secret\"}"));
+                .willReturn(new Password("{  \"login\": \"myUser\",  \"password\": \"myPassword\"}"));
 
         authenticator.configure(emptyMap());
 
-        assertThat(authenticator.getAuthorizationHeader()).contains("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.");
+        assertThat(authenticator.getAuthorizationHeader().toString())
+                .contains("Bearer someRandomJwtTokenHeader.");
     }
 
     @Test
-    void whenNoCredentials_thenHeaderEmpty() {
+    void whenNoCredentials_thenException() {
 
-        given(config.getAuthUri()).willReturn("");
-        given(config.getTokenKeyPath()).willReturn("");
+        given(config.getAuthUri()).willReturn("http://google.com/");
         given(config.getAuthPayload()).willReturn(new Password(""));
+
+        authenticator.configure(emptyMap());
+
+        assertThatThrownBy(() -> authenticator.getAuthorizationHeader()).isInstanceOf(ConnectException.class);
+
+    }
+
+    @Test
+    void whenInvalidUri_thenException() {
+
+        given(config.getAuthUri()).willReturn("this makes no sense");
+        given(config.getAuthPayload())
+                .willReturn(new Password("{  \"login\": \"myUser\",  \"password\": \"myPassword\"}"));
 
         authenticator.configure(emptyMap());
 

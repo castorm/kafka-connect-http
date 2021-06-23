@@ -1,5 +1,25 @@
 package com.github.castorm.kafka.connect.http.auth;
 
+/*-
+ * #%L
+ * Kafka Connect HTTP
+ * %%
+ * Copyright (C) 2020 - 2021 Cástor Rodríguez
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.castorm.kafka.connect.http.auth.spi.HttpAuthenticator;
@@ -40,9 +60,8 @@ public class TokenEndpointAuthenticator implements HttpAuthenticator {
     public Optional<String> getAuthorizationHeader() {
         String credentialsBody = config.getAuthPayload().value();
         RequestBody requestBody = RequestBody.create(credentialsBody,
-                MediaType.parse("applicationjson; charset=utf-8"));
-        Request request = new Request.Builder().url(config.getAuthUri()).post(requestBody).build();
-        String response = execute(request);
+                MediaType.parse("application/json; charset=utf-8"));
+        String response = execute(requestBody);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -53,15 +72,23 @@ public class TokenEndpointAuthenticator implements HttpAuthenticator {
             throw new ConnectException("Error: " + e.getMessage(), e);
         }
 
+        if (accessToken.isBlank()) {
+            throw new ConnectException("Error: No access token found at " + config.getTokenKeyPath());
+        }
+
         return Optional.of("Bearer " + accessToken);
     }
 
-    private String execute(Request request) {
+    private String execute(RequestBody requestBody) {
         OkHttpClient httpClient = new OkHttpClient();
-        try (Response response = httpClient.newCall(request).execute()) {
+        try {
+            Request request = new Request.Builder().url(config.getAuthUri()).post(requestBody).build();
+            Response response = httpClient.newCall(request).execute();
             return response.body().string();
         } catch (IOException e) {
             throw new RetriableException(e);
+        } catch (IllegalArgumentException e) {
+            throw new ConnectException("Error: " + e.getMessage(), e);
         }
     }
 
