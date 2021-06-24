@@ -23,11 +23,12 @@ services:
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-7.0.0-0.jar
       CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components,/opt/connectors"
+      CONNECT_PLUGIN_PATH: "/opt/connectors"
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
     depends_on:
         - zookeeper
         - broker
+        - schema-registry
   zookeeper:
     image: confluentinc/cp-zookeeper:6.2.0
     hostname: zookeeper
@@ -65,3 +66,15 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+  schema-registry:
+    image: confluentinc/cp-schema-registry:6.2.0
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - broker
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
