@@ -26,3 +26,4 @@ HttpSourceTaskHarnessTest.java
 .settings
 .factorypath
 .classpath
+.vscode
