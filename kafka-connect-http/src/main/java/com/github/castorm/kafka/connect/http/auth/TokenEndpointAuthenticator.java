@@ -69,11 +69,11 @@ public class TokenEndpointAuthenticator implements HttpAuthenticator {
         try {
             accessToken = objectMapper.readTree(response).path(config.getTokenKeyPath()).asText();
         } catch (JsonProcessingException e) {
-            throw new ConnectException("Error: " + e.getMessage(), e);
+            throw new RetriableException("Error: " + e.getMessage(), e);
         }
 
         if (accessToken.isBlank()) {
-            throw new ConnectException("Error: No access token found at " + config.getTokenKeyPath());
+            throw new RetriableException("Error: No access token found at " + config.getTokenKeyPath());
         }
 
         return Optional.of("Bearer " + accessToken);
@@ -86,7 +86,7 @@ public class TokenEndpointAuthenticator implements HttpAuthenticator {
             Response response = httpClient.newCall(request).execute();
             return response.body().string();
         } catch (IOException e) {
-            throw new RetriableException(e);
+            throw new RetriableException("Error: " + e.getMessage(), e);
         } catch (IllegalArgumentException e) {
             throw new ConnectException("Error: " + e.getMessage(), e);
         }
