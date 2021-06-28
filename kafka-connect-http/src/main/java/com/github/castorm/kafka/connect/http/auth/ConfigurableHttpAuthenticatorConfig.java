@@ -46,16 +46,20 @@ public class ConfigurableHttpAuthenticatorConfig extends AbstractConfig {
     private HttpAuthenticator getAuthenticator(Map<String, ?> originals) {
         switch (HttpAuthenticationType.valueOf(getString(AUTH_TYPE).toUpperCase())) {
             case BASIC:
-                BasicHttpAuthenticator auth = new BasicHttpAuthenticator();
-                auth.configure(originals);
-                return auth;
+                BasicHttpAuthenticator basicAuth = new BasicHttpAuthenticator();
+                basicAuth.configure(originals);
+                return basicAuth;
+            case TOKEN_ENDPOINT:
+                TokenEndpointAuthenticator tokenEndpointAuth = new TokenEndpointAuthenticator();
+                tokenEndpointAuth.configure(originals);
+                return tokenEndpointAuth;
             default:
                 return new NoneHttpAuthenticator();
         }
     }
 
     public static ConfigDef config() {
-        return new ConfigDef()
-                .define(AUTH_TYPE, STRING, HttpAuthenticationType.NONE.name(), MEDIUM, "Authentication Type");
+        return new ConfigDef().define(AUTH_TYPE, STRING, HttpAuthenticationType.NONE.name(), MEDIUM,
+                "Authentication Type");
     }
 }

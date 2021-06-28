@@ -21,5 +21,5 @@ package com.github.castorm.kafka.connect.http.auth.spi;
  */
 
 public enum HttpAuthenticationType {
-    NONE, BASIC
+    NONE, BASIC, TOKEN_ENDPOINT
 }

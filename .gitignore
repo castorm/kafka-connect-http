@@ -22,3 +22,8 @@ buildNumber.properties
 HttpSourceTaskHarnessTest.java
 .DS_Store
 .java-version
+.project
+.settings
+.factorypath
+.classpath
+.vscode
