@@ -33,12 +33,12 @@ class TokenEndpointAuthenticatorConfigTest {
 
     @Test
     void whenNoPayload_thenDefault() {
-        assertThat(config(emptyMap()).getAuthPayload()).isEqualTo(new Password(""));
+        assertThat(config(emptyMap()).getAuthBody()).isEqualTo(new Password(""));
     }
 
     @Test
     void whenPayload_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.auth.payload", "{\"foo\": \"bar\"}")).getAuthPayload())
+        assertThat(config(ImmutableMap.of("http.auth.payload", "{\"foo\": \"bar\"}")).getAuthBody())
                 .isEqualTo(new Password("{\"foo\": \"bar\"}"));
     }
 

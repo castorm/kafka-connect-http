@@ -33,23 +33,23 @@ import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 @Getter
 public class TokenEndpointAuthenticatorConfig extends AbstractConfig {
     private static final String AUTH_URI = "http.auth.uri";
-    private static final String PAYLOAD = "http.auth.payload";
+    private static final String AUTH_BODY = "http.auth.body";
     private static final String TOKEN_KEY_PATH = "http.auth.tokenkeypath";
 
     private final String authUri;
-    private final Password authPayload;
+    private final Password authBody;
     private final String tokenKeyPath;
 
     public TokenEndpointAuthenticatorConfig(Map<?, ?> originals) {
         super(config(), originals);
         authUri = getString(AUTH_URI);
-        authPayload = getPassword(PAYLOAD);
+        authBody = getPassword(AUTH_BODY);
         tokenKeyPath = getString(TOKEN_KEY_PATH);
 
     }
 
     public static ConfigDef config() {
-        return new ConfigDef().define(PAYLOAD, ConfigDef.Type.PASSWORD, "", HIGH, "Auth payload JSON")
+        return new ConfigDef().define(AUTH_BODY, ConfigDef.Type.PASSWORD, "", HIGH, "Auth payload JSON")
                 .define(TOKEN_KEY_PATH, STRING, "access_token", HIGH, "Auth request response token key")
                 .define(AUTH_URI, STRING, "", HIGH, "Auth endpoint");
     }
