@@ -4,6 +4,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ---
 
+## Unreleased
+-   Support for pre-authenticating against a second url
+
 ## v0.8
 
 ### v0.8.11 (03/26/2021)

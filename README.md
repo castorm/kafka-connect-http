@@ -294,13 +294,14 @@ to be included in the `HttpRequest`.
 >     *   `com.github.castorm.kafka.connect.http.auth.ConfigurableHttpAuthenticator`
 >     *   `com.github.castorm.kafka.connect.http.auth.NoneHttpAuthenticator`
 >     *   `com.github.castorm.kafka.connect.http.auth.BasicHttpAuthenticator`
+>     *   `com.github.castorm.kafka.connect.http.auth.TokenEndpointAuthenticator`
 
 #### Authenticating with `ConfigurableHttpAuthenticator`
 Allows selecting the authentication type via configuration property
 
 > ##### `http.auth.type`
 > Type of authentication
-> *   Type: `Enum { None, Basic }`
+> *   Type: `Enum { None, Basic, Token_Endpoint }`
 > *   Default: `None`
 
 #### Authenticating with `BasicHttpAuthenticator`
@@ -313,6 +314,22 @@ Allows selecting the authentication type via configuration property
 > ##### `http.auth.password`
 > *   Type: `String`
 > *   Default: `"""`
+
+#### Authenticating with `TokenEndpointAuthenticator`
+Allows selecting the authentication type via configuration property
+
+> ##### `http.auth.uri`
+> *   Type: `String`
+> *   Default: `""`
+>
+> ##### `http.auth.body`
+> *   Type: `String`
+> *   Default: `"""`
+>
+> ##### `http.auth.tokenkeypath`
+> *   Type: `String`
+> *   Default: `access_token`
+
 
 ---
 <a name="response"/>
