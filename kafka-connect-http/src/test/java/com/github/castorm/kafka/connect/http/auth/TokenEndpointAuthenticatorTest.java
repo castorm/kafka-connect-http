@@ -58,7 +58,7 @@ class TokenEndpointAuthenticatorTest {
 
         webServer.enqueue(response);
 
-        given(config.getAuthUri()).willReturn(webServer.url("/Auth").toString());
+        given(config.getAuthUrl()).willReturn(webServer.url("/Auth").toString());
         given(config.getTokenKeyPath()).willReturn("accessToken");
         given(config.getAuthBody())
                 .willReturn(new Password("{  \"login\": \"myUser\",  \"password\": \"myPassword\"}"));
@@ -72,7 +72,7 @@ class TokenEndpointAuthenticatorTest {
     @Test
     void whenNoCredentials_thenException() {
 
-        given(config.getAuthUri()).willReturn("http://google.com/");
+        given(config.getAuthUrl()).willReturn("http://google.com/");
         given(config.getAuthBody()).willReturn(new Password(""));
 
         authenticator.configure(emptyMap());
@@ -84,7 +84,7 @@ class TokenEndpointAuthenticatorTest {
     @Test
     void whenInvalidUri_thenException() {
 
-        given(config.getAuthUri()).willReturn("this makes no sense");
+        given(config.getAuthUrl()).willReturn("this makes no sense");
         given(config.getAuthBody())
                 .willReturn(new Password("{  \"login\": \"myUser\",  \"password\": \"myPassword\"}"));
 

@@ -44,13 +44,13 @@ class TokenEndpointAuthenticatorConfigTest {
 
     @Test
     void whenAuthEndpoint_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.auth.uri", "http://lol/login")).getAuthUri())
+        assertThat(config(ImmutableMap.of("http.auth.uri", "http://lol/login")).getAuthUrl())
                 .isEqualTo("http://lol/login");
     }
 
     @Test
     void whenNoAuthEndpoint_thenDefault() {
-        assertThat(config(emptyMap()).getAuthUri()).isEmpty();
+        assertThat(config(emptyMap()).getAuthUrl()).isEmpty();
     }
 
     @Test

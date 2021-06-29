@@ -58,7 +58,7 @@ public class TokenEndpointAuthenticator implements HttpAuthenticator {
 
     @Override
     public Optional<String> getAuthorizationHeader() {
-        String credentialsBody = config.getAuthPayload().value();
+        String credentialsBody = config.getAuthBody().value();
         RequestBody requestBody = RequestBody.create(credentialsBody,
                 MediaType.parse("application/json; charset=utf-8"));
         String response = execute(requestBody);
@@ -82,7 +82,7 @@ public class TokenEndpointAuthenticator implements HttpAuthenticator {
     private String execute(RequestBody requestBody) {
         OkHttpClient httpClient = new OkHttpClient();
         try {
-            Request request = new Request.Builder().url(config.getAuthUri()).post(requestBody).build();
+            Request request = new Request.Builder().url(config.getAuthUrl()).post(requestBody).build();
             Response response = httpClient.newCall(request).execute();
             return response.body().string();
         } catch (IOException e) {
