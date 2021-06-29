@@ -38,13 +38,13 @@ class TokenEndpointAuthenticatorConfigTest {
 
     @Test
     void whenPayload_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.auth.payload", "{\"foo\": \"bar\"}")).getAuthBody())
+        assertThat(config(ImmutableMap.of("http.auth.body", "{\"foo\": \"bar\"}")).getAuthBody())
                 .isEqualTo(new Password("{\"foo\": \"bar\"}"));
     }
 
     @Test
     void whenAuthEndpoint_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.auth.uri", "http://lol/login")).getAuthUrl())
+        assertThat(config(ImmutableMap.of("http.auth.url", "http://lol/login")).getAuthUrl())
                 .isEqualTo("http://lol/login");
     }
 
