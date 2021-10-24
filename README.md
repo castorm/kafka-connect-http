@@ -274,6 +274,26 @@ Uses a [OkHttp](https://square.github.io/okhttp/) client.
 > Time to live for the connection
 > *   Type: `Long`
 > *   Default: `300000`
+> 
+> ##### `http.client.proxy.host`
+> Hostname of the HTTP Proxy
+> *   Type: `String`
+> *   Default: ``
+> 
+> ##### `http.client.proxy.port`
+> Port of the HTTP Proxy
+> *   Type: `Integer`
+> *   Default: `3128`
+> 
+> ##### `http.client.proxy.username`
+> Username of the HTTP Proxy
+> *   Type: `String`
+> *   Default: ``
+> 
+> ##### `http.client.proxy.password`
+> Password of the HTTP Proxy
+> *   Type: `String`
+> *   Default: ``
 ---
 <a name="auth"/>
 
