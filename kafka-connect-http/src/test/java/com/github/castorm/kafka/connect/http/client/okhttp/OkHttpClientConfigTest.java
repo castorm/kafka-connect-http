@@ -82,6 +82,46 @@ class OkHttpClientConfigTest {
         assertThat(config(ImmutableMap.of("http.auth", "com.github.castorm.kafka.connect.http.auth.BasicHttpAuthenticator")).getAuthenticator()).isInstanceOf(BasicHttpAuthenticator.class);
     }
 
+    @Test
+    void whenNoProxyHost_thenDefault() {
+        assertThat(config(emptyMap()).getProxyHost()).isEqualTo("");
+    }
+
+    @Test
+    void whenProxyHost_thenInitialized() {
+        assertThat(config(ImmutableMap.of("http.client.proxy.host", "host")).getProxyHost()).isEqualTo("host");
+    }
+
+    @Test
+    void whenNoProxyPort_thenDefault() {
+        assertThat(config(emptyMap()).getProxyPort()).isEqualTo(3128);
+    }
+
+    @Test
+    void whenProxyPort_thenInitialized() {
+        assertThat(config(ImmutableMap.of("http.client.proxy.port", "8080")).getProxyPort()).isEqualTo(8080);
+    }
+
+    @Test
+    void whenNoProxyUsername_thenDefault() {
+        assertThat(config(emptyMap()).getProxyUsername()).isEqualTo("");
+    }
+
+    @Test
+    void whenProxyUsername_thenInitialized() {
+        assertThat(config(ImmutableMap.of("http.client.proxy.username", "user")).getProxyUsername()).isEqualTo("user");
+    }
+
+    @Test
+    void whenNoProxyPassword_thenDefault() {
+        assertThat(config(emptyMap()).getProxyPassword()).isEqualTo("");
+    }
+
+    @Test
+    void whenProxyPassword_thenInitialized() {
+        assertThat(config(ImmutableMap.of("http.client.proxy.password", "pass")).getProxyPassword()).isEqualTo("pass");
+    }
+
     private static OkHttpClientConfig config(Map<String, String> config) {
         return new OkHttpClientConfig(config);
     }
