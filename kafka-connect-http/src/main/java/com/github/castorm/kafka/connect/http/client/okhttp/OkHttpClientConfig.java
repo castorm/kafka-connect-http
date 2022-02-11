@@ -25,6 +25,7 @@ import com.github.castorm.kafka.connect.http.auth.spi.HttpAuthenticator;
 import lombok.Getter;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
+import org.apache.kafka.common.config.types.Password;
 
 import java.util.Map;
 
@@ -34,6 +35,7 @@ import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
 import static org.apache.kafka.common.config.ConfigDef.Type.INT;
 import static org.apache.kafka.common.config.ConfigDef.Type.LONG;
 import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
+import static org.apache.kafka.common.config.ConfigDef.Type.PASSWORD;
 
 @Getter
 public class OkHttpClientConfig extends AbstractConfig {
@@ -47,6 +49,8 @@ public class OkHttpClientConfig extends AbstractConfig {
     private static final String PROXY_PORT = "http.client.proxy.port";
     private static final String PROXY_USERNAME = "http.client.proxy.username";
     private static final String PROXY_PASSWORD = "http.client.proxy.password";
+    private static final String KEYSTORE = "http.client.keystore";
+    private static final String KEYSTORE_PASSWORD = "http.client.keystore.password";
 
     private final Long connectionTimeoutMillis;
     private final Long readTimeoutMillis;
@@ -57,6 +61,8 @@ public class OkHttpClientConfig extends AbstractConfig {
     private final Integer proxyPort;
     private final String proxyUsername;
     private final String proxyPassword;
+    private final String keyStore;
+    private final Password keyStorePassword;
 
     OkHttpClientConfig(Map<String, ?> originals) {
         super(config(), originals);
@@ -69,6 +75,8 @@ public class OkHttpClientConfig extends AbstractConfig {
         proxyPort = getInt(PROXY_PORT);
         proxyUsername = getString(PROXY_USERNAME);
         proxyPassword = getString(PROXY_PASSWORD);
+        keyStore = getString(KEYSTORE);
+        keyStorePassword = getPassword(KEYSTORE_PASSWORD);
     }
 
     public static ConfigDef config() {
@@ -82,6 +90,8 @@ public class OkHttpClientConfig extends AbstractConfig {
                 .define(PROXY_PORT, INT, 3128, MEDIUM, "Proxy port")
                 .define(PROXY_USERNAME, STRING, "", MEDIUM, "Proxy username")
                 .define(PROXY_PASSWORD, STRING, "", MEDIUM, "Proxy password")
+                .define(KEYSTORE, STRING, "", MEDIUM, "Keystore")
+                .define(KEYSTORE_PASSWORD, PASSWORD, "", MEDIUM, "Keystore password")
                 ;
     }
 }
