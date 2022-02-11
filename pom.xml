@@ -71,7 +71,7 @@
         <slf4j.version>1.7.36</slf4j.version>
         <logback.version>1.2.9</logback.version>
         <lombok.version>1.18.22</lombok.version>
-        <kafka.version>3.0.0</kafka.version>
+        <kafka.version>3.1.0</kafka.version>
         <okhttp.version>4.9.3</okhttp.version>
         <jackson.version>2.13.1</jackson.version>
         <freemarker.version>2.3.31</freemarker.version>
