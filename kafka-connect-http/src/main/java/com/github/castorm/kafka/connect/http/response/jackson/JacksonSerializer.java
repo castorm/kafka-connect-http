@@ -67,6 +67,11 @@ class JacksonSerializer {
         return Stream.of(array);
     }
 
+    boolean checkIfNonNull(JsonNode node, JsonPointer pointer) {
+        return !node.at(pointer).isMissingNode();
+    }
+
+
     private static JsonNode getRequiredAt(JsonNode body, JsonPointer recordsPointer) {
         return JSON_ROOT.equals(recordsPointer) ? body : body.requiredAt(recordsPointer);
     }

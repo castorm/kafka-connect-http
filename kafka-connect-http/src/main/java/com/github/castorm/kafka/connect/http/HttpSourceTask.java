@@ -40,8 +40,7 @@ import org.apache.kafka.connect.source.SourceTask;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
@@ -66,6 +65,16 @@ public class HttpSourceTask extends SourceTask {
     private SourceRecordSorter recordSorter;
 
     private SourceRecordFilterFactory recordFilterFactory;
+
+    private Boolean handlePagination;
+
+    private Boolean appendNextPageUrl;
+
+    private String baseUrl;
+
+    private String modifiedUrl;
+
+    private HttpRequest request = null;
 
     private ConfirmationWindow<Map<String, ?>> confirmationWindow = new ConfirmationWindow<>(emptyList());
 
@@ -92,6 +101,10 @@ public class HttpSourceTask extends SourceTask {
         recordSorter = config.getRecordSorter();
         recordFilterFactory = config.getRecordFilterFactory();
         offset = loadOffset(config.getInitialOffset());
+        handlePagination = !Objects.isNull(config.getHandlePagination()) && config.getHandlePagination();
+        appendNextPageUrl = !Objects.isNull(config.getAppendNextPageUrl()) && config.getAppendNextPageUrl();
+        baseUrl = config.getBaseUrl();
+        modifiedUrl = null;
     }
 
     private Offset loadOffset(Map<String, String> initialOffset) {
@@ -104,11 +117,37 @@ public class HttpSourceTask extends SourceTask {
 
         throttler.throttle(offset.getTimestamp().orElseGet(Instant::now));
 
-        HttpRequest request = requestFactory.createRequest(offset);
+//        HttpRequest request = requestFactory.createRequest(offset);
+
+        List<SourceRecord> records = new ArrayList<>();
+
+        if(handlePagination && !Objects.isNull(modifiedUrl)) {
+            request = HttpRequest.builder()
+                .method(request.getMethod())
+                .url(modifiedUrl)
+                .headers(request.getHeaders())
+                .body(request.getBody())
+                .build();
+        } else {
+            request = requestFactory.createRequest(offset);
+        }
 
         HttpResponse response = execute(request);
 
-        List<SourceRecord> records = responseParser.parse(response);
+        records.addAll(responseParser.parse(response));
+
+        if(handlePagination) {
+            Optional<String> nextPageUrl = responseParser.getNextPageUrl(response);
+            log.info("Next page URL: {}", nextPageUrl.orElse("no value"));
+            if( isNextPageUrlPresent(nextPageUrl) ) {
+                modifiedUrl = appendNextPageUrl
+                    ? baseUrl + nextPageUrl.orElse("")
+                    : nextPageUrl.orElse(null);
+            } else {
+                modifiedUrl = null;
+            }
+        }
+
 
         List<SourceRecord> unseenRecords = recordSorter.sort(records).stream()
                 .filter(recordFilterFactory.create(offset))
@@ -128,6 +167,13 @@ public class HttpSourceTask extends SourceTask {
             throw new RetriableException(e);
         }
     }
+
+    private Boolean isNextPageUrlPresent(Optional<String> nextPageUrl) {
+        return nextPageUrl.isPresent() &&
+            !Objects.isNull(nextPageUrl.orElse(null)) &&
+            !nextPageUrl.orElse(null).equalsIgnoreCase("null");
+    }
+
 
     private static List<Map<String, ?>> extractOffsets(List<SourceRecord> recordsToSend) {
         return recordsToSend.stream()

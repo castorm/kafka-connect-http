@@ -42,8 +42,9 @@ import java.util.Map;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Importance.LOW;
-import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
 import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
+import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
+import static org.apache.kafka.common.config.ConfigDef.Type.BOOLEAN;
 
 @Getter
 class HttpSourceConnectorConfig extends AbstractConfig {
@@ -55,6 +56,11 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private static final String RECORD_SORTER = "http.record.sorter";
     private static final String RECORD_FILTER_FACTORY = "http.record.filter.factory";
     private static final String OFFSET_INITIAL = "http.offset.initial";
+    private static final String HANDLE_PAGINATION = "http.request.pagination.handle";
+    private static final String NEXT_PAGE_URL_MODE = "http.request.pagination.mode";
+    private static final String NEXT_PAGE_BASE_URL = "http.request.pagination.baseurl";
+    private static final String OVERWRITE = "overwrite";
+    private static final String APPEND = "append";
 
     private final TimerThrottler throttler;
     private final HttpRequestFactory requestFactory;
@@ -63,6 +69,9 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private final SourceRecordFilterFactory recordFilterFactory;
     private final SourceRecordSorter recordSorter;
     private final Map<String, String> initialOffset;
+    private final Boolean handlePagination;
+    private final Boolean appendNextPageUrl;
+    private final String baseUrl;
 
     HttpSourceConnectorConfig(Map<String, ?> originals) {
         super(config(), originals);
@@ -74,6 +83,9 @@ class HttpSourceConnectorConfig extends AbstractConfig {
         recordSorter = getConfiguredInstance(RECORD_SORTER, SourceRecordSorter.class);
         recordFilterFactory = getConfiguredInstance(RECORD_FILTER_FACTORY, SourceRecordFilterFactory.class);
         initialOffset = breakDownMap(getString(OFFSET_INITIAL));
+        handlePagination = getBoolean(HANDLE_PAGINATION);
+        appendNextPageUrl = getString(NEXT_PAGE_URL_MODE).equalsIgnoreCase(APPEND);
+        baseUrl = getString(NEXT_PAGE_BASE_URL);
     }
 
     public static ConfigDef config() {
@@ -84,6 +96,9 @@ class HttpSourceConnectorConfig extends AbstractConfig {
                 .define(RESPONSE_PARSER, CLASS, PolicyHttpResponseParser.class, HIGH, "Response Parser Class")
                 .define(RECORD_SORTER, CLASS, OrderDirectionSourceRecordSorter.class, LOW, "Record Sorter Class")
                 .define(RECORD_FILTER_FACTORY, CLASS, OffsetRecordFilterFactory.class, LOW, "Record Filter Factory Class")
-                .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset");
+                .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset")
+                .define(HANDLE_PAGINATION, BOOLEAN, false, LOW, "Handle Pagination")
+                .define(NEXT_PAGE_URL_MODE, STRING, OVERWRITE, ConfigDef.ValidString.in(APPEND, OVERWRITE), LOW, "Append or overwrite the next page URL")
+                .define(NEXT_PAGE_BASE_URL, STRING, "", LOW, "Base URL in case of append mode");
     }
 }

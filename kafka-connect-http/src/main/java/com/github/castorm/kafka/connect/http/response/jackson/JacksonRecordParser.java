@@ -61,7 +61,7 @@ public class JacksonRecordParser implements Configurable {
         keyPointer = config.getKeyPointer();
         valuePointer = config.getValuePointer();
         offsetPointers = config.getOffsetPointers();
-        timestampPointer = config.getTimestampPointer();
+
     }
 
     /**
