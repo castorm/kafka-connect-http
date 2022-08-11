@@ -44,16 +44,8 @@ class JacksonKvRecordHttpResponseParserConfigTest {
         assertThat(config(emptyMap()).getResponseParser()).isInstanceOf(JacksonResponseRecordParser.class);
     }
 
-    @Test
-    void whenTimestampParserClassConfigured_thenInitialized() {
-        assertThat(config(ImmutableMap.of("http.response.record.timestamp.parser", "com.github.castorm.kafka.connect.http.response.timestamp.EpochMillisTimestampParser")).getTimestampParser())
-                .isInstanceOf(EpochMillisTimestampParser.class);
-    }
 
-    @Test
-    void whenMissingTimestampParserClassConfigured_thenInitialized() {
-        assertThat(config(emptyMap()).getTimestampParser()).isInstanceOf(EpochMillisOrDelegateTimestampParser.class);
-    }
+
 
     interface Fixture {
         static JacksonKvRecordHttpResponseParserConfig config(Map<String, String> settings) {

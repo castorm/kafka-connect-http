@@ -27,12 +27,13 @@ import com.github.castorm.kafka.connect.http.response.jackson.model.JacksonRecor
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.Configurable;
 
+import java.math.BigInteger;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.github.castorm.kafka.connect.common.CollectionUtils.merge;
-import static java.util.Collections.emptyMap;
 
 @RequiredArgsConstructor
 public class JacksonResponseRecordParser implements Configurable {
@@ -44,6 +45,8 @@ public class JacksonResponseRecordParser implements Configurable {
     private final JacksonSerializer serializer;
 
     private JsonPointer recordsPointer;
+
+    private JsonPointer keyPointer;
 
     public JacksonResponseRecordParser() {
         this(new JacksonRecordParser(), new JacksonSerializer(new ObjectMapper()));
@@ -57,27 +60,35 @@ public class JacksonResponseRecordParser implements Configurable {
     public void configure(Map<String, ?> settings) {
         JacksonRecordParserConfig config = configFactory.apply(settings);
         recordsPointer = config.getRecordsPointer();
+        keyPointer = config.getKeyPointer().stream().findFirst().orElseGet(JsonPointer::empty);
     }
 
     Stream<JacksonRecord> getRecords(byte[] body) {
+
+
+        AtomicInteger iterator = new AtomicInteger();
 
         JsonNode jsonBody = serializer.deserialize(body);
 
         Map<String, Object> responseOffset = getResponseOffset(jsonBody);
 
         return serializer.getArrayAt(jsonBody, recordsPointer)
-                .map(jsonRecord -> toJacksonRecord(jsonRecord, responseOffset));
+                .map(jsonRecord -> toJacksonRecord(jsonRecord, responseOffset, iterator.getAndIncrement()));
     }
 
     private Map<String, Object> getResponseOffset(JsonNode node) {
-        return emptyMap();
+        return Map.of("blockId", node.get("BlockId"));
     }
 
-    private JacksonRecord toJacksonRecord(JsonNode jsonRecord, Map<String, Object> responseOffset) {
+    private String getResponseKey(JsonNode node) {
+        return node.get(keyPointer.toString()).asText("");
+
+    }
+
+    private JacksonRecord toJacksonRecord(JsonNode jsonRecord, Map<String, Object> responseOffset, int index) {
         return JacksonRecord.builder()
-                .key(recordParser.getKey(jsonRecord).orElse(null))
-                .timestamp(recordParser.getTimestamp(jsonRecord).orElse(null))
-                .offset(merge(responseOffset, recordParser.getOffset(jsonRecord)))
+                .key(getResponseKey(jsonRecord))
+                .offset(merge(responseOffset, Map.of("index", index)))
                 .body(recordParser.getValue(jsonRecord))
                 .build();
     }

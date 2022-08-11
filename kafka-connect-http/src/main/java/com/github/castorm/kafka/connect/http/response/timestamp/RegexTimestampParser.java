@@ -37,10 +37,6 @@ public class RegexTimestampParser implements TimestampParser {
   private final Function<Map<String, ?>, RegexTimestampParserConfig> configFactory;
   private Pattern pattern;
   private TimestampParser delegate;
-  
-  public RegexTimestampParser() {
-    this(RegexTimestampParserConfig::new);
-  }
 
   @Override
   public Instant parse(String timestamp) {

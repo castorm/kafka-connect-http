@@ -1,81 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>kafka-connect-http-parent</artifactId>
-        <groupId>com.github.castorm</groupId>
-        <version>0.8.12-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>no.norsktipping</groupId>
     <artifactId>kafka-connect-http</artifactId>
     <name>Kafka Connect HTTP</name>
+    <version>1.0.0</version>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.0</version>
+                <configuration>
+                    <source>9</source>
+                    <target>9</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>provided</scope>
+            <version>1.18.22</version>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>connect-api</artifactId>
-            <scope>provided</scope>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <scope>provided</scope>
+            <version>1.2.11</version>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>1.7.10</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
+            <version>4.10.0</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>logging-interceptor</artifactId>
+            <version>4.10.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>2.13.3</version>
         </dependency>
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
+            <version>2.3.31</version>
         </dependency>
         <dependency>
             <groupId>com.joestelmach</groupId>
             <artifactId>natty</artifactId>
+            <version>0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.1.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.7.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
+            <version>5.7.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
+            <version>3.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <version>3.19.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <version>18.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -99,7 +124,7 @@
                                     <goal>single</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>${owner}-${project.artifactId}-${project.version}</finalName>
+                                    <finalName>${project.groupId}-${project.artifactId}-${project.version}</finalName>
                                     <appendAssemblyId>false</appendAssemblyId>
                                     <descriptors>
                                         <descriptor>src/assembly/package.xml</descriptor>
@@ -135,71 +160,15 @@
                                     <goal>kafka-connect</goal>
                                 </goals>
                                 <configuration>
-                                    <title>${project.name}</title>
-                                    <name>${project.artifactId}</name>
-                                    <sourceUrl>${project.parent.url}</sourceUrl>
-                                    <documentationUrl>${project.parent.url}</documentationUrl>
-                                    <description>${project.parent.description}</description>
+                                    <ownerUsername>nt</ownerUsername>
+                                    <description>bigconnectorgame</description>
                                     <version>${project.version}</version>
-                                    <supportProviderName>${project.parent.organization.name}</supportProviderName>
-                                    <supportSummary>Cástor Rodríguez supports the HTTP plugin alongside other contributors of
-                                        this open source project.
-                                    </supportSummary>
-                                    <supportUrl>${project.parent.issueManagement.url}</supportUrl>
-
-                                    <ownerUsername>castorm</ownerUsername>
-                                    <ownerType>user</ownerType>
-                                    <ownerName>Cástor Rodríguez</ownerName>
-                                    <ownerUrl>https://castorm.es</ownerUrl>
-
                                     <componentTypes>
                                         <componentType>source</componentType>
                                     </componentTypes>
-
-                                    <tags>
-                                        <tag>http</tag>
-                                        <tag>rest</tag>
-                                        <tag>api</tag>
-                                        <tag>json</tag>
-                                        <tag>cdc</tag>
-                                        <tag>change-data-capture</tag>
-                                    </tags>
-
-                                    <requirements>
-                                        <requirement>HTTP resource to perform requests against</requirement>
-                                        <requirement>To perform change-data-capture with effectively-once delivery
-                                            guarantees, the HTTP resource should allow ordering and filtering by one or
-                                            more monotonically increasing properties such as sequence numbers or
-                                            timestamps
-                                        </requirement>
-                                    </requirements>
-
-                                    <deliveryGuarantee>
-                                        <deliveryGuarantee>exactlyOnce</deliveryGuarantee>
-                                    </deliveryGuarantee>
-
-                                    <confluentControlCenterIntegration>false</confluentControlCenterIntegration>
                                 </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>license-maven-plugin</artifactId>
-                        <version>2.0.0</version>
-                        <configuration>
-                            <licenseName>apache_v2</licenseName>
-                            <excludes>
-                                <exclude>**/*.json</exclude>
-                            </excludes>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>first</id>
-                                <goals>
-                                    <goal>update-file-header</goal>
-                                </goals>
-                                <phase>process-sources</phase>
+
+
                             </execution>
                         </executions>
                     </plugin>
@@ -219,9 +188,9 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.3.2</version>
+                        <version>3.2.0</version>
                         <configuration>
-                            <source>${maven.compiler.source}</source>
+                            <source>${java.version}</source>
                         </configuration>
                         <executions>
                             <execution>
@@ -235,63 +204,7 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>sign</id>
-            <properties>
-                <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <gpgArguments>
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>ossrh</id>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
-                <repository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-                </repository>
-            </distributionManagement>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.12</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+
     </profiles>
 
     <reporting>

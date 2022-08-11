@@ -60,12 +60,6 @@ class JacksonResponseRecordParserTest {
     @Mock
     JacksonSerializer serializer;
 
-    @BeforeEach
-    void setUp() {
-        parser = new JacksonResponseRecordParser(__ -> config, recordParser, serializer);
-
-        given(recordParser.getKey(deserialize(item1))).willReturn(Optional.of("value"));
-    }
 
     @Test
     void givenRecords_whenGetRecords_thenAllReturned() {
@@ -75,50 +69,6 @@ class JacksonResponseRecordParserTest {
         assertThat(parser.getRecords(itemArray.getBytes()).collect(toList())).hasSize(2);
     }
 
-    @Test
-    void givenRecordWithKey_whenGetRecords_thenItemKeyMapped() {
-
-        givenRecords(deserialize(item1));
-        given(recordParser.getKey(deserialize(item1))).willReturn(Optional.of("value"));
-
-        assertThat(parser.getRecords(itemArray.getBytes()).findFirst().get().getKey()).isEqualTo("value");
-    }
-
-    @Test
-    void givenRecordWithoutKey_whenGetRecords_thenItemKeyNull() {
-
-        givenRecords(deserialize(item1));
-        given(recordParser.getKey(deserialize(item1))).willReturn(Optional.empty());
-
-        assertThat(parser.getRecords(itemArray.getBytes()).findFirst().get().getKey()).isNull();
-    }
-
-    @Test
-    void givenRecordWithTimestamp_whenGetRecords_thenItemTimestampMapped() {
-
-        givenRecords(deserialize(item1));
-        given(recordParser.getTimestamp(deserialize(item1))).willReturn(Optional.of("value"));
-
-        assertThat(parser.getRecords(itemArray.getBytes()).findFirst().get().getTimestamp()).isEqualTo("value");
-    }
-
-    @Test
-    void givenRecordWithoutTimestamp_whenGetRecords_thenItemTimestampNull() {
-
-        givenRecords(deserialize(item1));
-        given(recordParser.getTimestamp(deserialize(item1))).willReturn(Optional.empty());
-
-        assertThat(parser.getRecords(itemArray.getBytes()).findFirst().get().getTimestamp()).isNull();
-    }
-
-    @Test
-    void givenRecordWithOffset_whenGetRecords_thenItemOffsetMapped() {
-
-        givenRecords(deserialize(item1));
-        given(recordParser.getOffset(deserialize(item1))).willReturn(ImmutableMap.of("k", "v"));
-
-        assertThat(parser.getRecords(itemArray.getBytes()).findFirst().get().getOffset()).isEqualTo(ImmutableMap.of("k", "v"));
-    }
 
     @Test
     void givenRecordWithValue_whenGetRecords_thenItemBodyMapped() {

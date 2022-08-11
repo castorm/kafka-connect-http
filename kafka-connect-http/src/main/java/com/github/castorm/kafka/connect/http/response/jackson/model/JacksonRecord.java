@@ -25,6 +25,7 @@ import lombok.Builder.Default;
 import lombok.Value;
 import lombok.With;
 
+import java.math.BigInteger;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -34,17 +35,8 @@ import static java.util.Collections.emptyMap;
 @Builder
 public class JacksonRecord {
 
-    /**
-     * @deprecated To be integrated in offset
-     */
-    @Deprecated
-    String key;
 
-    /**
-     * @deprecated To be integrated in offset
-     */
-    @Deprecated
-    String timestamp;
+    String key;
 
     @Default
     Map<String, Object> offset = emptyMap();

@@ -28,13 +28,13 @@ import com.github.castorm.kafka.connect.http.response.spi.KvRecordHttpResponsePa
 import com.github.castorm.kafka.connect.http.response.timestamp.spi.TimestampParser;
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static java.util.Optional.ofNullable;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.stream.Collectors.toList;
 
@@ -45,8 +45,6 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
 
     private JacksonResponseRecordParser responseParser;
 
-    private TimestampParser timestampParser;
-
     public JacksonKvRecordHttpResponseParser() {
         this(JacksonKvRecordHttpResponseParserConfig::new);
     }
@@ -55,7 +53,6 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
     public void configure(Map<String, ?> configs) {
         JacksonKvRecordHttpResponseParserConfig config = configFactory.apply(configs);
         responseParser = config.getResponseParser();
-        timestampParser = config.getTimestampParser();
     }
 
     @Override
@@ -69,22 +66,12 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
 
         Map<String, Object> offsets = record.getOffset();
 
-        String key = ofNullable(record.getKey())
-                .map(Optional::of)
-                .orElseGet(() -> ofNullable(offsets.get("key")).map(String.class::cast))
-                .orElseGet(() -> generateConsistentKey(record.getBody()));
 
-        Optional<Instant> timestamp = ofNullable(record.getTimestamp())
-                .map(Optional::of)
-                .orElseGet(() -> ofNullable(offsets.get("timestamp")).map(String.class::cast))
-                .map(timestampParser::parse);
 
-        Offset offset = timestamp
-                .map(ts -> Offset.of(offsets, key, ts))
-                .orElseGet(() -> Offset.of(offsets, key));
+        Offset offset =  Offset.of(offsets);
 
         return KvRecord.builder()
-                .key(key)
+                .key(record.getKey())
                 .value(record.getBody())
                 .offset(offset)
                 .build();

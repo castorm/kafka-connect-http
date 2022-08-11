@@ -62,32 +62,7 @@ class JacksonRecordParserTest {
         parser = new JacksonRecordParser(__ -> config, new JacksonSerializer());
     }
 
-    @Test
-    void givenNoPointer_whenGetKey_thenEmpty() {
 
-        given(config.getKeyPointer()).willReturn(emptyList());
-        parser.configure(emptyMap());
-
-        assertThat(parser.getKey(jsonK1K2)).isEmpty();
-    }
-
-    @Test
-    void givenPointer_whenGetKey_thenKeyAsText() {
-
-        given(config.getKeyPointer()).willReturn(singletonList(pointerToK1));
-        parser.configure(emptyMap());
-
-        assertThat(parser.getKey(jsonK1K2)).contains(v1);
-    }
-
-    @Test
-    void givenPointers_whenGetKey_thenKeyAsTextConcatenated() {
-
-        given(config.getKeyPointer()).willReturn(asList(pointerToK1, pointerToK2));
-        parser.configure(emptyMap());
-
-        assertThat(parser.getKey(jsonK1K2)).contains(v1 + "+" + v2);
-    }
 
     @Test
     void givenPointer_whenGetValueText_thenValue() {
@@ -107,32 +82,6 @@ class JacksonRecordParserTest {
         assertThat(parser.getValue(jsonK1K2)).isEqualTo(v1);
     }
 
-    @Test
-    void givenNoPointer_whenGetTimestamp_thenEmpty() {
-
-        given(config.getTimestampPointer()).willReturn(empty());
-        parser.configure(emptyMap());
-
-        assertThat(parser.getTimestamp(jsonK1K2)).isEmpty();
-    }
-
-    @Test
-    void givenPointer_whenGetTimestamp_thenTimestampAsText() {
-
-        given(config.getTimestampPointer()).willReturn(Optional.of(pointerToK1));
-        parser.configure(emptyMap());
-
-        assertThat(parser.getTimestamp(jsonK1K2)).contains(v1);
-    }
-
-    @Test
-    void givenPointer_whenGetOffset_thenOffset() {
-
-        given(config.getOffsetPointers()).willReturn(ImmutableMap.of("key", pointerToK1));
-        parser.configure(emptyMap());
-
-        assertThat(parser.getOffset(jsonK1K2)).isEqualTo(ImmutableMap.of("key", v1));
-    }
 
     interface Fixture {
         ObjectMapper mapper = new ObjectMapper();

@@ -34,7 +34,7 @@ public class OffsetRecordFilterFactory implements SourceRecordFilterFactory {
     private final SourceRecordFilterFactory delegate;
 
     public OffsetRecordFilterFactory() {
-        this(new OffsetTimestampRecordFilterFactory());
+        this(new OffsetIdentityRecordFilterFactory());
     }
 
     @Override

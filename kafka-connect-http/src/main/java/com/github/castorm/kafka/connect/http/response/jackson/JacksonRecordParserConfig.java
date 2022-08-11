@@ -53,7 +53,6 @@ public class JacksonRecordParserConfig extends AbstractConfig {
     private final JsonPointer recordsPointer;
     private final List<JsonPointer> keyPointer;
     private final JsonPointer valuePointer;
-    private final Optional<JsonPointer> timestampPointer;
     private final Map<String, JsonPointer> offsetPointers;
 
     JacksonRecordParserConfig(Map<String, ?> originals) {
@@ -61,7 +60,6 @@ public class JacksonRecordParserConfig extends AbstractConfig {
         recordsPointer = compile(getString(LIST_POINTER));
         keyPointer = breakDownList(ofNullable(getString(ITEM_KEY_POINTER)).orElse("")).stream().map(JsonPointer::compile).collect(Collectors.toList());
         valuePointer = compile(getString(ITEM_POINTER));
-        timestampPointer = ofNullable(getString(ITEM_TIMESTAMP_POINTER)).map(JsonPointer::compile);
         offsetPointers = breakDownMap(getString(ITEM_OFFSET_VALUE_POINTER)).entrySet().stream()
                 .map(entry -> new SimpleEntry<>(entry.getKey(), compile(entry.getValue())))
                 .collect(toMap(Entry::getKey, Entry::getValue));

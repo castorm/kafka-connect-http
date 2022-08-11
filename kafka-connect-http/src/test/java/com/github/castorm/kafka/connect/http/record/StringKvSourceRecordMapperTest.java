@@ -29,9 +29,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigInteger;
 import java.time.Instant;
 
-import static com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapperTest.Fixture.now;
 import static com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapperTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.record.StringKvSourceRecordMapperTest.Fixture.record;
 import static java.time.Instant.now;
@@ -74,10 +74,6 @@ class StringKvSourceRecordMapperTest {
         assertThat(mapper.map(record.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
     }
 
-    @Test
-    void givenTimestamp_whenMap_thenTimestampMapped() {
-        assertThat(mapper.map(record.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
-    }
 
     @Test
     void whenMap_thenNoPartitionMapped() {
@@ -95,8 +91,8 @@ class StringKvSourceRecordMapperTest {
     }
 
     interface Fixture {
-        Instant now = now();
-        Offset offset = Offset.of(ImmutableMap.of("k", "v"), "key", now);
+        BigInteger bigInt = new BigInteger("1");
+        Offset offset = Offset.of(ImmutableMap.of("k", "v"), bigInt);
         KvRecord record = KvRecord.builder().value("not-null").offset(offset).build();
     }
 }

@@ -200,7 +200,6 @@ class HttpSourceTaskTest {
 
         task.poll();
 
-        then(throttler).should().throttle(offset.getTimestamp().get());
     }
 
     @Test

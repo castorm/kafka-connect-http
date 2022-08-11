@@ -68,7 +68,6 @@ class JacksonKvRecordHttpResponseParserTest {
     void setUp() {
         parser = new JacksonKvRecordHttpResponseParser(__ -> config);
         given(config.getResponseParser()).willReturn(responseParser);
-        given(config.getTimestampParser()).willReturn(timestampParser);
         parser.configure(emptyMap());
     }
 
@@ -80,29 +79,6 @@ class JacksonKvRecordHttpResponseParserTest {
         assertThat(parser.parse(response)).isEmpty();
     }
 
-    @Test
-    void givenOneItem_thenKeyMapped() {
-
-        givenRecords(Stream.of(record.withKey("key")));
-
-        assertThat(parser.parse(response)).first().extracting(KvRecord::getKey).isEqualTo("key");
-    }
-
-    @Test
-    void givenOneItemWithNoKeyButOffset_thenKeyMappedFromOffset() {
-
-        givenRecords(Stream.of(record.withKey(null).withOffset(ImmutableMap.of("key", "value"))));
-
-        assertThat(parser.parse(response)).first().extracting(KvRecord::getKey).isEqualTo("value");
-    }
-
-    @Test
-    void givenOneItemWithNoNoKey_thenKeyDefault() {
-
-        givenRecords(Stream.of(record.withKey(null)));
-
-        assertThat(parser.parse(response)).first().extracting(KvRecord::getKey).isNotNull();
-    }
 
     @Test
     void givenOneItem_thenValueMapped() {
@@ -112,31 +88,8 @@ class JacksonKvRecordHttpResponseParserTest {
         assertThat(parser.parse(response)).first().extracting(KvRecord::getValue).isEqualTo("value");
     }
 
-    @Test
-    void givenOneItem_thenTimestampMapped() {
 
-        givenRecords(Stream.of(record.withTimestamp(timestampIso)));
-        given(timestampParser.parse(timestampIso)).willReturn(timestamp);
 
-        assertThat(parser.parse(response)).first().extracting(KvRecord::getOffset).extracting(Offset::getTimestamp).isEqualTo(Optional.of(timestamp));
-    }
-
-    @Test
-    void givenOneItemWitNoTimestampButOffset_thenTimestampMappedFromOffset() {
-
-        givenRecords(Stream.of(record.withTimestamp(null).withOffset(ImmutableMap.of("timestamp", timestampIso))));
-        given(timestampParser.parse(timestampIso)).willReturn(timestamp);
-
-        assertThat(parser.parse(response)).first().extracting(KvRecord::getOffset).extracting(Offset::getTimestamp).isEqualTo(Optional.of(timestamp));
-    }
-
-    @Test
-    void givenOneItemWithNoTimestamp_thenDefault() {
-
-        givenRecords(Stream.of(record.withTimestamp(null)));
-
-        assertThat(parser.parse(response)).first().extracting(KvRecord::getOffset).extracting(Offset::getTimestamp).isNotNull();
-    }
 
     @Test
     void givenOneItem_thenOffsetMapped() {
@@ -146,30 +99,10 @@ class JacksonKvRecordHttpResponseParserTest {
         assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("offset-key")).isEqualTo("offset-value");
     }
 
-    @Test
-    void givenOneItem_thenTimestampMappedToOffset() {
 
-        givenRecords(Stream.of(record.withTimestamp(timestampIso).withOffset(emptyMap())));
-        given(timestampParser.parse(timestampIso)).willReturn(timestamp);
 
-        assertThat(parser.parse(response).stream().findFirst().get().getOffset().getTimestamp()).contains(parse(timestampIso));
-    }
 
-    @Test
-    void givenOneItem_thenKeyMappedToOffset() {
 
-        givenRecords(Stream.of(record.withKey("value").withOffset(emptyMap())));
-
-        assertThat(parser.parse(response).stream().findFirst().get().getOffset().getKey()).contains("value");
-    }
-
-    @Test
-    void givenOneItemWithNoKey_thenConsistentUUIDMappedToOffset() {
-
-        givenRecords(Stream.of(record.withKey(null).withOffset(emptyMap())));
-
-        assertThat(parser.parse(response).stream().findFirst().get().getOffset().getKey()).contains(nameUUIDFromBytes(record.getBody().toString().getBytes()).toString());
-    }
 
     private void givenRecords(Stream<JacksonRecord> records) {
         given(responseParser.getRecords(bytes)).willReturn(records);

@@ -62,4 +62,9 @@ public class ConfirmationWindow<T> {
 
         return Optional.ofNullable(offset);
     }
+
+
+  public void cleanupConfirmedOffsets() {
+        confirmedOffsets.clear();
+  }
 }

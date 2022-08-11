@@ -39,6 +39,7 @@ import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +90,6 @@ public class HttpSourceTask extends SourceTask {
         requestFactory = config.getRequestFactory();
         requestExecutor = config.getClient();
         responseParser = config.getResponseParser();
-        recordSorter = config.getRecordSorter();
         recordFilterFactory = config.getRecordFilterFactory();
         offset = loadOffset(config.getInitialOffset());
     }
@@ -102,7 +102,7 @@ public class HttpSourceTask extends SourceTask {
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
 
-        throttler.throttle(offset.getTimestamp().orElseGet(Instant::now));
+        throttler.throttle(Instant.now());
 
         HttpRequest request = requestFactory.createRequest(offset);
 
@@ -110,7 +110,7 @@ public class HttpSourceTask extends SourceTask {
 
         List<SourceRecord> records = responseParser.parse(response);
 
-        List<SourceRecord> unseenRecords = recordSorter.sort(records).stream()
+        List<SourceRecord> unseenRecords = records.stream()
                 .filter(recordFilterFactory.create(offset))
                 .collect(toList());
 
@@ -143,10 +143,16 @@ public class HttpSourceTask extends SourceTask {
     @Override
     public void commit() {
         offset = confirmationWindow.getLowWatermarkOffset()
-                .map(Offset::of)
+                .map(lastOffset -> Offset.of(Map.of("blockId", lastOffset.get("blockId"), "Index", 0)))
                 .orElse(offset);
 
         log.debug("Offset set to {}", offset);
+        confirmationWindow.cleanupConfirmedOffsets();
+    }
+
+    public void nextOffset(Map<String, ?> lastOffset){
+        BigInteger blockId = (BigInteger) lastOffset.get("blockId");
+        offset = Offset.of(Map.of("blockId", blockId,"index", 0));
     }
 
     @Override

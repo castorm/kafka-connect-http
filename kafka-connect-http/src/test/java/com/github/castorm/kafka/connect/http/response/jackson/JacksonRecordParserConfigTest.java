@@ -62,15 +62,6 @@ class JacksonRecordParserConfigTest {
         assertThat(config("http.response.record.pointer", "/test-pointer").getValuePointer()).isEqualTo(compile("/test-pointer"));
     }
 
-    @Test
-    void whenMissingTimestampPointerConfigured_thenInitialized() {
-        assertThat(configWithout("http.response.record.timestamp.pointer").getTimestampPointer()).isEmpty();
-    }
-
-    @Test
-    void whenItemTimestampPointerConfigured_thenInitialized() {
-        assertThat(config("http.response.record.timestamp.pointer", "/test-pointer").getTimestampPointer()).isEqualTo(Optional.of(compile("/test-pointer")));
-    }
 
     @Test
     void whenItemOffsetPointersHalfConfigured_thenEmpty() {

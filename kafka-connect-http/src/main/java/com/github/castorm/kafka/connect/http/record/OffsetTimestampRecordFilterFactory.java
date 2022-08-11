@@ -27,7 +27,7 @@ import org.apache.kafka.connect.source.SourceRecord;
 
 import java.time.Instant;
 import java.util.function.Predicate;
-
+/*
 @RequiredArgsConstructor
 public class OffsetTimestampRecordFilterFactory implements SourceRecordFilterFactory {
 
@@ -37,3 +37,4 @@ public class OffsetTimestampRecordFilterFactory implements SourceRecordFilterFac
         return record -> record.timestamp() > offsetTimestampMillis;
     }
 }
+*/

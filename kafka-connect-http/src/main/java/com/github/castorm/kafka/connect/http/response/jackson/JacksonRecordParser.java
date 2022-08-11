@@ -42,9 +42,6 @@ public class JacksonRecordParser implements Configurable {
 
     private final JacksonSerializer serializer;
 
-    private List<JsonPointer> keyPointer;
-    private Optional<JsonPointer> timestampPointer;
-    private Map<String, JsonPointer> offsetPointers;
     private JsonPointer valuePointer;
 
     public JacksonRecordParser() {
@@ -58,36 +55,9 @@ public class JacksonRecordParser implements Configurable {
     @Override
     public void configure(Map<String, ?> settings) {
         JacksonRecordParserConfig config = configFactory.apply(settings);
-        keyPointer = config.getKeyPointer();
         valuePointer = config.getValuePointer();
-        offsetPointers = config.getOffsetPointers();
-        timestampPointer = config.getTimestampPointer();
     }
 
-    /**
-     * @deprecated Replaced by Offset
-     */
-    @Deprecated
-    Optional<String> getKey(JsonNode node) {
-        String key = keyPointer.stream()
-                .map(pointer -> serializer.getObjectAt(node, pointer).asText())
-                .filter(it -> !it.isEmpty())
-                .collect(joining("+"));
-        return key.isEmpty() ? Optional.empty() : Optional.of(key);
-    }
-
-    /**
-     * @deprecated Replaced by Offset
-     */
-    @Deprecated
-    Optional<String> getTimestamp(JsonNode node) {
-        return timestampPointer.map(pointer -> serializer.getObjectAt(node, pointer).asText());
-    }
-
-    Map<String, Object> getOffset(JsonNode node) {
-        return offsetPointers.entrySet().stream()
-                .collect(toMap(Entry::getKey, entry -> serializer.getObjectAt(node, entry.getValue()).asText()));
-    }
 
     String getValue(JsonNode node) {
 

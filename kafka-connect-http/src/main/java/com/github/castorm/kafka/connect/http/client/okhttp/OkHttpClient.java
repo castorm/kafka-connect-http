@@ -26,7 +26,6 @@ import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Authenticator;
 import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.HttpUrl;
@@ -35,39 +34,19 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.net.Proxy.NO_PROXY;
-import static java.net.Proxy.Type.HTTP;
 import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static okhttp3.Credentials.basic;
 import static okhttp3.HttpUrl.parse;
 import static okhttp3.RequestBody.create;
 import static okhttp3.logging.HttpLoggingInterceptor.Level.BASIC;
 import static okhttp3.logging.HttpLoggingInterceptor.Level.BODY;
 import static okhttp3.logging.HttpLoggingInterceptor.Level.NONE;
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 @Slf4j
 public class OkHttpClient implements HttpClient {
@@ -82,8 +61,7 @@ public class OkHttpClient implements HttpClient {
         OkHttpClientConfig config = new OkHttpClientConfig(configs);
 
         authenticator = config.getAuthenticator();
-
-        okhttp3.OkHttpClient.Builder builder = new okhttp3.OkHttpClient.Builder()
+        client = new okhttp3.OkHttpClient.Builder()
                 .connectionPool(new ConnectionPool(config.getMaxIdleConnections(), config.getKeepAliveDuration(), MILLISECONDS))
                 .connectTimeout(config.getConnectionTimeoutMillis(), MILLISECONDS)
                 .readTimeout(config.getReadTimeoutMillis(), MILLISECONDS)
@@ -91,12 +69,7 @@ public class OkHttpClient implements HttpClient {
                 .addInterceptor(createLoggingInterceptor())
                 .addInterceptor(chain -> chain.proceed(authorize(chain.request())))
                 .authenticator((route, response) -> authorize(response.request()))
-                .proxy(resolveProxy(config.getProxyHost(), config.getProxyPort()))
-                .proxyAuthenticator(resolveProxyAuthenticator(config.getProxyUsername(), config.getProxyPassword()));
-
-        resolveSslSocketFactory(builder, config.getKeyStore(), config.getKeyStorePassword().value());
-
-        client = builder.build();
+                .build();
     }
 
     private Request authorize(Request request) {
@@ -113,68 +86,6 @@ public class OkHttpClient implements HttpClient {
         } else {
             return new HttpLoggingInterceptor(log::info).setLevel(NONE);
         }
-    }
-
-    private static Proxy resolveProxy(String host, Integer port) {
-        return isEmpty(host) ? NO_PROXY : new Proxy(HTTP, new InetSocketAddress(host, port));
-    }
-
-    private static Authenticator resolveProxyAuthenticator(String username, String password) {
-        return isEmpty(username) ? Authenticator.NONE :
-                (route, response) -> response.request().newBuilder()
-                        .header("Proxy-Authorization", basic(username, password))
-                        .build();
-    }
-
-    private static void resolveSslSocketFactory(okhttp3.OkHttpClient.Builder builder, String keyStorePath, String keyStorePassword) {
-        if (keyStorePath.isEmpty()) {
-            return;
-        }
-
-        KeyStore keyStore;
-        try {
-            keyStore = KeyStore.getInstance("PKCS12");
-        } catch (KeyStoreException e) {
-            throw new IllegalStateException("Unable to create keystore", e);
-        }
-
-        try (InputStream is = new FileInputStream(keyStorePath)) {
-            keyStore.load(is, keyStorePassword.toCharArray());
-        }
-        catch (CertificateException | IOException | NoSuchAlgorithmException e) {
-            throw new IllegalStateException(String.format("Unable to load keystore '%s'", keyStorePath), e);
-        }
-
-        KeyManagerFactory kmf;
-        try {
-            kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            kmf.init(keyStore, keyStorePassword.toCharArray());
-        } catch (UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException e) {
-            throw new IllegalStateException("Unable to initialize key manager", e);
-        }
-
-        SSLContext sslContext;
-        try {
-            sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(kmf.getKeyManagers(), null, null);
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            throw new IllegalStateException("Unable to initialize SSL context", e);
-        }
-
-        TrustManagerFactory trustManagerFactory;
-        try {
-            trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init((KeyStore) null);
-        } catch (NoSuchAlgorithmException | KeyStoreException e) {
-            throw new IllegalStateException("Unable to initialize trust manager", e);
-        }
-
-        TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-        if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
-            throw new IllegalStateException("Unexpected default trust managers:" + Arrays.toString(trustManagers));
-        }
-
-        builder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManagers[0]);
     }
 
     @Override

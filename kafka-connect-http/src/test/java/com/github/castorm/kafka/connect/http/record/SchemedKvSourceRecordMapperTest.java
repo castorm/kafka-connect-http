@@ -30,12 +30,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
+import java.math.BigInteger;
 
-import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.now;
 import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.offset;
 import static com.github.castorm.kafka.connect.http.record.SchemedKvSourceRecordMapperTest.Fixture.record;
-import static java.time.Instant.now;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -75,20 +73,13 @@ class SchemedKvSourceRecordMapperTest {
         assertThat(((Struct) mapper.map(record.withKey("key")).value()).get("key")).isEqualTo("key");
     }
 
-    @Test
-    void givenOffsetTimestamp_whenMap_thenValueTimestampMapped() {
-        assertThat(((Struct) mapper.map(record.withOffset(offset)).value()).get("timestamp")).isEqualTo(now.toEpochMilli());
-    }
+
 
     @Test
     void givenOffset_whenMap_thenOffsetMapped() {
         assertThat(mapper.map(record.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
     }
 
-    @Test
-    void givenTimestamp_whenMap_thenTimestampMapped() {
-        assertThat(mapper.map(record.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
-    }
 
     @Test
     void whenMap_thenNoPartitionMapped() {
@@ -106,8 +97,8 @@ class SchemedKvSourceRecordMapperTest {
     }
 
     interface Fixture {
-        Instant now = now();
-        Offset offset = Offset.of(ImmutableMap.of("k", "v"), "key", now);
+        BigInteger bigInt = new BigInteger("1");
+        Offset offset = Offset.of(ImmutableMap.of("k", "v"), bigInt);
         KvRecord record = KvRecord.builder().value("not-null").offset(offset).build();
     }
 }
