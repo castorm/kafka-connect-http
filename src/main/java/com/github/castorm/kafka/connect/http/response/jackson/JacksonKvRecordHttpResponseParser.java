@@ -68,6 +68,7 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
     private KvRecord map(JacksonRecord record) {
 
         Map<String, Object> offsets = record.getOffset();
+        System.out.println("JACKSON Records offsets: " + offsets);
 
         String key = ofNullable(record.getKey())
                 .map(Optional::of)

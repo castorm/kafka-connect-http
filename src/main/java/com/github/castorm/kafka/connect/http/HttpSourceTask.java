@@ -39,9 +39,11 @@ import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
@@ -69,6 +71,10 @@ public class HttpSourceTask extends SourceTask {
 
     private ConfirmationWindow<Map<String, ?>> confirmationWindow = new ConfirmationWindow<>(emptyList());
 
+    private BigInteger offsetIndex;
+
+    private int sleepInterval;
+
     @Getter
     private Offset offset;
 
@@ -92,11 +98,18 @@ public class HttpSourceTask extends SourceTask {
         recordSorter = config.getRecordSorter();
         recordFilterFactory = config.getRecordFilterFactory();
         offset = loadOffset(config.getInitialOffset());
+        offsetIndex =  loadOffsetIndex(offset);
+        sleepInterval = config.getSleepInterval();
     }
 
     private Offset loadOffset(Map<String, String> initialOffset) {
         Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
         return Offset.of(!restoredOffset.isEmpty() ? restoredOffset : initialOffset);
+    }
+
+    private BigInteger loadOffsetIndex(Offset offset) {
+        Optional<?> op = Optional.ofNullable(offset.toMap().get("offsetIndex"));
+        return op.map(o -> new BigInteger(o.toString())).orElse(BigInteger.ONE);
     }
 
     @Override
@@ -105,6 +118,8 @@ public class HttpSourceTask extends SourceTask {
         throttler.throttle(offset.getTimestamp().orElseGet(Instant::now));
 
         HttpRequest request = requestFactory.createRequest(offset);
+
+        log.info("HTTP call to {} with param {} ", request.getUrl(), request.getQueryParams());
 
         HttpResponse response = execute(request);
 
@@ -116,6 +131,14 @@ public class HttpSourceTask extends SourceTask {
 
         log.info("Request for offset {} yields {}/{} new records", offset.toMap(), unseenRecords.size(), records.size());
 
+        // increase offsetIndex
+        if (!unseenRecords.isEmpty()) {
+            offsetIndex = offsetIndex.add(BigInteger.ONE);
+            ((Map<String, Object>)offset.toMap()).put("offsetIndex", offsetIndex.toString());
+        } else {
+            // No unseenRecords found, sleep
+            Thread.sleep(sleepInterval);
+        }
         confirmationWindow = new ConfirmationWindow<>(extractOffsets(unseenRecords));
 
         return unseenRecords;
@@ -137,6 +160,8 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void commitRecord(SourceRecord record, RecordMetadata metadata) {
+        ((Map<String, Object>)record.sourceOffset()).put("offsetIndex", offsetIndex.toString());
+        log.info("Commit record " + record.sourceOffset());
         confirmationWindow.confirm(record.sourceOffset());
     }
 
@@ -146,7 +171,7 @@ public class HttpSourceTask extends SourceTask {
                 .map(Offset::of)
                 .orElse(offset);
 
-        log.debug("Offset set to {}", offset);
+        log.info("Commit offset " + offset);
     }
 
     @Override

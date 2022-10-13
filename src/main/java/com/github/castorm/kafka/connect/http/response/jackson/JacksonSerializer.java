@@ -54,6 +54,7 @@ class JacksonSerializer {
     }
 
     JsonNode getObjectAt(JsonNode node, JsonPointer pointer) {
+        System.out.println("TEST node " + node);
         return getRequiredAt(node, pointer);
     }
 

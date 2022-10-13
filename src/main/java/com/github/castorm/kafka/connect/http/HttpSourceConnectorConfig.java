@@ -42,8 +42,7 @@ import java.util.Map;
 import static com.github.castorm.kafka.connect.common.ConfigUtils.breakDownMap;
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
 import static org.apache.kafka.common.config.ConfigDef.Importance.LOW;
-import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
-import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
+import static org.apache.kafka.common.config.ConfigDef.Type.*;
 
 @Getter
 class HttpSourceConnectorConfig extends AbstractConfig {
@@ -55,6 +54,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private static final String RECORD_SORTER = "http.record.sorter";
     private static final String RECORD_FILTER_FACTORY = "http.record.filter.factory";
     private static final String OFFSET_INITIAL = "http.offset.initial";
+    private static final String SLEEP_INTERVAL = "http.sleep.interval";
 
     private final TimerThrottler throttler;
     private final HttpRequestFactory requestFactory;
@@ -63,6 +63,8 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private final SourceRecordFilterFactory recordFilterFactory;
     private final SourceRecordSorter recordSorter;
     private final Map<String, String> initialOffset;
+
+    private final int sleepInterval;
 
     HttpSourceConnectorConfig(Map<String, ?> originals) {
         super(config(), originals);
@@ -74,6 +76,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
         recordSorter = getConfiguredInstance(RECORD_SORTER, SourceRecordSorter.class);
         recordFilterFactory = getConfiguredInstance(RECORD_FILTER_FACTORY, SourceRecordFilterFactory.class);
         initialOffset = breakDownMap(getString(OFFSET_INITIAL));
+        sleepInterval = getInt(SLEEP_INTERVAL);
     }
 
     public static ConfigDef config() {
@@ -84,6 +87,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
                 .define(RESPONSE_PARSER, CLASS, PolicyHttpResponseParser.class, HIGH, "Response Parser Class")
                 .define(RECORD_SORTER, CLASS, OrderDirectionSourceRecordSorter.class, LOW, "Record Sorter Class")
                 .define(RECORD_FILTER_FACTORY, CLASS, OffsetRecordFilterFactory.class, LOW, "Record Filter Factory Class")
-                .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset");
+                .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset")
+                .define(SLEEP_INTERVAL, INT, 60000, LOW, "Sleep when no unseen records commit");
     }
 }

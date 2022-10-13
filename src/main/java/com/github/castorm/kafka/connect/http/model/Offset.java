@@ -23,6 +23,7 @@ package com.github.castorm.kafka.connect.http.model;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +38,8 @@ public class Offset {
     private static final String KEY_KEY = "key";
 
     private static final String TIMESTAMP_KEY = "timestamp";
+
+    private static final String BLOCK_KEY = "block";
 
     private final Map<String, ?> properties;
 
@@ -60,6 +63,15 @@ public class Offset {
         props.put(TIMESTAMP_KEY, timestamp.toString());
         return new Offset(props);
     }
+
+    /*public static Offset increaseIndex(Map<String, ?> properties) {
+        Map<String, Object> props = new HashMap<>(properties);
+        if (properties.get(BLOCK_KEY) != null) {
+            long l = Long.parseLong(properties.get(BLOCK_KEY).toString()) + 1;
+            props.put(BLOCK_KEY, Long.toString(l));
+        }
+        return new Offset(props);
+    }*/
 
     public Map<String, ?> toMap() {
         return properties;

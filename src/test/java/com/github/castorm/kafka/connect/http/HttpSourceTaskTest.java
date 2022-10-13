@@ -29,7 +29,6 @@ import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.timer.TimerThrottler;
-import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTaskContext;
@@ -42,6 +41,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.github.castorm.kafka.connect.http.HttpSourceTaskTest.Fixture.offset;
@@ -59,7 +60,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
@@ -251,6 +251,7 @@ class HttpSourceTaskTest {
     void givenTaskStarted_whenPollAndCommitRecords_thenOffsetUpdated() throws InterruptedException, IOException {
 
         givenTaskConfiguration();
+        offsetMap.put("offsetIndex", 1);
         task.initialize(getContext(offsetMap));
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
@@ -265,8 +266,7 @@ class HttpSourceTaskTest {
         task.commitRecord(record(offsetMap(3)), null);
         task.commitRecord(record(offsetMap(2)), null);
         task.commit();
-
-        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap(3)));
+        assertThat(task.getOffset().toMap().get("offsetIndex")).isEqualTo("2");
     }
 
     @Test
@@ -298,14 +298,14 @@ class HttpSourceTaskTest {
     interface Fixture {
         Instant now = now();
         String key = "customKey";
-        Map<String, Object> offsetMap = ImmutableMap.of("custom", "value", "key", key, "timestamp", now.toString());
-        Map<String, String> offsetInitialMap = ImmutableMap.of("k2", "v2");
+        Map<String, Object> offsetMap = new LinkedHashMap<>(Map.of("custom", "value", "key", key, "timestamp", now.toString()));
+        Map<String, String> offsetInitialMap = new LinkedHashMap<>(Map.of("k2", "v2"));
         Offset offset = Offset.of(offsetMap);
         HttpRequest request = HttpRequest.builder().build();
         HttpResponse response = HttpResponse.builder().build();
 
         static Map<String, Object> offsetMap(Object value) {
-            return ImmutableMap.of("custom", value, "key", key, "timestamp", now.toString());
+            return new LinkedHashMap<>(Map.of("offsetIndex", 1, "custom", value, "key", key, "timestamp", now.toString()));
         }
 
         static SourceRecord record(Map<String, Object> offset) {
