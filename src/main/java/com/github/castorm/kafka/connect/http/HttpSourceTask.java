@@ -161,7 +161,7 @@ public class HttpSourceTask extends SourceTask {
     @Override
     public void commitRecord(SourceRecord record, RecordMetadata metadata) {
         ((Map<String, Object>)record.sourceOffset()).put("offsetIndex", offsetIndex.toString());
-        log.info("Commit record " + record.sourceOffset());
+        log.debug("Commit record " + record.sourceOffset());
         confirmationWindow.confirm(record.sourceOffset());
     }
 
@@ -171,7 +171,7 @@ public class HttpSourceTask extends SourceTask {
                 .map(Offset::of)
                 .orElse(offset);
 
-        log.info("Commit offset " + offset);
+        log.debug("Commit offset " + offset);
     }
 
     @Override
