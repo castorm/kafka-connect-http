@@ -172,7 +172,7 @@
                                 </goals>
                                 <configuration>
                                     <formats>
-                                        <format>tar.gz</format>
+                                        <format>tgz</format>
                                     </formats>
                                     <tarLongFileMode>posix</tarLongFileMode>
                                     <descriptors>
