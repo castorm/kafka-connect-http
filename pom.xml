@@ -9,7 +9,7 @@
     <groupId>no.norsktipping</groupId>
     <artifactId>kafka-connect-http</artifactId>
     <name>Kafka Connect HTTP</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <scm>
         <developerConnection>scm:git:https://x-access-token:${env.GITHUB_TOKEN}@github.com/Norsk-Tipping/kafka-connect-http.git</developerConnection>
