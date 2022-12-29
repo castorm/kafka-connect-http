@@ -44,6 +44,6 @@ public class OrderDirectionSourceRecordSorterConfig extends AbstractConfig {
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(ORDER_DIRECTION, STRING, "IMPLICIT", LOW, "Order direction of the results in the list, either ASC, DESC or IMPLICIT");
+                .define(ORDER_DIRECTION, STRING, "IMPLICIT", LOW, "Order direction of the results in the list, either ASC, DESC, IMPLICIT or ASC_FORCED_BY_TIMESTAMP");
     }
 }
