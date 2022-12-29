@@ -539,7 +539,7 @@ is especially important, as subsequent request are likely to produce similar res
 offered by this connector are order-dependent, as they are usually based on timestamps.
 
 To enable de-duplication in cases like this, we can instruct the connector to assume a specific order direction, either
-`ASC`, `DESC`, or `IMPLICIT`, where implicit figures it out based on records' timestamps.
+`ASC`, `DESC`, `IMPLICIT`, where implicit figures it out based on records' timestamps, or `ASC_FORCED_BY_TIMESTAMP` where items are unordered and you want to order it by timestamp.
 
 > #### `http.record.sorter`
 > ```java
@@ -555,7 +555,7 @@ To enable de-duplication in cases like this, we can instruct the connector to as
 >
 > #### `http.response.list.order.direction`
 > Order direction of the results in the response list.
-> *   Type: `Enum { ASC, DESC, IMPLICIT }`
+> *   Type: `Enum { ASC, DESC, IMPLICIT, ASC_FORCED_BY_TIMESTAMP }`
 > *   Default: `IMPLICIT`
 
 ---

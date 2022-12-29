@@ -33,11 +33,8 @@ import java.util.List;
 import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter.OrderDirection.ASC;
 import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter.OrderDirection.DESC;
 import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter.OrderDirection.IMPLICIT;
-import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorterTest.Fixture.mid;
-import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorterTest.Fixture.newer;
-import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorterTest.Fixture.older;
-import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorterTest.Fixture.ordered;
-import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorterTest.Fixture.reverseOrdered;
+import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter.OrderDirection.ASC_FORCED_BY_TIMESTAMP;
+import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorterTest.Fixture.*;
 import static java.lang.Long.MAX_VALUE;
 import static java.lang.Long.MIN_VALUE;
 import static java.util.Arrays.asList;
@@ -100,6 +97,30 @@ class OrderDirectionSourceRecordSorterTest {
         assertThat(sorter.sort(reverseOrdered)).containsExactly(older, mid, newer);
     }
 
+    @Test
+    void givenAscByTimestamp_whenOrderedRecords_thenAsIs() {
+
+        givenDirection(ASC_FORCED_BY_TIMESTAMP);
+
+        assertThat(sorter.sort(ordered)).containsExactly(older, mid, newer);
+    }
+
+    @Test
+    void givenAscByTimestamp_whenReverseOrderedRecords_thenAsIs() {
+
+        givenDirection(ASC_FORCED_BY_TIMESTAMP);
+
+        assertThat(sorter.sort(reverseOrdered)).containsExactly(older, mid, newer);
+    }
+
+    @Test
+    void givenAscByTimestamp_whenUnOrderedRecords_thenAsIs() {
+
+        givenDirection(ASC_FORCED_BY_TIMESTAMP);
+
+        assertThat(sorter.sort(unordered)).containsExactly(older, mid, newer);
+    }
+
     private void givenDirection(OrderDirection asc) {
         sorter = new OrderDirectionSourceRecordSorter(__ -> config);
         given(config.getOrderDirection()).willReturn(asc);
@@ -111,6 +132,8 @@ class OrderDirectionSourceRecordSorterTest {
         SourceRecord mid = new SourceRecord(null, null, null, null, null, null, null, null, 0L);
         SourceRecord newer = new SourceRecord(null, null, null, null, null, null, null, null, MAX_VALUE);
         List<SourceRecord> ordered = asList(older, mid, newer);
+
+        List<SourceRecord> unordered = asList(older, newer, mid);
         List<SourceRecord> reverseOrdered = asList(newer, mid, older);
     }
 }

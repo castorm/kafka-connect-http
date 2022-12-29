@@ -22,12 +22,15 @@ package com.github.castorm.kafka.connect.http.record;
 
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter.OrderDirection.ASC;
 import static com.github.castorm.kafka.connect.http.record.OrderDirectionSourceRecordSorter.OrderDirection.DESC;
@@ -62,6 +65,8 @@ public class OrderDirectionSourceRecordSorter implements SourceRecordSorter {
                 return reversed;
             case ASC:
                 return records;
+            case ASC_FORCED_BY_TIMESTAMP:
+                return records.stream().sorted(Comparator.comparing(ConnectRecord::timestamp)).collect(Collectors.toList());
             case IMPLICIT:
             default:
                 return sortWithDirection(records, getImplicitDirection(records));
@@ -78,6 +83,6 @@ public class OrderDirectionSourceRecordSorter implements SourceRecordSorter {
     }
 
     public enum OrderDirection {
-        ASC, DESC, IMPLICIT
+        ASC, DESC, IMPLICIT, ASC_FORCED_BY_TIMESTAMP
     }
 }
