@@ -78,7 +78,7 @@
         <natty.version>0.13</natty.version>
 
         <junit.version>5.8.2</junit.version>
-        <mockito.version>4.3.1</mockito.version>
+        <mockito.version>5.1.1</mockito.version>
         <assertj.version>3.22.0</assertj.version>
         <wiremock.version>2.32.0</wiremock.version>
         <guava.version>31.0.1-jre</guava.version>
