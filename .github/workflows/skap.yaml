@@ -1,0 +1,51 @@
+name: Java CI
+
+on: [push]
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: kafka-connect-http
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: kafka-connect-http
+        run: |
+          cd kafka-connect-http
+          mvn package -DskipTests || true
+
+      - name: docker build
+        run: |
+          cd kafka-connect-http
+          version=`grep '<artifactId>kafka-connect-http-parent</artifactId>' -A1 pom.xml  | grep version | grep -o '[0-9]*\.[0-9]*\.[0-9][^<]*'`
+          docker build -t 003675007768.dkr.ecr.us-west-2.amazonaws.com/connect-packages:kafka-connect-http-${version}-`date +%y%m%d`-`git rev-parse --short HEAD` .
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: docker push
+        run: |
+          cd kafka-connect-http
+          version=`grep '<artifactId>kafka-connect-http-parent</artifactId>' -A1 pom.xml  | grep version | grep -o '[0-9]*\.[0-9]*\.[0-9][^<]*'`
+          docker push 003675007768.dkr.ecr.us-west-2.amazonaws.com/connect-packages:kafka-connect-http-${version}-`date +%y%m%d`-`git rev-parse --short HEAD`
