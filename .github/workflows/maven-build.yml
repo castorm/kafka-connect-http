@@ -3,11 +3,11 @@
 
 name: Build
 
-on:
-  push:
-    branches: [ master ]
-  pull_request_target:
-    branches: [ master ]
+on: workflow_dispatch
+  # push:
+  #   branches: [ master ]
+  # pull_request_target:
+  #   branches: [ master ]
 
 
 jobs:

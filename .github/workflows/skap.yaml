@@ -25,7 +25,7 @@ jobs:
       - name: kafka-connect-http
         run: |
           cd kafka-connect-http
-          mvn clean package -DskipTests || true
+          mvn -B clean package -DskipTests || true
 
       - name: docker build
         run: |

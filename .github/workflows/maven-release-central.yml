@@ -3,10 +3,10 @@
 
 name: Release to Maven Central
 
-on:
-  push:
-    tags:
-      - 'v*'
+on: workflow_dispatch
+  # push:
+  #   tags:
+  #     - 'v*'
 
 jobs:
   build:
