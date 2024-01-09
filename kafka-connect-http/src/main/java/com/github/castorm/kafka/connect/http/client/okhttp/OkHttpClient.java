@@ -91,7 +91,7 @@ public class OkHttpClient implements HttpClient {
                 .addInterceptor(createLoggingInterceptor())
                 .addInterceptor(chain -> chain.proceed(authorize(chain.request())))
                 .authenticator((route, response) -> authorize(response.request()))
-                .proxy(resolveProxy(config.getProxyHost(), config.getProxyPort()))
+                .proxy(resolveProxy(config.getProxyHost(), config.getProxyPort(), config.getProxyType()))
                 .proxyAuthenticator(resolveProxyAuthenticator(config.getProxyUsername(), config.getProxyPassword()));
 
         resolveSslSocketFactory(builder, config.getKeyStore(), config.getKeyStorePassword().value());
@@ -115,8 +115,8 @@ public class OkHttpClient implements HttpClient {
         }
     }
 
-    private static Proxy resolveProxy(String host, Integer port) {
-        return isEmpty(host) ? NO_PROXY : new Proxy(HTTP, new InetSocketAddress(host, port));
+    private static Proxy resolveProxy(String host, Integer port, Proxy.Type proxyType) {
+        return isEmpty(host) ? NO_PROXY : new Proxy(proxyType, new InetSocketAddress(host, port));
     }
 
     private static Authenticator resolveProxyAuthenticator(String username, String password) {

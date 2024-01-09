@@ -25,11 +25,15 @@ import com.github.castorm.kafka.connect.http.auth.spi.HttpAuthenticator;
 import lombok.Getter;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
+import org.apache.kafka.common.config.ConfigDef.ValidList;
+import org.apache.kafka.common.config.ConfigDef.ValidString;
 import org.apache.kafka.common.config.types.Password;
 
+import java.net.Proxy;
 import java.util.Map;
 
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
+import static org.apache.kafka.common.config.ConfigDef.Importance.LOW;
 import static org.apache.kafka.common.config.ConfigDef.Importance.MEDIUM;
 import static org.apache.kafka.common.config.ConfigDef.Type.CLASS;
 import static org.apache.kafka.common.config.ConfigDef.Type.INT;
@@ -45,6 +49,7 @@ public class OkHttpClientConfig extends AbstractConfig {
     private static final String CONNECTION_KEEP_ALIVE_DURATION_MILLIS = "http.client.ttl.millis";
     private static final String CONNECTION_MAX_IDLE = "http.client.max-idle";
     private static final String AUTHENTICATOR = "http.auth";
+    private static final String PROXY_TYPE = "http.client.proxy.type";
     private static final String PROXY_HOST = "http.client.proxy.host";
     private static final String PROXY_PORT = "http.client.proxy.port";
     private static final String PROXY_USERNAME = "http.client.proxy.username";
@@ -59,6 +64,7 @@ public class OkHttpClientConfig extends AbstractConfig {
     private final HttpAuthenticator authenticator;
     private final String proxyHost;
     private final Integer proxyPort;
+    private final Proxy.Type proxyType;
     private final String proxyUsername;
     private final String proxyPassword;
     private final String keyStore;
@@ -73,6 +79,7 @@ public class OkHttpClientConfig extends AbstractConfig {
         authenticator = getConfiguredInstance(AUTHENTICATOR, HttpAuthenticator.class);
         proxyHost = getString(PROXY_HOST);
         proxyPort = getInt(PROXY_PORT);
+        proxyType = Proxy.Type.valueOf(getString(PROXY_TYPE).toUpperCase());
         proxyUsername = getString(PROXY_USERNAME);
         proxyPassword = getString(PROXY_PASSWORD);
         keyStore = getString(KEYSTORE);
@@ -88,6 +95,7 @@ public class OkHttpClientConfig extends AbstractConfig {
                 .define(AUTHENTICATOR, CLASS, ConfigurableHttpAuthenticator.class, MEDIUM, "Custom Authenticator")
                 .define(PROXY_HOST, STRING, "", MEDIUM, "Proxy host")
                 .define(PROXY_PORT, INT, 3128, MEDIUM, "Proxy port")
+                .define(PROXY_TYPE, STRING, "http", ValidString.in("http", "socks"), LOW, "Proxy type, http or socks")
                 .define(PROXY_USERNAME, STRING, "", MEDIUM, "Proxy username")
                 .define(PROXY_PASSWORD, STRING, "", MEDIUM, "Proxy password")
                 .define(KEYSTORE, STRING, "", MEDIUM, "Keystore")
