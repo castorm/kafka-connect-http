@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.config.ConfigException;
@@ -19,8 +20,17 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class HttpSourceTask extends SourceTask {
+    private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
 
     private Map<String, HttpSourceTaskSingleIndex> tasks;
+
+    HttpSourceTask(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
+        this.configFactory = configFactory;
+    }
+
+    public HttpSourceTask() {
+        this(HttpSourceConnectorConfig::new);
+    }
 
     @Override
     public void start(Map<String, String> settings) {
@@ -38,7 +48,7 @@ public class HttpSourceTask extends SourceTask {
             Map<String, String> taskSettings = new HashMap<>();
             taskSettings.putAll(settings);
             taskSettings.put(TemplateHttpRequestFactoryConfig.URL, originalUrl.replace("<INDEX>", index));
-            HttpSourceTaskSingleIndex task = new HttpSourceTaskSingleIndex();
+            HttpSourceTaskSingleIndex task = new HttpSourceTaskSingleIndex(this.configFactory);
             task.start(taskSettings);
             tasks.put(index, task);
         }
