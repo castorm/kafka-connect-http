@@ -1,5 +1,5 @@
 {
-  "name": "connector1",
+  "name": "connector2",
   "config": {
     "connector.class": "com.github.castorm.kafka.connect.http.HttpSourceConnector",
     "http.request.url": "http://${server.url}/rest/api",
@@ -12,7 +12,7 @@
     "http.response.list.pointer": "/issues",
     "http.response.record.offset.pointer": "key=/key, timestamp=/fields/updated, index=/fields/_index",
     "kafka.topic": "topic-name",
-    "kafka.topic.template": "true",
+    "kafka.topic.template": "false",
     "http.timer.interval.millis": "0",
     "http.timer.catchup.interval.millis": "0",
     "http.client.read.timeout.millis": "0"

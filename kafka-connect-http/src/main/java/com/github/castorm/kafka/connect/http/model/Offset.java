@@ -38,6 +38,8 @@ public class Offset {
 
     private static final String TIMESTAMP_KEY = "timestamp";
 
+    private static final String INDEX_KEY = "index";
+
     private final Map<String, ?> properties;
 
     private Offset(Map<String, ?> properties) {
@@ -48,16 +50,18 @@ public class Offset {
         return new Offset(properties);
     }
 
-    public static Offset of(Map<String, ?> properties, String key) {
+    public static Offset of(Map<String, ?> properties, String key, String index) {
         Map<String, Object> props = new HashMap<>(properties);
         props.put(KEY_KEY, key);
+        props.put(INDEX_KEY, index);
         return new Offset(props);
     }
 
-    public static Offset of(Map<String, ?> properties, String key, Instant timestamp) {
+    public static Offset of(Map<String, ?> properties, String key, Instant timestamp, String index) {
         Map<String, Object> props = new HashMap<>(properties);
         props.put(KEY_KEY, key);
         props.put(TIMESTAMP_KEY, timestamp.toString());
+        props.put(INDEX_KEY, index);
         return new Offset(props);
     }
 
@@ -71,5 +75,9 @@ public class Offset {
 
     public Optional<Instant> getTimestamp() {
         return ofNullable((String) properties.get(TIMESTAMP_KEY)).map(Instant::parse);
+    }
+
+    public Optional<String> getIndex() {
+        return ofNullable((String) properties.get(INDEX_KEY));
     }
 }

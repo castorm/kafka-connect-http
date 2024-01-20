@@ -49,7 +49,7 @@ class StringKvSourceRecordMapperTest {
 
     @BeforeEach
     void setUp() {
-        given(config.getTopic()).willReturn("topic");
+        given(config.getTopicName("index")).willReturn("topic");
         mapper = new StringKvSourceRecordMapper(__ -> config);
         mapper.configure(emptyMap());
     }
@@ -96,7 +96,7 @@ class StringKvSourceRecordMapperTest {
 
     interface Fixture {
         Instant now = now();
-        Offset offset = Offset.of(ImmutableMap.of("k", "v"), "key", now);
+        Offset offset = Offset.of(ImmutableMap.of("k", "v"), "key", now, "index");
         KvRecord record = KvRecord.builder().value("not-null").offset(offset).build();
     }
 }

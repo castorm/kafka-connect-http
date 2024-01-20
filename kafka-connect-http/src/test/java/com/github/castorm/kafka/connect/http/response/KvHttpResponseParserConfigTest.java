@@ -76,6 +76,7 @@ class KvHttpResponseParserConfigTest {
     private static KvHttpResponseParserConfig config(Map<String, Object> settings) {
         Map<String, Object> defaultSettings = new HashMap<String, Object>() {{
             put("kafka.topic", "topic");
+            put("kafka.topic.template", "false");
         }};
         defaultSettings.putAll(settings);
         return new KvHttpResponseParserConfig(defaultSettings);

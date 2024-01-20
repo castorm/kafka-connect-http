@@ -34,6 +34,8 @@ public class KafkaConnectInfraExtension implements InvocationInterceptor {
 
     KafkaConnectInfra infra = new KafkaConnectInfra();
 
+//        Use following container instead for ARM Architecture (i.e. M2 Apple chip like)
+//  WiremockContainer wiremock = new WiremockContainer(parse("wiremock/wiremock:nightly"))
     WiremockContainer wiremock = new WiremockContainer(parse("rodolpheche/wiremock:2.25.1"))
             .withNetwork(infra.getNetwork())
             .withNetworkAliases("wiremock")

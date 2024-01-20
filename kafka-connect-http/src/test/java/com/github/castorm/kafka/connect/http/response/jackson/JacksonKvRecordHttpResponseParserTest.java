@@ -83,7 +83,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItem_thenKeyMapped() {
 
-        givenRecords(Stream.of(record.withKey("key")));
+        givenRecords(Stream.of(record.withKey("key").withOffset(ImmutableMap.of( "index", "topic"))));
 
         assertThat(parser.parse(response)).first().extracting(KvRecord::getKey).isEqualTo("key");
     }
@@ -91,7 +91,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItemWithNoKeyButOffset_thenKeyMappedFromOffset() {
 
-        givenRecords(Stream.of(record.withKey(null).withOffset(ImmutableMap.of("key", "value"))));
+        givenRecords(Stream.of(record.withKey(null).withOffset(ImmutableMap.of("key", "value", "index", "topic"))));
 
         assertThat(parser.parse(response)).first().extracting(KvRecord::getKey).isEqualTo("value");
     }
@@ -99,7 +99,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItemWithNoNoKey_thenKeyDefault() {
 
-        givenRecords(Stream.of(record.withKey(null)));
+        givenRecords(Stream.of(record.withKey(null).withOffset(ImmutableMap.of( "index", "topic"))));
 
         assertThat(parser.parse(response)).first().extracting(KvRecord::getKey).isNotNull();
     }
@@ -107,7 +107,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItem_thenValueMapped() {
 
-        givenRecords(Stream.of(record.withBody("value")));
+        givenRecords(Stream.of(record.withBody("value").withOffset(ImmutableMap.of( "index", "topic"))));
 
         assertThat(parser.parse(response)).first().extracting(KvRecord::getValue).isEqualTo("value");
     }
@@ -115,7 +115,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItem_thenTimestampMapped() {
 
-        givenRecords(Stream.of(record.withTimestamp(timestampIso)));
+        givenRecords(Stream.of(record.withTimestamp(timestampIso).withOffset(ImmutableMap.of( "index", "topic"))));
         given(timestampParser.parse(timestampIso)).willReturn(timestamp);
 
         assertThat(parser.parse(response)).first().extracting(KvRecord::getOffset).extracting(Offset::getTimestamp).isEqualTo(Optional.of(timestamp));
@@ -124,7 +124,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItemWitNoTimestampButOffset_thenTimestampMappedFromOffset() {
 
-        givenRecords(Stream.of(record.withTimestamp(null).withOffset(ImmutableMap.of("timestamp", timestampIso))));
+        givenRecords(Stream.of(record.withTimestamp(null).withOffset(ImmutableMap.of("timestamp", timestampIso, "index", "topic"))));
         given(timestampParser.parse(timestampIso)).willReturn(timestamp);
 
         assertThat(parser.parse(response)).first().extracting(KvRecord::getOffset).extracting(Offset::getTimestamp).isEqualTo(Optional.of(timestamp));
@@ -133,7 +133,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItemWithNoTimestamp_thenDefault() {
 
-        givenRecords(Stream.of(record.withTimestamp(null)));
+        givenRecords(Stream.of(record.withTimestamp(null).withOffset(ImmutableMap.of( "index", "topic"))));
 
         assertThat(parser.parse(response)).first().extracting(KvRecord::getOffset).extracting(Offset::getTimestamp).isNotNull();
     }
@@ -141,7 +141,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItem_thenOffsetMapped() {
 
-        givenRecords(Stream.of(record.withOffset(ImmutableMap.of("offset-key", "offset-value"))));
+        givenRecords(Stream.of(record.withOffset(ImmutableMap.of("offset-key", "offset-value", "index", "value"))));
 
         assertThat(parser.parse(response).stream().findFirst().get().getOffset().toMap().get("offset-key")).isEqualTo("offset-value");
     }
@@ -149,7 +149,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItem_thenTimestampMappedToOffset() {
 
-        givenRecords(Stream.of(record.withTimestamp(timestampIso).withOffset(emptyMap())));
+        givenRecords(Stream.of(record.withTimestamp(timestampIso).withOffset(ImmutableMap.of( "index", "topic"))));
         given(timestampParser.parse(timestampIso)).willReturn(timestamp);
 
         assertThat(parser.parse(response).stream().findFirst().get().getOffset().getTimestamp()).contains(parse(timestampIso));
@@ -158,7 +158,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItem_thenKeyMappedToOffset() {
 
-        givenRecords(Stream.of(record.withKey("value").withOffset(emptyMap())));
+        givenRecords(Stream.of(record.withKey("value").withOffset(ImmutableMap.of( "index", "topic"))));
 
         assertThat(parser.parse(response).stream().findFirst().get().getOffset().getKey()).contains("value");
     }
@@ -166,7 +166,7 @@ class JacksonKvRecordHttpResponseParserTest {
     @Test
     void givenOneItemWithNoKey_thenConsistentUUIDMappedToOffset() {
 
-        givenRecords(Stream.of(record.withKey(null).withOffset(emptyMap())));
+        givenRecords(Stream.of(record.withKey(null).withOffset(ImmutableMap.of( "index", "topic"))));
 
         assertThat(parser.parse(response).stream().findFirst().get().getOffset().getKey()).contains(nameUUIDFromBytes(record.getBody().toString().getBytes()).toString());
     }

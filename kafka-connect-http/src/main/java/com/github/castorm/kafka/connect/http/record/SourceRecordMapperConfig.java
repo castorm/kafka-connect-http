@@ -20,6 +20,7 @@ package com.github.castorm.kafka.connect.http.record;
  * #L%
  */
 
+import freemarker.template.Configuration;
 import lombok.Getter;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
@@ -27,6 +28,7 @@ import org.apache.kafka.common.config.ConfigDef;
 import java.util.Map;
 
 import static org.apache.kafka.common.config.ConfigDef.Importance.HIGH;
+import static org.apache.kafka.common.config.ConfigDef.Type.BOOLEAN;
 import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 
 @Getter
@@ -34,15 +36,34 @@ public class SourceRecordMapperConfig extends AbstractConfig {
 
     private static final String TOPIC = "kafka.topic";
 
+    private static final String TOPIC_TEMPLATE = "kafka.topic.template";
+
     private final String topic;
+
+    private final String topicTemplate;
+
+    private final Configuration freemarkerConfig;
 
     SourceRecordMapperConfig(Map<String, ?> originals) {
         super(config(), originals);
         topic = getString(TOPIC);
+        topicTemplate = getString(TOPIC_TEMPLATE);
+        freemarkerConfig = new Configuration(Configuration.VERSION_2_3_31);
     }
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(TOPIC, STRING, HIGH, "Kafka Topic");
+                .define(TOPIC, STRING, HIGH, "Kafka Topic")
+                .define(TOPIC_TEMPLATE, STRING, HIGH, "Kafka Topic Template");
+
+    }
+
+    public String getTopicName(String index) {
+        if (topicTemplate != null && Boolean.TRUE.toString().equals(topicTemplate.toLowerCase())) {
+            if (index != null && !index.isEmpty()) {
+                return index;
+            }
+        }
+        return topic;
     }
 }

@@ -48,6 +48,7 @@ class SourceRecordMapperConfigTest {
         static SourceRecordMapperConfig minimumConfig(Map<String, String> customConfig) {
             HashMap<String, String> finalConfig = new HashMap<>();
             finalConfig.put("kafka.topic", "test-topic");
+            finalConfig.put("kafka.topic.template", "false");
             finalConfig.putAll(customConfig);
             return new SourceRecordMapperConfig(finalConfig);
         }

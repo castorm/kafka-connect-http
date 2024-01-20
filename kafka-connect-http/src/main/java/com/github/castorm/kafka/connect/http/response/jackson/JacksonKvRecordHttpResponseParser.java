@@ -74,14 +74,17 @@ public class JacksonKvRecordHttpResponseParser implements KvRecordHttpResponsePa
                 .orElseGet(() -> ofNullable(offsets.get("key")).map(String.class::cast))
                 .orElseGet(() -> generateConsistentKey(record.getBody()));
 
+        String index = ofNullable(offsets.get("index")).map(String.class::cast)
+            .orElseThrow(() -> new IllegalStateException("Record parsed without index from ElasticSearch "));
+
         Optional<Instant> timestamp = ofNullable(record.getTimestamp())
                 .map(Optional::of)
                 .orElseGet(() -> ofNullable(offsets.get("timestamp")).map(String.class::cast))
                 .map(timestampParser::parse);
 
         Offset offset = timestamp
-                .map(ts -> Offset.of(offsets, key, ts))
-                .orElseGet(() -> Offset.of(offsets, key));
+                .map(ts -> Offset.of(offsets, key, ts, index))
+                .orElseGet(() -> Offset.of(offsets, key, index));
 
         return KvRecord.builder()
                 .key(key)

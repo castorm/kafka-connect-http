@@ -148,6 +148,7 @@ class HttpSourceConnectorConfigTest {
         static Map<String, String> defaultMap() {
             return new HashMap<String, String>() {{
                 put("kafka.topic", "topic");
+                put("kafka.topic.template", "false");
                 put("http.request.url", "foo");
                 put("http.response.json.record.offset.value.pointer", "/baz");
             }};

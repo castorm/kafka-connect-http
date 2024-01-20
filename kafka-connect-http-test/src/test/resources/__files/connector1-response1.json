@@ -9,7 +9,8 @@
       "fields": {
         "summary": "My first ticket",
         "created": "2020-01-01T00:00:02.000+0000",
-        "updated": "2020-01-01T00:00:02.000+0000"
+        "updated": "2020-01-01T00:00:02.000+0000",
+        "_index": "topic-name1"
       }
     },
     {
@@ -18,7 +19,8 @@
       "fields": {
         "summary": "My first ticket",
         "created": "2020-01-01T00:00:03.000+0000",
-        "updated": "2020-01-01T00:00:03.000+0000"
+        "updated": "2020-01-01T00:00:03.000+0000",
+        "_index": "topic-name2"
       }
     }
   ]

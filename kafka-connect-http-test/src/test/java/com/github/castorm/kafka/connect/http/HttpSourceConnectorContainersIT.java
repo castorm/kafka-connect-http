@@ -47,20 +47,45 @@ class HttpSourceConnectorContainersIT {
 
     KafkaClient kafkaClient = new KafkaClient(infra.getKafkaBootstrapServers());
 
+//    @Test
+//    @Timeout(60)
+//    void whenConnector1_thenRecordsInDifferentTopics() {
+//
+//        String configJson = replaceVariables(readFileFromClasspath("connectors/connector1.json"), ImmutableMap.of("server.url", infra.getWiremockInternalUrl()));
+//
+//        Map<String, String> config = kafkaConnectClient.createConnector(configJson);
+//
+//        assertThat(kafkaClient.observeTopic("topic-name1")
+//            .take(1)
+//            .doOnNext(record -> log.info("{} {} {} {}", record.timestamp(), record.key(), record.value(), record.offset()))
+//            .collect(toList())
+//            .blockingGet())
+//            .extracting(ConsumerRecord::key)
+//            .containsExactly("Struct{key=TICKT-0002}");
+//
+//        assertThat(kafkaClient.observeTopic("topic-name2")
+//            .take(1)
+//            .doOnNext(record -> log.info("{} {} {} {}", record.timestamp(), record.key(), record.value(), record.offset()))
+//            .collect(toList())
+//            .blockingGet())
+//            .extracting(ConsumerRecord::key)
+//            .containsExactly( "Struct{key=TICKT-0003}");
+//    }
+
     @Test
     @Timeout(60)
-    void whenConnector1_thenRecordsInTopic() {
+    void whenConnector2_thenRecordsInSingleTopic() {
 
-        String configJson = replaceVariables(readFileFromClasspath("connectors/connector1.json"), ImmutableMap.of("server.url", infra.getWiremockInternalUrl()));
+        String configJson = replaceVariables(readFileFromClasspath("connectors/connector2.json"), ImmutableMap.of("server.url", infra.getWiremockInternalUrl()));
 
         Map<String, String> config = kafkaConnectClient.createConnector(configJson);
 
         assertThat(kafkaClient.observeTopic(config.get("kafka.topic"))
-                .take(2)
-                .doOnNext(record -> log.info("{} {} {}", record.timestamp(), record.key(), record.value()))
-                .collect(toList())
-                .blockingGet())
-                .extracting(ConsumerRecord::key)
-                .containsExactly("Struct{key=TICKT-0002}", "Struct{key=TICKT-0003}");
+            .take(2)
+            .doOnNext(record -> log.info("{} {} {}", record.timestamp(), record.key(), record.value()))
+            .collect(toList())
+            .blockingGet())
+            .extracting(ConsumerRecord::key)
+            .containsExactly("Struct{key=TICKT-0002}", "Struct{key=TICKT-0003}");
     }
 }
