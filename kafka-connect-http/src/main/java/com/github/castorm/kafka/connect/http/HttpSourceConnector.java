@@ -1,5 +1,7 @@
 package com.github.castorm.kafka.connect.http;
 
+import org.apache.commons.collections4.ListUtils;
+
 /*-
  * #%L
  * kafka-connect-http
@@ -21,6 +23,7 @@ package com.github.castorm.kafka.connect.http;
  */
 
 import org.apache.kafka.common.config.ConfigDef;
+import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.source.SourceConnector;
 
@@ -30,6 +33,9 @@ import java.util.Map;
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class HttpSourceConnector extends SourceConnector {
 
@@ -57,9 +63,25 @@ public class HttpSourceConnector extends SourceConnector {
 
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
-        return range(0, maxTasks).boxed()
-                .map(__ -> settings)
-                .collect(toList());
+        List<Map<String, String>> taskConfigs = new ArrayList<>();
+
+        String indexIncludeList = settings.get(HttpSourceConnectorConfig.INDEX_INCLUDE_LIST);
+        if (null == indexIncludeList) {
+            throw new ConfigException(HttpSourceConnectorConfig.INDEX_INCLUDE_LIST + " is required");
+        }
+        List<String> indexes = List.of(indexIncludeList.split(","));
+        List<List<String>> tasksIndexIncludeLists = ListUtils.partition(indexes, maxTasks);
+
+        for (int i = 0; i < maxTasks; i++) {
+            Map<String, String> taskSettings = new HashMap<>();
+            taskSettings.putAll(settings);
+            List<String> taskIndexes = tasksIndexIncludeLists.size() <= i ? List.of() : tasksIndexIncludeLists.get(i);
+            taskSettings.put(HttpSourceConnectorConfig.INDEX_INCLUDE_LIST,
+                    String.join(",", taskIndexes));
+            taskConfigs.add(taskSettings);
+        }
+
+        return taskConfigs;
     }
 
     @Override
