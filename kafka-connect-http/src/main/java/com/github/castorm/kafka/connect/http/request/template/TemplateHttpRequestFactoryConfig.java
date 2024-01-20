@@ -37,7 +37,7 @@ import static org.apache.kafka.common.config.ConfigDef.Type.STRING;
 @Getter
 public class TemplateHttpRequestFactoryConfig extends AbstractConfig {
 
-    private static final String URL = "http.request.url";
+    public static final String URL = "http.request.url";
     private static final String METHOD = "http.request.method";
     private static final String HEADERS = "http.request.headers";
     private static final String QUERY_PARAMS = "http.request.params";

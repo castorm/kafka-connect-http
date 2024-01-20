@@ -28,24 +28,20 @@ import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
-import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfig;
 import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.timer.TimerThrottler;
 import edu.emory.mathcs.backport.java.util.Collections;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
@@ -55,41 +51,74 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
-public class HttpSourceTask extends SourceTask {
+public class HttpSourceTaskSingleIndex extends SourceTask {
 
-    private List<HttpSourceTaskSingleIndex> tasks;
-    Executor
+    private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
+
+    private TimerThrottler throttler;
+
+    private HttpRequestFactory requestFactory;
+
+    private HttpClient requestExecutor;
+
+    private HttpResponseParser responseParser;
+
+    private SourceRecordSorter recordSorter;
+
+    private SourceRecordFilterFactory recordFilterFactory;
+
+    private ConfirmationWindow<Map<String, ?>> confirmationWindow = new ConfirmationWindow<>(emptyList());
+
+    @Getter
+    private Offset offset;
+
+    HttpSourceTaskSingleIndex(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
+        this.configFactory = configFactory;
+    }
+
+    public HttpSourceTaskSingleIndex() {
+        this(HttpSourceConnectorConfig::new);
+    }
 
     @Override
     public void start(Map<String, String> settings) {
-        String indexIncludeList = settings.get(HttpSourceConnectorConfig.INDEX_INCLUDE_LIST);
-        if (null == indexIncludeList) {
-            throw new ConfigException(HttpSourceConnectorConfig.INDEX_INCLUDE_LIST + " is required");
-        }
 
-        String originalUrl = settings.get(TemplateHttpRequestFactoryConfig.URL);
+        HttpSourceConnectorConfig config = configFactory.apply(settings);
 
-        List<String> indexes = List.of(indexIncludeList.split(","));
-        int idx = 0;
-        for (String index : indexes) {
-            log.info("Initializing task {} for index {}", idx++, index);
-            Map<String, String> taskSettings = new HashMap<>();
-            taskSettings.putAll(settings);
-            taskSettings.put(TemplateHttpRequestFactoryConfig.URL, originalUrl.replace("<INDEX>", index));
-            HttpSourceTaskSingleIndex task = new HttpSourceTaskSingleIndex();
-            task.start(taskSettings);
-            tasks.add(task);
-        }
+        throttler = config.getThrottler();
+        requestFactory = config.getRequestFactory();
+        requestExecutor = config.getClient();
+        responseParser = config.getResponseParser();
+        recordSorter = config.getRecordSorter();
+        recordFilterFactory = config.getRecordFilterFactory();
+        offset = loadOffset(config.getInitialOffset());
     }
 
+    private Offset loadOffset(Map<String, String> initialOffset) {
+        Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
+        return Offset.of(!restoredOffset.isEmpty() ? restoredOffset : initialOffset);
+    }
 
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
 
-        //call tasks in parallel
-        List<List<SourceRecord>> records = tasks.parallelStream()
-                .map(HttpSourceTaskSingleIndex::poll)
+        throttler.throttle(offset.getTimestamp().orElseGet(Instant::now));
+
+        HttpRequest request = requestFactory.createRequest(offset);
+
+        HttpResponse response = execute(request);
+
+        List<SourceRecord> records = responseParser.parse(response);
+
+        List<SourceRecord> unseenRecords = recordSorter.sort(records).stream()
+                .filter(recordFilterFactory.create(offset))
                 .collect(toList());
+
+        log.info("Request for offset {} yields {}/{} new records", offset.toMap(), unseenRecords.size(), records.size());
+
+        confirmationWindow = new ConfirmationWindow<>(extractOffsets(unseenRecords));
+
+        return unseenRecords;
     }
 
     private HttpResponse execute(HttpRequest request) {
