@@ -45,8 +45,6 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
     private static final String TIMESTAMP_FIELD_NAME = "timestamp";
     private static final String INDEX_FIELD_NAME = "index";
 
-    private static Map<String, ?> sourcePartition = emptyMap();
-
     private final Function<Map<String, ?>, SourceRecordMapperConfig> configFactory;
 
     private SourceRecordMapperConfig config;
@@ -85,7 +83,8 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
 
         Struct key = keyStruct(record.getKey());
         Struct value = valueStruct(record.getKey(), record.getValue(), timestamp, index);
-
+        Map<String, ?> sourcePartition = Map.of("index", offset.getIndex());
+        
         return new SourceRecord(
                 sourcePartition,
                 offset.toMap(),

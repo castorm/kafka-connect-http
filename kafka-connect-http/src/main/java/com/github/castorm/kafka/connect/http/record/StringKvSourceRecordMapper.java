@@ -47,8 +47,6 @@ import static org.apache.kafka.connect.data.SchemaBuilder.string;
 @RequiredArgsConstructor
 public class StringKvSourceRecordMapper implements KvSourceRecordMapper {
 
-    private static Map<String, ?> sourcePartition = emptyMap();
-
     private static final Schema keySchema = string().build();
 
     private static final Schema valueSchema = string().build();
@@ -70,6 +68,7 @@ public class StringKvSourceRecordMapper implements KvSourceRecordMapper {
     public SourceRecord map(KvRecord record) {
 
         Offset offset = record.getOffset();
+        Map<String, ?> sourcePartition = Map.of("index", offset.getIndex());
 
         return new SourceRecord(
                 sourcePartition,
