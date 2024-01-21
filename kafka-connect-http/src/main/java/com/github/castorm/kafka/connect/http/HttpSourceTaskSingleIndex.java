@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
-import org.apache.kafka.connect.source.SourceTask;
+import org.apache.kafka.connect.source.SourceTaskContext;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -51,7 +51,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
-public class HttpSourceTaskSingleIndex extends SourceTask {
+public class HttpSourceTaskSingleIndex {
 
     private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
 
@@ -80,8 +80,7 @@ public class HttpSourceTaskSingleIndex extends SourceTask {
         this(HttpSourceConnectorConfig::new);
     }
 
-    @Override
-    public void start(Map<String, String> settings) {
+    public void start(SourceTaskContext context, Map<String, String> settings) {
 
         HttpSourceConnectorConfig config = configFactory.apply(settings);
 
@@ -91,15 +90,14 @@ public class HttpSourceTaskSingleIndex extends SourceTask {
         responseParser = config.getResponseParser();
         recordSorter = config.getRecordSorter();
         recordFilterFactory = config.getRecordFilterFactory();
-        offset = loadOffset(config.getInitialOffset());
+        offset = loadOffset(context, config.getInitialOffset());
     }
 
-    private Offset loadOffset(Map<String, String> initialOffset) {
+    private Offset loadOffset(SourceTaskContext context, Map<String, String> initialOffset) {
         Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
         return Offset.of(!restoredOffset.isEmpty() ? restoredOffset : initialOffset);
     }
 
-    @Override
     public List<SourceRecord> poll() throws InterruptedException {
 
         throttler.throttle(offset.getTimestamp().orElseGet(Instant::now));
@@ -135,12 +133,10 @@ public class HttpSourceTaskSingleIndex extends SourceTask {
                 .collect(toList());
     }
 
-    @Override
     public void commitRecord(SourceRecord record, RecordMetadata metadata) {
         confirmationWindow.confirm(record.sourceOffset());
     }
 
-    @Override
     public void commit() {
         offset = confirmationWindow.getLowWatermarkOffset()
                 .map(Offset::of)
@@ -149,12 +145,10 @@ public class HttpSourceTaskSingleIndex extends SourceTask {
         log.debug("Offset set to {}", offset);
     }
 
-    @Override
     public void stop() {
         // Nothing to do, no resources to release
     }
 
-    @Override
     public String version() {
         return getVersion();
     }

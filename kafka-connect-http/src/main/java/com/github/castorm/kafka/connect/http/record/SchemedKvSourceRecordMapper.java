@@ -83,7 +83,7 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
 
         Struct key = keyStruct(record.getKey());
         Struct value = valueStruct(record.getKey(), record.getValue(), timestamp, index);
-        Map<String, ?> sourcePartition = Map.of("index", offset.getIndex());
+        Map<String, ?> sourcePartition = offset.getPartition();
         
         return new SourceRecord(
                 sourcePartition,

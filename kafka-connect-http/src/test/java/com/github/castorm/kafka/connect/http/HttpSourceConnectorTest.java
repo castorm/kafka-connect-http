@@ -32,7 +32,7 @@ class HttpSourceConnectorTest {
 
     @Test
     void whenTaskClass_thenHttpSourceTask() {
-        assertThat(connector.taskClass()).isEqualTo(HttpSourceTask.class);
+        assertThat(connector.taskClass()).isEqualTo(HttpSourceTaskSingleIndex.class);
     }
 
     @Test

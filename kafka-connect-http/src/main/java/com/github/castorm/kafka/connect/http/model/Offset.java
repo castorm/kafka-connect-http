@@ -46,6 +46,14 @@ public class Offset {
         this.properties = properties;
     }
 
+    public static Map<String, ?> getPartition(String index) {
+         return Map.of("index", index);
+    }
+
+    public Map<String, ?> getPartition() {
+        return Map.of("index", getIndex());
+    }
+
     public static Offset of(Map<String, ?> properties) {
         return new Offset(properties);
     }

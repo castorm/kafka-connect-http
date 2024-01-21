@@ -68,7 +68,7 @@ public class StringKvSourceRecordMapper implements KvSourceRecordMapper {
     public SourceRecord map(KvRecord record) {
 
         Offset offset = record.getOffset();
-        Map<String, ?> sourcePartition = Map.of("index", offset.getIndex());
+        Map<String, ?> sourcePartition = offset.getPartition();
 
         return new SourceRecord(
                 sourcePartition,
