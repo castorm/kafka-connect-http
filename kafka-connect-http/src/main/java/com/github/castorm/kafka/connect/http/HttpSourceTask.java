@@ -43,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 public class HttpSourceTask extends SourceTask {
     private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
 
-    private Map<String, HttpSourceTaskSingleEndpoint> tasks;
+    private Map<String, HttpSourceTaskSingleEndpoint> tasks = new HashMap<>();
 
     HttpSourceTask(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
         this.configFactory = configFactory;
