@@ -35,6 +35,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class HttpSourceConnector extends SourceConnector {
@@ -63,11 +64,14 @@ public class HttpSourceConnector extends SourceConnector {
 
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
+        if (settings == null) {
+            return Collections.singletonList(null);
+        }
         List<Map<String, String>> taskConfigs = new ArrayList<>();
 
         String endpointIncludeList = settings.get(HttpSourceConnectorConfig.ENDPOINT_INCLUDE_LIST);
         if (null == endpointIncludeList) {
-            throw new ConfigException(HttpSourceConnectorConfig.ENDPOINT_INCLUDE_LIST + " is required");
+            endpointIncludeList = HttpSourceConnectorConfig.DEFAULT_ENDPOINT;
         }
         List<String> endpoints = List.of(endpointIncludeList.split(","));
         List<List<String>> tasksEndpointIncludeLists = new ArrayList<>();

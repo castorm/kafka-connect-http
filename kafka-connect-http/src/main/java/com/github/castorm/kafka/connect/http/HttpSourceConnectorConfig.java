@@ -77,6 +77,8 @@ class HttpSourceConnectorConfig extends AbstractConfig {
         initialOffset = breakDownMap(getString(OFFSET_INITIAL));
     }
 
+    public static String DEFAULT_ENDPOINT = "_DEFAULT_";
+
     public static ConfigDef config() {
         return new ConfigDef()
                 .define(TIMER, CLASS, AdaptableIntervalTimer.class, HIGH, "Poll Timer Class")
@@ -86,6 +88,6 @@ class HttpSourceConnectorConfig extends AbstractConfig {
                 .define(RECORD_SORTER, CLASS, OrderDirectionSourceRecordSorter.class, LOW, "Record Sorter Class")
                 .define(RECORD_FILTER_FACTORY, CLASS, OffsetRecordFilterFactory.class, LOW, "Record Filter Factory Class")
                 .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset")
-                .define(ENDPOINT_INCLUDE_LIST, STRING, "", HIGH, "Comma separated list of indices to include");
+                .define(ENDPOINT_INCLUDE_LIST, STRING, DEFAULT_ENDPOINT, HIGH, "Comma separated list of indices to include");
     }
 }

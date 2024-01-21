@@ -42,6 +42,8 @@ class HttpSourceConnectorTest {
 
     @Test
     void whenSeveralTaskConfigs_thenAsManyReturned() {
+        ImmutableMap<String, String> myMap = ImmutableMap.of("endpoint.include.list", "e1,e2,e3,e4");
+        connector.start(myMap);
         assertThat(connector.taskConfigs(3)).hasSize(3);
     }
 
