@@ -236,7 +236,7 @@ For an Epoch representation of the same string, FreeMarker built-ins should be u
 http.request.params=after=${offset.timestamp?datetime.iso?long}
 ```
 For a complete understanding of the features provided by FreeMarker, please, refer to the 
-[User Manual](https://freemarker.apache.org/docs/index.html)
+[User Manual](https://freemarker.apache.org/docs/endpoint.html)
 
 ---
 <a name="client"/>

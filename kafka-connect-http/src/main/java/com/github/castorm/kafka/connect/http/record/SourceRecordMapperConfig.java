@@ -58,10 +58,10 @@ public class SourceRecordMapperConfig extends AbstractConfig {
 
     }
 
-    public String getTopicName(String index) {
+    public String getTopicName(String endpoint) {
         if (topicTemplate != null && Boolean.TRUE.toString().equals(topicTemplate.toLowerCase())) {
-            if (index != null && !index.isEmpty()) {
-                return index;
+            if (endpoint != null && !endpoint.isEmpty()) {
+                return endpoint;
             }
         }
         return topic;

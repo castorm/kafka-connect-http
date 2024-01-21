@@ -67,8 +67,8 @@ class OffsetRecordFilterFactoryTest {
     }
 
     interface Fixture {
-        static SourceRecord record(int index) {
-            return new SourceRecord(null, ImmutableMap.of("i", index), null, null, null, null, null, null, 0L);
+        static SourceRecord record(int endpoint) {
+            return new SourceRecord(null, ImmutableMap.of("i", endpoint), null, null, null, null, null, null, 0L);
         }
     }
 }

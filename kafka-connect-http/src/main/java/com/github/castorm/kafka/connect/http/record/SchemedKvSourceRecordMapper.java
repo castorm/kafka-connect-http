@@ -43,7 +43,7 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
     private static final String KEY_FIELD_NAME = "key";
     private static final String VALUE_FIELD_NAME = "value";
     private static final String TIMESTAMP_FIELD_NAME = "timestamp";
-    private static final String INDEX_FIELD_NAME = "index";
+    private static final String ENDPOINT_FIELD_NAME = "endpoint";
 
     private final Function<Map<String, ?>, SourceRecordMapperConfig> configFactory;
 
@@ -68,7 +68,7 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
                 .name("com.github.castorm.kafka.connect.http.Value").doc("Message Value")
                 .field(VALUE_FIELD_NAME, string().doc("HTTP Record Value").build())
                 .field(KEY_FIELD_NAME, string().optional().doc("HTTP Record Key").build())
-                .field(INDEX_FIELD_NAME, string().optional().doc("HTTP Record Value Index").build())
+                .field(ENDPOINT_FIELD_NAME, string().optional().doc("HTTP Record Value Endpoint").build())
                 .field(TIMESTAMP_FIELD_NAME, int64().optional().doc("HTTP Record Timestamp").build())
                 .build();
     }
@@ -78,17 +78,17 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
 
         Offset offset = record.getOffset();
         Long timestamp = offset.getTimestamp().map(Instant::toEpochMilli).orElseGet(System::currentTimeMillis);
-        String index = offset.getIndex()
-            .orElseThrow(() -> new IllegalStateException("KvRecord parsed without index from ElasticSearch!"));
+        String endpoint = offset.getEndpoint()
+            .orElseThrow(() -> new IllegalStateException("KvRecord parsed without endpoint from ElasticSearch!"));
 
         Struct key = keyStruct(record.getKey());
-        Struct value = valueStruct(record.getKey(), record.getValue(), timestamp, index);
+        Struct value = valueStruct(record.getKey(), record.getValue(), timestamp, endpoint);
         Map<String, ?> sourcePartition = offset.getPartition();
         
         return new SourceRecord(
                 sourcePartition,
                 offset.toMap(),
-                config.getTopicName(index),
+                config.getTopicName(endpoint),
                 null,
                 key.schema(),
                 key,
@@ -101,11 +101,11 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
         return new Struct(keySchema).put(KEY_FIELD_NAME, key);
     }
 
-    private Struct valueStruct(String key, String value, Long timestamp, String index) {
+    private Struct valueStruct(String key, String value, Long timestamp, String endpoint) {
         return new Struct(valueSchema)
                 .put(KEY_FIELD_NAME, key)
                 .put(VALUE_FIELD_NAME, value)
                 .put(TIMESTAMP_FIELD_NAME, timestamp)
-                .put(INDEX_FIELD_NAME, index);
+                .put(ENDPOINT_FIELD_NAME, endpoint);
     }
 }

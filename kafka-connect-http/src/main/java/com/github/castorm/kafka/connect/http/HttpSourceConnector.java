@@ -65,19 +65,26 @@ public class HttpSourceConnector extends SourceConnector {
     public List<Map<String, String>> taskConfigs(int maxTasks) {
         List<Map<String, String>> taskConfigs = new ArrayList<>();
 
-        String indexIncludeList = settings.get(HttpSourceConnectorConfig.INDEX_INCLUDE_LIST);
-        if (null == indexIncludeList) {
-            throw new ConfigException(HttpSourceConnectorConfig.INDEX_INCLUDE_LIST + " is required");
+        String endpointIncludeList = settings.get(HttpSourceConnectorConfig.ENDPOINT_INCLUDE_LIST);
+        if (null == endpointIncludeList) {
+            throw new ConfigException(HttpSourceConnectorConfig.ENDPOINT_INCLUDE_LIST + " is required");
         }
-        List<String> indexes = List.of(indexIncludeList.split(","));
-        List<List<String>> tasksIndexIncludeLists = ListUtils.partition(indexes, maxTasks);
+        List<String> endpoints = List.of(endpointIncludeList.split(","));
+        List<List<String>> tasksEndpointIncludeLists = new ArrayList<>();
+        for (int i = 0; i < maxTasks; i++) {
+            tasksEndpointIncludeLists.add(new ArrayList<>());
+        }
+        for (int i = 0; i < endpoints.size(); i++) {
+            String endpoint = endpoints.get(i);
+            tasksEndpointIncludeLists.get(i % maxTasks).add(endpoint);
+        }
 
         for (int i = 0; i < maxTasks; i++) {
             Map<String, String> taskSettings = new HashMap<>();
             taskSettings.putAll(settings);
-            List<String> taskIndexes = tasksIndexIncludeLists.size() <= i ? List.of() : tasksIndexIncludeLists.get(i);
-            taskSettings.put(HttpSourceConnectorConfig.INDEX_INCLUDE_LIST,
-                    String.join(",", taskIndexes));
+            List<String> taskEndpointes = tasksEndpointIncludeLists.size() <= i ? List.of() : tasksEndpointIncludeLists.get(i);
+            taskSettings.put(HttpSourceConnectorConfig.ENDPOINT_INCLUDE_LIST,
+                    String.join(",", taskEndpointes));
             taskConfigs.add(taskSettings);
         }
 

@@ -55,7 +55,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     private static final String RECORD_SORTER = "http.record.sorter";
     private static final String RECORD_FILTER_FACTORY = "http.record.filter.factory";
     private static final String OFFSET_INITIAL = "http.offset.initial";
-    public static final String INDEX_INCLUDE_LIST = "index.include.list";
+    public static final String ENDPOINT_INCLUDE_LIST = "endpoint.include.list";
 
     private final TimerThrottler throttler;
     private final HttpRequestFactory requestFactory;
@@ -86,6 +86,6 @@ class HttpSourceConnectorConfig extends AbstractConfig {
                 .define(RECORD_SORTER, CLASS, OrderDirectionSourceRecordSorter.class, LOW, "Record Sorter Class")
                 .define(RECORD_FILTER_FACTORY, CLASS, OffsetRecordFilterFactory.class, LOW, "Record Filter Factory Class")
                 .define(OFFSET_INITIAL, STRING, "", HIGH, "Starting offset")
-                .define(INDEX_INCLUDE_LIST, STRING, "", HIGH, "Comma separated list of indices to include");
+                .define(ENDPOINT_INCLUDE_LIST, STRING, "", HIGH, "Comma separated list of indices to include");
     }
 }

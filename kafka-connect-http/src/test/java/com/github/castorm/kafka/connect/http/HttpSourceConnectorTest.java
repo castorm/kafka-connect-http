@@ -32,7 +32,7 @@ class HttpSourceConnectorTest {
 
     @Test
     void whenTaskClass_thenHttpSourceTask() {
-        assertThat(connector.taskClass()).isEqualTo(HttpSourceTaskSingleIndex.class);
+        assertThat(connector.taskClass()).isEqualTo(HttpSourceTask.class);
     }
 
     @Test
@@ -48,11 +48,14 @@ class HttpSourceConnectorTest {
     @Test
     void whenSeveralTaskConfigs_thenAllWithConnectorConfig() {
 
-        ImmutableMap<String, String> myMap = ImmutableMap.of("key", "value");
+        ImmutableMap<String, String> myMap = ImmutableMap.of("key", "value", "endpoint.include.list", "e1,e2,e3,e4");
+        ImmutableMap<String, String> m1 = ImmutableMap.of("key", "value", "endpoint.include.list", "e1,e4");
+        ImmutableMap<String, String> m2 = ImmutableMap.of("key", "value", "endpoint.include.list", "e2");
+        ImmutableMap<String, String> m3 = ImmutableMap.of("key", "value", "endpoint.include.list", "e3");
 
         connector.start(myMap);
 
-        assertThat(connector.taskConfigs(3)).containsExactly(myMap, myMap, myMap);
+        assertThat(connector.taskConfigs(3)).containsExactly(m1, m2, m3);
     }
 
     @Test

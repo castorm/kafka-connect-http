@@ -65,7 +65,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 @ExtendWith(MockitoExtension.class)
 class HttpSourceTaskTest {
 
-    HttpSourceTask task;
+    HttpSourceTaskSingleEndpoint task;
 
     @Mock
     HttpSourceConnectorConfig config;
@@ -90,7 +90,7 @@ class HttpSourceTaskTest {
 
     @BeforeEach
     void setUp() {
-        task = new HttpSourceTask(__ -> config);
+        task = new HttpSourceTaskSingleEndpoint(__ -> config);
     }
 
     private void givenTaskConfiguration() {

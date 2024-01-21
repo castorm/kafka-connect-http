@@ -1,5 +1,25 @@
 package com.github.castorm.kafka.connect.http;
 
+/*-
+ * #%L
+ * Kafka Connect HTTP
+ * %%
+ * Copyright (C) 2020 - 2024 Cástor Rodríguez
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import static com.github.castorm.kafka.connect.common.VersionUtils.getVersion;
 
 import java.util.ArrayList;
@@ -13,6 +33,7 @@ import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
+import org.apache.kafka.connect.source.SourceTaskContext;
 
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfig;
 
@@ -22,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 public class HttpSourceTask extends SourceTask {
     private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
 
-    private Map<String, HttpSourceTaskSingleIndex> tasks;
+    private Map<String, HttpSourceTaskSingleEndpoint> tasks;
 
     HttpSourceTask(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
         this.configFactory = configFactory;
@@ -34,23 +55,24 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void start(Map<String, String> settings) {
-        String indexIncludeList = settings.get(HttpSourceConnectorConfig.INDEX_INCLUDE_LIST);
-        if (null == indexIncludeList) {
-            throw new ConfigException(HttpSourceConnectorConfig.INDEX_INCLUDE_LIST + " is required");
+        String endpointIncludeList = settings.get(HttpSourceConnectorConfig.ENDPOINT_INCLUDE_LIST);
+        if (null == endpointIncludeList) {
+            throw new ConfigException(HttpSourceConnectorConfig.ENDPOINT_INCLUDE_LIST + " is required");
         }
 
         String originalUrl = settings.get(TemplateHttpRequestFactoryConfig.URL);
 
-        List<String> indexes = List.of(indexIncludeList.split(","));
+        List<String> endpoints = List.of(endpointIncludeList.split(","));
         int idx = 0;
-        for (String index : indexes) {
-            log.info("Initializing task {} for index {}", idx++, index);
+        for (String endpoint : endpoints) {
+            log.info("Initializing task {} for endpoint {}", idx++, endpoint);
             Map<String, String> taskSettings = new HashMap<>();
             taskSettings.putAll(settings);
-            taskSettings.put(TemplateHttpRequestFactoryConfig.URL, originalUrl.replace("<INDEX>", index));
-            HttpSourceTaskSingleIndex task = new HttpSourceTaskSingleIndex(this.configFactory);
+            taskSettings.put(TemplateHttpRequestFactoryConfig.URL, originalUrl.replace("<ENDPOINT>", endpoint));
+            HttpSourceTaskSingleEndpoint task = new HttpSourceTaskSingleEndpoint(this.configFactory);
+            task.initialize(this.context);
             task.start(taskSettings);
-            tasks.put(index, task);
+            tasks.put(endpoint, task);
         }
     }
 
@@ -59,17 +81,17 @@ public class HttpSourceTask extends SourceTask {
     public List<SourceRecord> poll() throws InterruptedException {
 
         List<SourceRecord> records = new ArrayList<>();
-        for (HttpSourceTaskSingleIndex task : tasks.values()) {
+        for (HttpSourceTaskSingleEndpoint task : tasks.values()) {
             records.addAll(task.poll());
         }
         return records;
     }
 
-    private HttpSourceTaskSingleIndex getTaskForRecord(SourceRecord record) {
-        String index = record.topic();
-        HttpSourceTaskSingleIndex task = tasks.get(index);
+    private HttpSourceTaskSingleEndpoint getTaskForRecord(SourceRecord record) {
+        String endpoint = record.topic();
+        HttpSourceTaskSingleEndpoint task = tasks.get(endpoint);
         if (task == null) {
-            throw new ConnectException("No HttpSourceTaskSingleIndex found for topic " + index);
+            throw new ConnectException("No HttpSourceTaskSingleEndpoint found for topic " + endpoint);
         }
         return task;
     }
@@ -81,14 +103,14 @@ public class HttpSourceTask extends SourceTask {
 
     @Override
     public void commit() {
-        for (HttpSourceTaskSingleIndex task : tasks.values()) {
+        for (HttpSourceTaskSingleEndpoint task : tasks.values()) {
             task.commit();
         }
     }
 
     @Override
     public void stop() {
-        for (HttpSourceTaskSingleIndex task : tasks.values()) {
+        for (HttpSourceTaskSingleEndpoint task : tasks.values()) {
             task.stop();
         }
     }

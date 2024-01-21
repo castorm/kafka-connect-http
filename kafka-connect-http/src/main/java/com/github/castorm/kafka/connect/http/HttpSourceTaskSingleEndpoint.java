@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
+import org.apache.kafka.connect.source.SourceTask;
 import org.apache.kafka.connect.source.SourceTaskContext;
 
 import java.io.IOException;
@@ -51,7 +52,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
-public class HttpSourceTaskSingleIndex {
+public class HttpSourceTaskSingleEndpoint extends SourceTask {
 
     private final Function<Map<String, String>, HttpSourceConnectorConfig> configFactory;
 
@@ -72,15 +73,16 @@ public class HttpSourceTaskSingleIndex {
     @Getter
     private Offset offset;
 
-    HttpSourceTaskSingleIndex(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
+    HttpSourceTaskSingleEndpoint(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
         this.configFactory = configFactory;
     }
 
-    public HttpSourceTaskSingleIndex() {
+    public HttpSourceTaskSingleEndpoint() {
         this(HttpSourceConnectorConfig::new);
     }
 
-    public void start(SourceTaskContext context, Map<String, String> settings) {
+    @Override
+    public void start(Map<String, String> settings) {
 
         HttpSourceConnectorConfig config = configFactory.apply(settings);
 
@@ -90,7 +92,7 @@ public class HttpSourceTaskSingleIndex {
         responseParser = config.getResponseParser();
         recordSorter = config.getRecordSorter();
         recordFilterFactory = config.getRecordFilterFactory();
-        offset = loadOffset(context, config.getInitialOffset());
+        offset = loadOffset(this.context, config.getInitialOffset());
     }
 
     private Offset loadOffset(SourceTaskContext context, Map<String, String> initialOffset) {
@@ -98,6 +100,7 @@ public class HttpSourceTaskSingleIndex {
         return Offset.of(!restoredOffset.isEmpty() ? restoredOffset : initialOffset);
     }
 
+    @Override
     public List<SourceRecord> poll() throws InterruptedException {
 
         throttler.throttle(offset.getTimestamp().orElseGet(Instant::now));
@@ -145,6 +148,7 @@ public class HttpSourceTaskSingleIndex {
         log.debug("Offset set to {}", offset);
     }
 
+    @Override
     public void stop() {
         // Nothing to do, no resources to release
     }

@@ -38,7 +38,7 @@ public class Offset {
 
     private static final String TIMESTAMP_KEY = "timestamp";
 
-    private static final String INDEX_KEY = "index";
+    private static final String ENDPOINT_KEY = "endpoint";
 
     private final Map<String, ?> properties;
 
@@ -46,30 +46,30 @@ public class Offset {
         this.properties = properties;
     }
 
-    public static Map<String, ?> getPartition(String index) {
-         return Map.of("index", index);
+    public static Map<String, ?> getPartition(String endpoint) {
+         return Map.of("endpoint", endpoint);
     }
 
     public Map<String, ?> getPartition() {
-        return Map.of("index", getIndex());
+        return Map.of("endpoint", getEndpoint());
     }
 
     public static Offset of(Map<String, ?> properties) {
         return new Offset(properties);
     }
 
-    public static Offset of(Map<String, ?> properties, String key, String index) {
+    public static Offset of(Map<String, ?> properties, String key, String endpoint) {
         Map<String, Object> props = new HashMap<>(properties);
         props.put(KEY_KEY, key);
-        props.put(INDEX_KEY, index);
+        props.put(ENDPOINT_KEY, endpoint);
         return new Offset(props);
     }
 
-    public static Offset of(Map<String, ?> properties, String key, Instant timestamp, String index) {
+    public static Offset of(Map<String, ?> properties, String key, Instant timestamp, String endpoint) {
         Map<String, Object> props = new HashMap<>(properties);
         props.put(KEY_KEY, key);
         props.put(TIMESTAMP_KEY, timestamp.toString());
-        props.put(INDEX_KEY, index);
+        props.put(ENDPOINT_KEY, endpoint);
         return new Offset(props);
     }
 
@@ -85,7 +85,7 @@ public class Offset {
         return ofNullable((String) properties.get(TIMESTAMP_KEY)).map(Instant::parse);
     }
 
-    public Optional<String> getIndex() {
-        return ofNullable((String) properties.get(INDEX_KEY));
+    public Optional<String> getEndpoint() {
+        return ofNullable((String) properties.get(ENDPOINT_KEY));
     }
 }

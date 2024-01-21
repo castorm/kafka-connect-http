@@ -66,7 +66,7 @@ class HttpSourceConnectorIT {
         assertThat(records).extracting(SourceRecord::topic).containsExactly("topic-name1", "topic-name2");
         assertThat(records).extracting(record -> (String) record.sourceOffset().get("key")).containsExactly("TICKT-0002", "TICKT-0003");
         assertThat(records).extracting(record -> (String) record.sourceOffset().get("timestamp")).containsExactly("2020-01-01T00:00:02Z", "2020-01-01T00:00:03Z");
-        assertThat(records).extracting(record -> (String) record.sourceOffset().get("index")).containsExactly("topic-name1", "topic-name2");
+        assertThat(records).extracting(record -> (String) record.sourceOffset().get("endpoint")).containsExactly("topic-name1", "topic-name2");
     }
 
     @Test
