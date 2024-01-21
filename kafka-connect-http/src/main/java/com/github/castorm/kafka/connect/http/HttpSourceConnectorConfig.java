@@ -78,6 +78,7 @@ class HttpSourceConnectorConfig extends AbstractConfig {
     }
 
     public static String DEFAULT_ENDPOINT = "_DEFAULT_";
+    public static String URL_ENDPOINT_PLACEHOLDER = "<ENDPOINT>";
 
     public static ConfigDef config() {
         return new ConfigDef()

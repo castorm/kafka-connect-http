@@ -60,17 +60,16 @@ class StreamkapElasticConnectorTest {
 
         HttpSourceConnector connector = new HttpSourceConnector();
         Map<String, String> props = new HashMap<>();
-        props.put("connector.class", "com.github.castorm.kafka.connect.http.HttpSourceConnector");
-        props.put("http.request.url", "http://${server.url}/rest/api");
-        props.put("http.request.params", "updated=${offset.timestamp}");
-        props.put("http.request.headers", "Accept: application/json");
-        props.put("http.auth.type", "Basic");
-        props.put("http.auth.user", "user");
-        props.put("http.auth.password", "password");
-        props.put("http.offset.initial", "key=TICKT-0001, timestamp=2020-01-01T00:00:01Z, endpoint=topic-name1");
-        props.put("http.response.list.pointer", "/issues");
-        props.put("http.response.record.offset.pointer", "key=/key, timestamp=/fields/updated, endpoint=/fields/_index");
-        props.put("kafka.topic", "topic-name");
+        props.put("http.response.record.offset.pointer", "key=/_id, timestamp=/sort/0, endpoint=/_index");
+        props.put("http.request.body", "{\"size\": 100, \"sort\": [{\"my_timestamp\": \"asc\"}], \"search_after\": [${offset.timestamp?datetime.iso?long}]}");
+        props.put("http.request.url", opensearch.getHttpHostAddress() + "/" + HttpSourceConnectorConfig.URL_ENDPOINT_PLACEHOLDER + "/_search");
+        props.put("http.response.record.pointer", "/_source");
+        props.put("http.request.method", "POST");
+        props.put("http.response.list.pointer", "/hits/hits");
+        props.put("http.request.headers", "Content-Type: application/json");
+        props.put("http.offset.initial", "timestamp=2024-01-10T14:24:03Z");
+        props.put("endpoint.include.list", "index1,index2,index1_1,index2_2");
+        props.put("kafka.topic", "my_prefix");
         props.put("kafka.topic.template", "true");
         props.put("http.timer.interval.millis", "0");
         props.put("http.timer.catchup.interval.millis", "0");
@@ -86,7 +85,8 @@ class StreamkapElasticConnectorTest {
             task.start(taskConfig);
             pool.submit(() -> records.addAll(task.poll()));
         }
-        pool.awaitTermination(10, TimeUnit.SECONDS);
+        pool.shutdown();
+        pool.awaitTermination(1000, TimeUnit.SECONDS);
         assertThat(records).hasSize(4);
     }
 

@@ -68,7 +68,8 @@ public class HttpSourceTask extends SourceTask {
             log.info("Initializing task {} for endpoint {}", idx++, endpoint);
             Map<String, String> taskSettings = new HashMap<>();
             taskSettings.putAll(settings);
-            taskSettings.put(TemplateHttpRequestFactoryConfig.URL, originalUrl.replace("<ENDPOINT>", endpoint));
+            taskSettings.put(TemplateHttpRequestFactoryConfig.URL, 
+                originalUrl.replace(HttpSourceConnectorConfig.URL_ENDPOINT_PLACEHOLDER, endpoint));
             HttpSourceTaskSingleEndpoint task = new HttpSourceTaskSingleEndpoint(this.configFactory);
             task.initialize(this.context);
             task.start(taskSettings);
