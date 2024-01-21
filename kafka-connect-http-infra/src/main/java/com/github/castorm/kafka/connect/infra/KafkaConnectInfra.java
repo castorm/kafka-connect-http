@@ -46,16 +46,16 @@ public class KafkaConnectInfra {
 
 //        Use following container instead for ARM Architecture (i.e. M2 Apple chip like)
 //        kafka = new KafkaContainer(parse("confluentinc/cp-kafka:7.5.3.arm64"))
-        kafka = new KafkaContainer(parse("confluentinc/cp-kafka:6.0.1"))
+        kafka = new KafkaContainer(parse("confluentinc/cp-kafka:7.5.3"))
             .withNetwork(network)
                 .withNetworkAliases("kafka");
 
 //        Use following container instead for ARM Architecture (i.e. M2 Apple chip like)
 //        kafkaConnect = new KafkaConnectContainer(parse("confluentinc/cp-kafka-connect:7.5.3.arm64"))
-        kafkaConnect = new KafkaConnectContainer(parse("confluentinc/cp-kafka-connect:6.0.1"))
+        kafkaConnect = new KafkaConnectContainer(parse("confluentinc/cp-kafka-connect:7.5.3"))
             .withNetwork(network)
                 .withBootstrapServers("PLAINTEXT://kafka:9092")
-                .withFileSystemBind("target/kafka-connect-http", "/etc/kafka-connect/plugins/kafka-connect-http", READ_ONLY)
+                .withFileSystemBind("kafka-connect-http/target", "/etc/kafka-connect/plugins/kafka-connect-http", READ_ONLY)
                 .withStartupTimeout(Duration.ofMinutes(3));
     }
 
