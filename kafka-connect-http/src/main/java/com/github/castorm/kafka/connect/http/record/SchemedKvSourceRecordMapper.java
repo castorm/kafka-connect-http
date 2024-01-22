@@ -40,10 +40,11 @@ import static org.apache.kafka.connect.data.SchemaBuilder.string;
 @RequiredArgsConstructor
 public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
 
-    private static final String KEY_FIELD_NAME = "key";
-    private static final String VALUE_FIELD_NAME = "value";
-    private static final String TIMESTAMP_FIELD_NAME = "timestamp";
-    private static final String ENDPOINT_FIELD_NAME = "endpoint";
+    private static final String KEY_FIELD_NAME = "_streamkap_key";
+    private static final String VALUE_FIELD_NAME = "_streamkap_value";
+    private static final String TIMESTAMP_FIELD_NAME = "_streamkap_timestamp";
+    // TODO change ednpoint field name (maybe create new Mapper or extend current class with a specific implementation)
+    private static final String ENDPOINT_FIELD_NAME = "_streamkap_index";
 
     private final Function<Map<String, ?>, SourceRecordMapperConfig> configFactory;
 
