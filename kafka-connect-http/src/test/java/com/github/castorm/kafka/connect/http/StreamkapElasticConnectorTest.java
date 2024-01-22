@@ -28,6 +28,9 @@ import org.junit.jupiter.api.Test;
 import org.opensearch.testcontainers.OpensearchContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 class StreamkapElasticConnectorTest {
 
     private static OpensearchContainer<?> opensearch = new OpensearchContainer<>(
@@ -57,6 +60,7 @@ class StreamkapElasticConnectorTest {
         sendRequest("/index2/_doc", "POST", "{ \"my_timestamp\": \"" + Instant.now().toString() + "\", \"message\": \"Hello OpenSearch 2\" }");
         sendRequest("/index1_1/_doc", "POST", "{ \"my_timestamp\": \"" + Instant.now().toString() + "\", \"message\": \"Hello OpenSearch 1_1\" }");
         sendRequest("/index2_2/_doc", "POST", "{ \"my_timestamp\": \"" + Instant.now().toString() + "\", \"message\": \"Hello OpenSearch 2_1\" }");
+        Thread.sleep(2000);//wait for ES to index the data and make it available for search
 
         HttpSourceConnector connector = new HttpSourceConnector();
         Map<String, String> props = new HashMap<>();
@@ -83,10 +87,12 @@ class StreamkapElasticConnectorTest {
             HttpSourceTask task = new HttpSourceTask();
             task.initialize(getContext(emptyMap()));
             task.start(taskConfig);
+            log.info("Starting task: {}", taskConfig.get(HttpSourceConnectorConfig.ENDPOINT_INCLUDE_LIST));
             pool.submit(() -> records.addAll(task.poll()));
         }
         pool.shutdown();
         pool.awaitTermination(1000, TimeUnit.SECONDS);
+        log.info("Tasks done, got {} records", records.size());
         assertThat(records).hasSize(4);
     }
 
