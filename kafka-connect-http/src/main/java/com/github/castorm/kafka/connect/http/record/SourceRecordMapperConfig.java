@@ -53,7 +53,7 @@ public class SourceRecordMapperConfig extends AbstractConfig {
 
     public static ConfigDef config() {
         return new ConfigDef()
-                .define(TOPIC, STRING, HIGH, "Kafka Topic")
+                .define(TOPIC, STRING, "default-topic", HIGH, "Kafka Topic")
                 .define(TOPIC_TEMPLATE, STRING, HIGH, "Kafka Topic Template");
 
     }
