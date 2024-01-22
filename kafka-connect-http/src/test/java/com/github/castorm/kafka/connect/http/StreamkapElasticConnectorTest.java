@@ -137,7 +137,7 @@ class StreamkapElasticConnectorTest {
         List<SourceRecord> records = runTasks(config, 4);
         assertThat(records).hasSize(4);
         assertThat(records.get(0).value()).isInstanceOf(Struct.class);
-        assertThat(((Struct)records.get(0).value()).get("value").toString()).contains("my_timestamp");
+        assertThat(((Struct)records.get(0).value()).get("_streamkap_value").toString()).contains("my_timestamp");
     }
 
     @Test
@@ -148,11 +148,11 @@ class StreamkapElasticConnectorTest {
         List<SourceRecord> records = runTasks(config, 4, 4);
         assertThat(records).hasSize(16);
         assertThat(records.get(0).value()).isInstanceOf(Struct.class);
-        assertThat(((Struct) records.get(0).value()).get("value").toString()).contains("my_timestamp");
+        assertThat(((Struct) records.get(0).value()).get("_streamkap_value").toString()).contains("my_timestamp");
         assertThat(records.stream()
-                .sorted((r1, r2) -> ((Struct) r1.value()).getString("key")
-                        .compareTo(((Struct) r2.value()).getString("key")))
-                .map(r -> ((Struct) r.value()).getString("key")).toArray())
+                .sorted((r1, r2) -> ((Struct) r1.value()).getString("_streamkap_key")
+                        .compareTo(((Struct) r2.value()).getString("_streamkap_key")))
+                .map(r -> ((Struct) r.value()).getString("_streamkap_key")).toArray())
                 .containsExactly(
                         "0-0", "0-1", "0-2", "0-3",
                         "1-0", "1-1", "1-2", "1-3",
