@@ -62,22 +62,22 @@ class SchemedKvSourceRecordMapperTest {
 
     @Test
     void givenKey_whenMap_thenKeyMapped() {
-        assertThat(((Struct) mapper.map(record.withKey("key")).key()).get("key")).isEqualTo("key");
+        assertThat(((Struct) mapper.map(record.withKey("key")).key()).get("_streamkap_key")).isEqualTo("key");
     }
 
     @Test
     void givenValue_whenMap_thenValueMapped() {
-        assertThat(((Struct) mapper.map(record.withValue("value")).value()).get("value")).isEqualTo("value");
+        assertThat(((Struct) mapper.map(record.withValue("value")).value()).get("_streamkap_value")).isEqualTo("value");
     }
 
     @Test
     void givenKey_whenMap_thenValueKeyMapped() {
-        assertThat(((Struct) mapper.map(record.withKey("key")).value()).get("key")).isEqualTo("key");
+        assertThat(((Struct) mapper.map(record.withKey("key")).value()).get("_streamkap_key")).isEqualTo("key");
     }
 
     @Test
     void givenOffsetTimestamp_whenMap_thenValueTimestampMapped() {
-        assertThat(((Struct) mapper.map(record.withOffset(offset)).value()).get("timestamp")).isEqualTo(now.toEpochMilli());
+        assertThat(((Struct) mapper.map(record.withOffset(offset)).value()).get("_streamkap_timestamp")).isEqualTo(now.toEpochMilli());
     }
 
     @Test
