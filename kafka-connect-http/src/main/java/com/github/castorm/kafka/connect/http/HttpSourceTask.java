@@ -70,7 +70,7 @@ public class HttpSourceTask extends SourceTask {
             taskSettings.putAll(settings);
             taskSettings.put(TemplateHttpRequestFactoryConfig.URL, 
                 originalUrl.replace(HttpSourceConnectorConfig.URL_ENDPOINT_PLACEHOLDER, endpoint));
-            HttpSourceTaskSingleEndpoint task = new HttpSourceTaskSingleEndpoint(this.configFactory);
+            HttpSourceTaskSingleEndpoint task = new HttpSourceTaskSingleEndpoint(endpoint, this.configFactory);
             task.initialize(this.context);
             task.start(taskSettings);
             tasks.put(endpoint, task);

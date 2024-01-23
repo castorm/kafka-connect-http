@@ -90,7 +90,7 @@ class HttpSourceTaskTest {
 
     @BeforeEach
     void setUp() {
-        task = new HttpSourceTaskSingleEndpoint(__ -> config);
+        task = new HttpSourceTaskSingleEndpoint(HttpSourceConnectorConfig.DEFAULT_ENDPOINT, __ -> config);
     }
 
     private void givenTaskConfiguration() {

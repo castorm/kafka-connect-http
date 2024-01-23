@@ -32,6 +32,7 @@ import com.github.castorm.kafka.connect.http.response.spi.HttpResponseParser;
 import com.github.castorm.kafka.connect.timer.TimerThrottler;
 import edu.emory.mathcs.backport.java.util.Collections;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.connect.errors.RetriableException;
@@ -73,12 +74,17 @@ public class HttpSourceTaskSingleEndpoint extends SourceTask {
     @Getter
     private Offset offset;
 
-    HttpSourceTaskSingleEndpoint(Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
+    @Setter
+    @Getter
+    private String endpoint;
+
+    HttpSourceTaskSingleEndpoint(String endpoint, Function<Map<String, String>, HttpSourceConnectorConfig> configFactory) {
         this.configFactory = configFactory;
+        this.endpoint = endpoint;
     }
 
-    public HttpSourceTaskSingleEndpoint() {
-        this(HttpSourceConnectorConfig::new);
+    public HttpSourceTaskSingleEndpoint(String endpoint) {
+        this(endpoint, HttpSourceConnectorConfig::new);
     }
 
     @Override
@@ -96,7 +102,7 @@ public class HttpSourceTaskSingleEndpoint extends SourceTask {
     }
 
     private Offset loadOffset(SourceTaskContext context, Map<String, String> initialOffset) {
-        Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(emptyMap())).orElseGet(Collections::emptyMap);
+        Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(Offset.getPartition(endpoint))).orElseGet(Collections::emptyMap);
         return Offset.of(!restoredOffset.isEmpty() ? restoredOffset : initialOffset);
     }
 
