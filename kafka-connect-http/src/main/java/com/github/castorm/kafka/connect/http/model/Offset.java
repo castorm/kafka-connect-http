@@ -51,7 +51,7 @@ public class Offset {
     }
 
     public Map<String, ?> getPartition() {
-        return Map.of("endpoint", getEndpoint());
+        return Map.of("endpoint", getEndpoint().get());
     }
 
     public static Offset of(Map<String, ?> properties) {
