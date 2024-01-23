@@ -53,7 +53,7 @@ public class KafkaConnectFake {
 
     @SneakyThrows
     private static List<SourceRecord> runTaskUntilExhaust(Map<String, String> config) {
-        HttpSourceTaskSingleEndpoint task = new HttpSourceTaskSingleEndpoint();
+        HttpSourceTaskSingleEndpoint task = new HttpSourceTaskSingleEndpoint("dummy");
         task.initialize(emptyContext());
         task.start(config);
         List<SourceRecord> allRecords = new ArrayList<>();
