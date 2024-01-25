@@ -89,6 +89,6 @@ class TemplateHttpRequestFactoryTest {
     interface Fixture {
         String value = "value";
         String url = "url";
-        Offset offset = Offset.of(emptyMap());
+        Offset offset = Offset.of(emptyMap(), "dummy-endpoint");
     }
 }

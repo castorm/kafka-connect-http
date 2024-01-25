@@ -32,6 +32,6 @@ class NoTemplateFactoryTest {
 
     @Test
     void givenTemplate_whenApply_thenAsIs() {
-        assertThat(factory.create("template").apply(Offset.of(emptyMap()))).isEqualTo("template");
+        assertThat(factory.create("template").apply(Offset.of(emptyMap(), "dummy-endpoint"))).isEqualTo("template");
     }
 }

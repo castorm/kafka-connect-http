@@ -90,7 +90,7 @@ class HttpSourceTaskTest {
 
     @BeforeEach
     void setUp() {
-        task = new HttpSourceTaskSingleEndpoint(HttpSourceConnectorConfig.DEFAULT_ENDPOINT, __ -> config);
+        task = new HttpSourceTaskSingleEndpoint("dummy-endpoint", __ -> config);
     }
 
     private void givenTaskConfiguration() {
@@ -128,7 +128,7 @@ class HttpSourceTaskTest {
 
         task.start(emptyMap());
 
-        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap));
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap, "dummy-endpoint"));
     }
 
     @Test
@@ -140,7 +140,7 @@ class HttpSourceTaskTest {
 
         task.start(emptyMap());
 
-        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetInitialMap));
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetInitialMap, "dummy-endpoint"));
     }
 
     @Test
@@ -266,7 +266,7 @@ class HttpSourceTaskTest {
         task.commitRecord(record(offsetMap(2)), null);
         task.commit();
 
-        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap(3)));
+        assertThat(task.getOffset()).isEqualTo(Offset.of(offsetMap(3), "dummy-endpoint"));
     }
 
     @Test
@@ -300,7 +300,7 @@ class HttpSourceTaskTest {
         String key = "customKey";
         Map<String, Object> offsetMap = ImmutableMap.of("custom", "value", "key", key, "timestamp", now.toString());
         Map<String, String> offsetInitialMap = ImmutableMap.of("k2", "v2");
-        Offset offset = Offset.of(offsetMap);
+        Offset offset = Offset.of(offsetMap, "dummy-endpoint");
         HttpRequest request = HttpRequest.builder().build();
         HttpResponse response = HttpResponse.builder().build();
 

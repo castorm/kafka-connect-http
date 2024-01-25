@@ -79,8 +79,7 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
 
         Offset offset = record.getOffset();
         Long timestamp = offset.getTimestamp().map(Instant::toEpochMilli).orElseGet(System::currentTimeMillis);
-        String endpoint = offset.getEndpoint()
-            .orElseThrow(() -> new IllegalStateException("KvRecord parsed without endpoint from ElasticSearch!"));
+        String endpoint = offset.getEndpoint();
 
         Struct key = keyStruct(record.getKey());
         Struct value = valueStruct(record.getKey(), record.getValue(), timestamp, endpoint);

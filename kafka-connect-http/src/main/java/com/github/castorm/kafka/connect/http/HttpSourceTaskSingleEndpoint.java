@@ -103,7 +103,7 @@ public class HttpSourceTaskSingleEndpoint extends SourceTask {
 
     private Offset loadOffset(SourceTaskContext context, Map<String, String> initialOffset) {
         Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(Offset.getPartition(endpoint))).orElseGet(Collections::emptyMap);
-        return Offset.of(!restoredOffset.isEmpty() ? restoredOffset : initialOffset);
+        return Offset.of(!restoredOffset.isEmpty() ? restoredOffset : initialOffset, endpoint);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class HttpSourceTaskSingleEndpoint extends SourceTask {
 
     public void commit() {
         offset = confirmationWindow.getLowWatermarkOffset()
-                .map(Offset::of)
+                .map(props -> Offset.of(props, this.endpoint))
                 .orElse(offset);
 
         log.debug("Offset set to {}", offset);

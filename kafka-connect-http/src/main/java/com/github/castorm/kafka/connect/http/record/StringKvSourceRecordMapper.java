@@ -31,7 +31,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.function.Function;
 
-import static java.util.Collections.emptyMap;
 import static org.apache.kafka.connect.data.SchemaBuilder.string;
 
 /**
@@ -73,7 +72,7 @@ public class StringKvSourceRecordMapper implements KvSourceRecordMapper {
         return new SourceRecord(
                 sourcePartition,
                 offset.toMap(),
-                config.getTopicName(offset.getEndpoint().orElse("")),
+                config.getTopicName(offset.getEndpoint()),
                 null,
                 keySchema,
                 record.getKey(),

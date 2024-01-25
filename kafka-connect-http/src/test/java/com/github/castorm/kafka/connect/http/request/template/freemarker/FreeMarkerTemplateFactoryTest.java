@@ -35,24 +35,24 @@ class FreeMarkerTemplateFactoryTest {
 
     @Test
     void givenTemplate_whenApplyEmpty_thenAsIs() {
-        assertThat(factory.create("template").apply(Offset.of(emptyMap()))).isEqualTo("template");
+        assertThat(factory.create("template").apply(Offset.of(emptyMap(), "dummy-endpoint"))).isEqualTo("template");
     }
 
     @Test
     void givenTemplate_whenApplyValue_thenReplaced() {
-        Offset offset = Offset.of(ImmutableMap.of("key", "offset1"));
+        Offset offset = Offset.of(ImmutableMap.of("key", "offset1"), "dummy-endpoint");
         assertThat(factory.create("template ${offset.key}").apply(offset)).isEqualTo("template offset1");
     }
 
     @Test
     void givenTemplateWithTimestampAsString_whenApplyValue_thenReplaced() {
-        Offset offset = Offset.of(ImmutableMap.of("timestamp", Instant.parse("2020-01-01T00:00:00Z")));
+        Offset offset = Offset.of(ImmutableMap.of("timestamp", Instant.parse("2020-01-01T00:00:00Z")), "dummy-endpoint");
         assertThat(factory.create("${offset.timestamp}").apply(offset)).isEqualTo("2020-01-01T00:00:00Z");
     }
 
     @Test
     void givenTemplateWithTimestampAsEpoch_whenApplyValue_thenReplaced() {
-        Offset offset = Offset.of(ImmutableMap.of("timestamp", Instant.parse("2020-01-01T00:00:00Z")));
+        Offset offset = Offset.of(ImmutableMap.of("timestamp", Instant.parse("2020-01-01T00:00:00Z")), "dummy-endpoint");
         assertThat(factory.create("${offset.timestamp?datetime.iso?long}").apply(offset)).isEqualTo("1577836800000");
     }
 }
