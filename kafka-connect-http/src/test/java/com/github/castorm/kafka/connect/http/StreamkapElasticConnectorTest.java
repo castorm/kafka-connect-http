@@ -2,7 +2,7 @@ package com.github.castorm.kafka.connect.http;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.connect.data.Struct;
@@ -30,6 +31,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opensearch.testcontainers.OpensearchContainer;
 import org.testcontainers.utility.DockerImageName;
+
+import com.github.castorm.kafka.connect.http.model.Offset;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -82,26 +85,28 @@ class StreamkapElasticConnectorTest {
         List<String> indexes = new ArrayList<>();
         for (int i = 0; i < nbIndexes; i++) {
             long now = new Date().getTime();
+            String indexName = "index-" + i;
             for (int j = 0; j < nbRecordsPerIndex; j++) {
                 String id = "" + i + "-" + j;
-                sendRequest("/index" + i + "/_doc/" + id, "PUT", 
+                sendRequest("/" + indexName + "/_doc/" + id, "PUT", 
                     "{ \"my_timestamp\": \"" + Instant.ofEpochMilli(now + j).toString() + "\", \"message\": \"Hello OpenSearch " + id + "\" }");
             }
-            indexes.add("index" + i);
+            indexes.add(indexName);
         }
         Thread.sleep(2000);//wait for ES to index the data and make it available for search
         return StringUtils.join(indexes, ",");
     }
 
-    private List<SourceRecord> runTasks(Map<String, String> config, int nbTasks) throws InterruptedException {
+    private List<SourceRecord> runTasks(Map<String, String> config, int nbTasks) throws Exception {
         return runTasks(config, nbTasks, 1);
     }
-    private List<SourceRecord> runTasks(Map<String, String> config, int nbTasks, int nbPolls) throws InterruptedException {
+    private List<SourceRecord> runTasks(Map<String, String> config, int nbTasks, int nbPolls) throws Exception {
         HttpSourceConnector connector = new HttpSourceConnector();
         connector.start(config);
         List<Map<String, String>> taskConfigs = connector.taskConfigs(2);
         ForkJoinPool pool = new ForkJoinPool(2);
         List<SourceRecord> records = Collections.synchronizedList(new ArrayList<>());
+        AtomicReference<Exception> taskEx = new AtomicReference<>();
         for (Map<String, String> taskConfig : taskConfigs) {
             HttpSourceTask task = new HttpSourceTask();
             task.initialize(getContext(emptyMap()));
@@ -113,10 +118,14 @@ class StreamkapElasticConnectorTest {
                         List<SourceRecord> polledRecords = task.poll();
                         records.addAll(polledRecords);
                         for (SourceRecord record : polledRecords) {
+                            assertEquals(record.topic(), 
+                                Offset.getEndpointFromPartition(
+                                    record.sourcePartition()).replaceAll("[^a-zA-Z0-9_]", "_"));
                             task.commitRecord(record, null);
                         }
                         task.commit();
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
+                        taskEx.set(e);
                         throw new RuntimeException(e);
                     }
                 }
@@ -124,6 +133,9 @@ class StreamkapElasticConnectorTest {
         }
         pool.shutdown();
         pool.awaitTermination(1000, TimeUnit.SECONDS);
+        if (taskEx.get() != null) {
+            throw taskEx.get();
+        }
         log.info("Tasks done, got {} records", records.size());
 
         return records;

@@ -35,6 +35,7 @@ import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 import org.apache.kafka.connect.source.SourceTaskContext;
 
+import com.github.castorm.kafka.connect.http.model.Offset;
 import com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfig;
 
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +90,7 @@ public class HttpSourceTask extends SourceTask {
     }
 
     private HttpSourceTaskSingleEndpoint getTaskForRecord(SourceRecord record) {
-        String endpoint = record.topic();
+        String endpoint = Offset.getEndpointFromPartition(record.sourcePartition());
         HttpSourceTaskSingleEndpoint task = tasks.get(endpoint);
         if (task == null) {
             throw new ConnectException("No HttpSourceTaskSingleEndpoint found for topic " + endpoint);

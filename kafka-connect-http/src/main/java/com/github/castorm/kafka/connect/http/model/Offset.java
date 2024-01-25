@@ -54,6 +54,10 @@ public class Offset {
         return Map.of("endpoint", endpoint);
     }
 
+    public static String getEndpointFromPartition(Map<String, ?> partition) {
+        return partition.get("endpoint").toString();
+    }
+
     public static Offset of(Map<String, ?> properties, String endpoint) {
         return new Offset(endpoint, properties);
     }

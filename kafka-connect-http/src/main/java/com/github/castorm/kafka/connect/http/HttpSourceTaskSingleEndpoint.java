@@ -121,7 +121,7 @@ public class HttpSourceTaskSingleEndpoint extends SourceTask {
                 .filter(recordFilterFactory.create(offset))
                 .collect(toList());
 
-        log.info("Request for offset {} yields {}/{} new records", offset.toMap(), unseenRecords.size(), records.size());
+        log.info("Request for offset {} yields {}/{} new records, endpoint {}", offset.toMap(), unseenRecords.size(), records.size(), endpoint);
 
         confirmationWindow = new ConfirmationWindow<>(extractOffsets(unseenRecords));
 
