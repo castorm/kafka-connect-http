@@ -61,7 +61,7 @@ public class SourceRecordMapperConfig extends AbstractConfig {
     public String getTopicName(String endpoint) {
         if (topicTemplate != null && Boolean.TRUE.toString().equals(topicTemplate.toLowerCase())) {
             if (endpoint != null && !endpoint.isEmpty()) {
-                return endpoint;
+                return endpoint.replaceAll("[^a-zA-Z0-9_]", "_");
             }
         }
         return topic;
