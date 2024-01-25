@@ -68,7 +68,7 @@ class KvHttpResponseParserTest {
 
         given(recordParser.parse(response)).willReturn(emptyList());
 
-        assertThat(parser.parse(response)).isEmpty();
+        assertThat(parser.parse("dummy-endpoint", response)).isEmpty();
     }
 
     @Test
@@ -76,18 +76,18 @@ class KvHttpResponseParserTest {
 
         given(recordParser.parse(response)).willReturn(singletonList(record));
 
-        parser.parse(response);
+        parser.parse("dummy-endpoint", response);
 
-        then(recordFactory).should().map(record);
+        then(recordFactory).should().map("dummy-endpoint", record);
     }
 
     @Test
     void givenEmptyList_whenParse_thenItemsMappedReturned() {
 
         given(recordParser.parse(response)).willReturn(singletonList(record));
-        given(recordFactory.map(record)).willReturn(sourceRecord);
+        given(recordFactory.map("dummy-endpoint", record)).willReturn(sourceRecord);
 
-        assertThat(parser.parse(response)).containsExactly(sourceRecord);
+        assertThat(parser.parse("dummy-endpoint", response)).containsExactly(sourceRecord);
     }
 
     interface Fixture {

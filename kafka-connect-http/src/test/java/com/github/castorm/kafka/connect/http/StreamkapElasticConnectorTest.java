@@ -33,6 +33,7 @@ import org.opensearch.testcontainers.OpensearchContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.model.Partition;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -119,8 +120,8 @@ class StreamkapElasticConnectorTest {
                         records.addAll(polledRecords);
                         for (SourceRecord record : polledRecords) {
                             assertEquals(record.topic(), 
-                                Offset.getEndpointFromPartition(
-                                    record.sourcePartition()).replaceAll("[^a-zA-Z0-9_]", "_"));
+                                Partition.getEndpointFromPartition(record.sourcePartition())
+                                    .replaceAll("[^a-zA-Z0-9_]", "_"));
                             task.commitRecord(record, null);
                         }
                         task.commit();

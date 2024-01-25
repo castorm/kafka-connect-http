@@ -195,7 +195,7 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(responseParser.parse("dummy-endpoint", response)).willReturn(asList(record(offsetMap)));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
 
         task.poll();
@@ -211,7 +211,7 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(responseParser.parse("dummy-endpoint", response)).willReturn(asList(record(offsetMap)));
         given(recordSorter.sort(asList(record(offsetMap)))).willReturn(asList(record(offsetMap)));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
 
@@ -226,7 +226,7 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(responseParser.parse("dummy-endpoint", response)).willReturn(asList(record(offsetMap)));
         given(recordSorter.sort(asList(record(offsetMap)))).willReturn(asList(record(offsetMap(1)), record(offsetMap(2))));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);
 
@@ -241,7 +241,7 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(responseParser.parse("dummy-endpoint", response)).willReturn(asList(record(offsetMap)));
         given(recordFilterFactory.create(offset)).willReturn(__ -> false);
 
         assertThat(task.poll()).isEmpty();
@@ -255,7 +255,7 @@ class HttpSourceTaskTest {
         task.start(emptyMap());
         given(requestFactory.createRequest(offset)).willReturn(request);
         given(client.execute(request)).willReturn(response);
-        given(responseParser.parse(response)).willReturn(asList(record(offsetMap)));
+        given(responseParser.parse("dummy-endpoint", response)).willReturn(asList(record(offsetMap)));
         given(recordSorter.sort(asList(record(offsetMap))))
                 .willReturn(asList(record(offsetMap(1)), record(offsetMap(2)), record(offsetMap(3))));
         given(recordFilterFactory.create(offset)).willReturn(__ -> true);

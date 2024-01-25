@@ -345,7 +345,7 @@ the list of `SourceRecord`s expected by Kafka Connect.
 > ```java
 > public interface HttpResponseParser extends Configurable {
 > 
->     List<SourceRecord> parse(HttpResponse response);
+>     List<SourceRecord> parse(String endpoint, HttpResponse response);
 > }
 > ```
 > *   Type: `Class`
@@ -419,7 +419,7 @@ Parses the HTTP response into a key-value SourceRecord. This process is decompos
 > ```java
 > public interface KvSourceRecordMapper extends Configurable {
 > 
->     SourceRecord map(KvRecord record);
+>     SourceRecord map(String endpoint, KvRecord record);
 > }
 > ```
 > *   Type: `Class`

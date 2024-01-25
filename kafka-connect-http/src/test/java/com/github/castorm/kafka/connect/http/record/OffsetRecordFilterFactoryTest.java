@@ -59,7 +59,7 @@ class OffsetRecordFilterFactoryTest {
     @Test
     void givenSeen_whenCreateAndTest_thenTrue() {
 
-        Predicate<SourceRecord> predicate = factory.create(Offset.of(ImmutableMap.of("i", 5), "dummy-endpoint"));
+        Predicate<SourceRecord> predicate = factory.create(Offset.of(ImmutableMap.of("i", 5)));
 
         predicate.test(record(5));
 

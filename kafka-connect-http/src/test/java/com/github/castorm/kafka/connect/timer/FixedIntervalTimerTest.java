@@ -79,7 +79,7 @@ class FixedIntervalTimerTest {
     }
 
     interface Fixture {
-        Offset offset = Offset.of(emptyMap(), "key", now(), "endpoint");
+        Offset offset = Offset.of(emptyMap(), "key", now());
         long intervalMillis = 300000L;
         long lastPollMillis = System.currentTimeMillis();
         long maxExecutionTimeMillis = 500L;

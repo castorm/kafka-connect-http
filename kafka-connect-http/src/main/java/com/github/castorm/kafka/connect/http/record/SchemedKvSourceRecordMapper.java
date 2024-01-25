@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.record;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.record.spi.KvSourceRecordMapper;
 import lombok.RequiredArgsConstructor;
@@ -75,16 +76,15 @@ public class SchemedKvSourceRecordMapper implements KvSourceRecordMapper {
     }
 
     @Override
-    public SourceRecord map(KvRecord record) {
+    public SourceRecord map(String endpoint, KvRecord record) {
 
         Offset offset = record.getOffset();
         Long timestamp = offset.getTimestamp().map(Instant::toEpochMilli).orElseGet(System::currentTimeMillis);
-        String endpoint = offset.getEndpoint();
 
         Struct key = keyStruct(record.getKey());
         Struct value = valueStruct(record.getKey(), record.getValue(), timestamp, endpoint);
-        Map<String, ?> sourcePartition = offset.getPartition();
-        
+        Map<String, ?> sourcePartition = Partition.getPartition(endpoint);
+
         return new SourceRecord(
                 sourcePartition,
                 offset.toMap(),

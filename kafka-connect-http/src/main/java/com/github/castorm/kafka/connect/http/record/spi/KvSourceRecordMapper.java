@@ -29,7 +29,7 @@ import java.util.Map;
 @FunctionalInterface
 public interface KvSourceRecordMapper extends Configurable {
 
-    SourceRecord map(KvRecord record);
+    SourceRecord map(String endpoint, KvRecord record);
 
     default void configure(Map<String, ?> map) {
         // Do nothing

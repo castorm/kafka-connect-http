@@ -54,10 +54,10 @@ public class PolicyHttpResponseParser implements HttpResponseParser {
     }
 
     @Override
-    public List<SourceRecord> parse(HttpResponse response) {
+    public List<SourceRecord> parse(String endpoint, HttpResponse response) {
         switch (policy.resolve(response)) {
             case PROCESS:
-                return delegate.parse(response);
+                return delegate.parse(endpoint, response);
             case SKIP:
                 return emptyList();
             case FAIL:

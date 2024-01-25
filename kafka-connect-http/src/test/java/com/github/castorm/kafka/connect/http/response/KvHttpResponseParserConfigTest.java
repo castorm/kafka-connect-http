@@ -70,7 +70,7 @@ class KvHttpResponseParserConfigTest {
     public static class TestRecordMapper implements KvSourceRecordMapper {
 
         @Override
-        public SourceRecord map(KvRecord record) { return null; }
+        public SourceRecord map(String endpoint, KvRecord record) { return null; }
     }
 
     private static KvHttpResponseParserConfig config(Map<String, Object> settings) {

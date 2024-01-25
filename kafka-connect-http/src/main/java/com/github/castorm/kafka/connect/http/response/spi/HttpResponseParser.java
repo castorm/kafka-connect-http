@@ -30,7 +30,7 @@ import java.util.Map;
 @FunctionalInterface
 public interface HttpResponseParser extends Configurable {
 
-    List<SourceRecord> parse(HttpResponse response);
+    List<SourceRecord> parse(String endpoint, HttpResponse response);
 
     default void configure(Map<String, ?> map) {
         // Do nothing

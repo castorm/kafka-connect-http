@@ -21,6 +21,7 @@ package com.github.castorm.kafka.connect.http.record;
  */
 
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.model.KvRecord;
 import com.github.castorm.kafka.connect.http.record.spi.KvSourceRecordMapper;
 import lombok.RequiredArgsConstructor;
@@ -64,15 +65,15 @@ public class StringKvSourceRecordMapper implements KvSourceRecordMapper {
     }
 
     @Override
-    public SourceRecord map(KvRecord record) {
+    public SourceRecord map(String endpoint, KvRecord record) {
 
         Offset offset = record.getOffset();
-        Map<String, ?> sourcePartition = offset.getPartition();
+        Map<String, ?> sourcePartition = Partition.getPartition(endpoint);
 
         return new SourceRecord(
                 sourcePartition,
                 offset.toMap(),
-                config.getTopicName(offset.getEndpoint()),
+                config.getTopicName(endpoint),
                 null,
                 keySchema,
                 record.getKey(),

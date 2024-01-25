@@ -49,54 +49,54 @@ class StringKvSourceRecordMapperTest {
 
     @BeforeEach
     void setUp() {
-        given(config.getTopicName("endpoint")).willReturn("topic");
+        given(config.getTopicName("dummy-endpoint")).willReturn("topic");
         mapper = new StringKvSourceRecordMapper(__ -> config);
         mapper.configure(emptyMap());
     }
 
     @Test
     void givenTopic_whenMap_thenTopicMapped() {
-        assertThat(mapper.map(record).topic()).isEqualTo("topic");
+        assertThat(mapper.map("dummy-endpoint", record).topic()).isEqualTo("topic");
     }
 
     @Test
     void givenKey_whenMap_thenIdMapped() {
-        assertThat(mapper.map(record.withKey("value")).key()).isEqualTo("value");
+        assertThat(mapper.map("dummy-endpoint", record.withKey("value")).key()).isEqualTo("value");
     }
 
     @Test
     void givenValue_whenMap_thenBodyMapped() {
-        assertThat(mapper.map(record.withValue("value")).value()).isEqualTo("value");
+        assertThat(mapper.map("dummy-endpoint", record.withValue("value")).value()).isEqualTo("value");
     }
 
     @Test
     void givenOffset_whenMap_thenOffsetMapped() {
-        assertThat(mapper.map(record.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
+        assertThat(mapper.map("dummy-endpoint", record.withOffset(offset)).sourceOffset()).isEqualTo(offset.toMap());
     }
 
     @Test
     void givenTimestamp_whenMap_thenTimestampMapped() {
-        assertThat(mapper.map(record.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
+        assertThat(mapper.map("dummy-endpoint", record.withOffset(offset)).timestamp()).isEqualTo(now.toEpochMilli());
     }
 
     @Test
     void whenMap_thenNoPartitionMapped() {
-        assertThat(mapper.map(record).kafkaPartition()).isNull();
+        assertThat(mapper.map("dummy-endpoint", record).kafkaPartition()).isNull();
     }
 
     @Test
     void whenMap_thenKeySchemaMapped() {
-        assertThat(mapper.map(record).keySchema()).isNotNull();
+        assertThat(mapper.map("dummy-endpoint", record).keySchema()).isNotNull();
     }
 
     @Test
     void whenMap_thenValueSchemaMapped() {
-        assertThat(mapper.map(record).valueSchema()).isNotNull();
+        assertThat(mapper.map("dummy-endpoint", record).valueSchema()).isNotNull();
     }
 
     interface Fixture {
         Instant now = now();
-        Offset offset = Offset.of(ImmutableMap.of("k", "v"), "key", now, "endpoint");
+        Offset offset = Offset.of(ImmutableMap.of("k", "v"), "key", now);
         KvRecord record = KvRecord.builder().value("not-null").offset(offset).build();
     }
 }

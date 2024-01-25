@@ -44,12 +44,12 @@ class OffsetTimestampRecordFilterFactoryTest {
 
     @Test
     void givenOffset_whenTestEarlier_thenFalse() {
-        assertThat(factory.create(Offset.of(emptyMap(), key, now, endpoint)).test(record(now.minus(1, MINUTES)))).isFalse();
+        assertThat(factory.create(Offset.of(emptyMap(), key, now)).test(record(now.minus(1, MINUTES)))).isFalse();
     }
 
     @Test
     void givenOffset_whenTestLater_thenTrue() {
-        assertThat(factory.create(Offset.of(emptyMap(), key, now, endpoint)).test(record(now.plus(1, MINUTES)))).isTrue();
+        assertThat(factory.create(Offset.of(emptyMap(), key, now)).test(record(now.plus(1, MINUTES)))).isTrue();
     }
 
     interface Fixture {

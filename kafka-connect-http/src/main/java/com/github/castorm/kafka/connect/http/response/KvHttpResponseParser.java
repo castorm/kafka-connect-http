@@ -54,9 +54,9 @@ public class KvHttpResponseParser implements HttpResponseParser {
     }
 
     @Override
-    public List<SourceRecord> parse(HttpResponse response) {
+    public List<SourceRecord> parse(String endpoint, HttpResponse response) {
         return recordParser.parse(response).stream()
-                .map(recordMapper::map)
+                .map(x -> recordMapper.map(endpoint, x))
                 .collect(toList());
     }
 }

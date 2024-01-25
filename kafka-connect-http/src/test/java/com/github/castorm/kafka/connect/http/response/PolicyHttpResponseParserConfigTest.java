@@ -59,7 +59,7 @@ class PolicyHttpResponseParserConfigTest {
     public static class TestResponseParser implements HttpResponseParser {
 
         @Override
-        public List<SourceRecord> parse(HttpResponse response) {
+        public List<SourceRecord> parse(String endpoint, HttpResponse response) {
             return null;
         }
     }

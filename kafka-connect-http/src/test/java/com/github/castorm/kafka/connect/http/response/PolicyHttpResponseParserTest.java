@@ -71,7 +71,7 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(FAIL);
 
-        assertThat(catchThrowable(() -> parser.parse(response))).isInstanceOf(IllegalStateException.class);
+        assertThat(catchThrowable(() -> parser.parse("dummy-endpoint", response))).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -79,9 +79,9 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(FAIL);
 
-        catchThrowable(() -> parser.parse(response));
+        catchThrowable(() -> parser.parse("dummy-endpoint", response));
 
-        then(delegate).should(never()).parse(any());
+        then(delegate).should(never()).parse(any(), any());
     }
 
     @Test
@@ -89,9 +89,9 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(PROCESS);
 
-        parser.parse(response);
+        parser.parse("dummy-endpoint", response);
 
-        then(delegate).should().parse(response);
+        then(delegate).should().parse("dummy-endpoint", response);
     }
 
     @Test
@@ -99,9 +99,9 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(PROCESS);
 
-        given(delegate.parse(response)).willReturn(ImmutableList.of(record));
+        given(delegate.parse("dummy-endpoint", response)).willReturn(ImmutableList.of(record));
 
-        assertThat(parser.parse(response)).containsExactly(record);
+        assertThat(parser.parse("dummy-endpoint", response)).containsExactly(record);
     }
 
     @Test
@@ -109,9 +109,9 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(SKIP);
 
-        parser.parse(response);
+        parser.parse("dummy-endpoint", response);
 
-        then(delegate).should(never()).parse(any());
+        then(delegate).should(never()).parse(any(), any());
     }
 
     @Test
@@ -119,7 +119,7 @@ class PolicyHttpResponseParserTest {
 
         given(policy.resolve(response)).willReturn(SKIP);
 
-        assertThat(parser.parse(response)).isEmpty();
+        assertThat(parser.parse("dummy-endpoint", response)).isEmpty();
     }
 
     interface Fixture {

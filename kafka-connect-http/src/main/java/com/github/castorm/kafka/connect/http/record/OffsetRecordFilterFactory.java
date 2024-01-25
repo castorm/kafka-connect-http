@@ -42,7 +42,7 @@ public class OffsetRecordFilterFactory implements SourceRecordFilterFactory {
         AtomicBoolean lastSeenReached = new AtomicBoolean(false);
         return delegate.create(offset).or(record -> {
             boolean result = lastSeenReached.get();
-            if (!result && Offset.of(record.sourceOffset(), offset.getEndpoint()).equals(offset)) {
+            if (!result && Offset.of(record.sourceOffset()).equals(offset)) {
                 lastSeenReached.set(true);
             }
             return result;

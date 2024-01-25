@@ -40,39 +40,25 @@ public class Offset {
 
     private final Map<String, ?> properties;
 
-    String endpoint;
-    private Offset(String endpoint, Map<String, ?> properties) {
+    private Offset(Map<String, ?> properties) {
         this.properties = properties;
-        this.endpoint = endpoint;
     }
 
-    public static Map<String, ?> getPartition(String endpoint) {
-         return Map.of("endpoint", endpoint);
+    public static Offset of(Map<String, ?> properties) {
+        return new Offset(properties);
     }
 
-    public Map<String, ?> getPartition() {
-        return Map.of("endpoint", endpoint);
-    }
-
-    public static String getEndpointFromPartition(Map<String, ?> partition) {
-        return partition.get("endpoint").toString();
-    }
-
-    public static Offset of(Map<String, ?> properties, String endpoint) {
-        return new Offset(endpoint, properties);
-    }
-
-    public static Offset of(Map<String, ?> properties, String key, String endpoint) {
+    public static Offset of(Map<String, ?> properties, String key) {
         Map<String, Object> props = new HashMap<>(properties);
         props.put(KEY_KEY, key);
-        return new Offset(endpoint, props);
+        return new Offset(props);
     }
 
-    public static Offset of(Map<String, ?> properties, String key, Instant timestamp, String endpoint) {
+    public static Offset of(Map<String, ?> properties, String key, Instant timestamp) {
         Map<String, Object> props = new HashMap<>(properties);
         props.put(KEY_KEY, key);
         props.put(TIMESTAMP_KEY, timestamp.toString());
-        return new Offset(endpoint, props);
+        return new Offset(props);
     }
 
     public Map<String, ?> toMap() {
@@ -85,9 +71,5 @@ public class Offset {
 
     public Optional<Instant> getTimestamp() {
         return ofNullable((String) properties.get(TIMESTAMP_KEY)).map(Instant::parse);
-    }
-
-    public String getEndpoint() {
-        return endpoint;
     }
 }

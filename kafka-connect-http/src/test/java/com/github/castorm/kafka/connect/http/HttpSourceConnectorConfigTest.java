@@ -133,7 +133,7 @@ class HttpSourceConnectorConfigTest {
     }
 
     public static class TestResponseParser implements HttpResponseParser {
-        public List<SourceRecord> parse(HttpResponse response) {
+        public List<SourceRecord> parse(String endpoint, HttpResponse response) {
             return null;
         }
     }

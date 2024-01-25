@@ -25,6 +25,7 @@ import com.github.castorm.kafka.connect.http.client.spi.HttpClient;
 import com.github.castorm.kafka.connect.http.model.HttpRequest;
 import com.github.castorm.kafka.connect.http.model.HttpResponse;
 import com.github.castorm.kafka.connect.http.model.Offset;
+import com.github.castorm.kafka.connect.http.model.Partition;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordFilterFactory;
 import com.github.castorm.kafka.connect.http.record.spi.SourceRecordSorter;
 import com.github.castorm.kafka.connect.http.request.spi.HttpRequestFactory;
@@ -102,7 +103,9 @@ public class HttpSourceTaskSingleEndpoint extends SourceTask {
     }
 
     private Offset loadOffset(SourceTaskContext context, Map<String, String> initialOffset) {
-        Map<String, Object> restoredOffset = ofNullable(context.offsetStorageReader().offset(Offset.getPartition(endpoint))).orElseGet(Collections::emptyMap);
+        Map<String, Object> restoredOffset = ofNullable(
+            context.offsetStorageReader().offset(
+                Partition.getPartition(endpoint))).orElseGet(Collections::emptyMap);
         return Offset.of(!restoredOffset.isEmpty() ? restoredOffset : initialOffset, endpoint);
     }
 
@@ -115,7 +118,7 @@ public class HttpSourceTaskSingleEndpoint extends SourceTask {
 
         HttpResponse response = execute(request);
 
-        List<SourceRecord> records = responseParser.parse(response);
+        List<SourceRecord> records = responseParser.parse(endpoint, response);
 
         List<SourceRecord> unseenRecords = recordSorter.sort(records).stream()
                 .filter(recordFilterFactory.create(offset))
